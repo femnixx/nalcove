@@ -1,0 +1,17 @@
+// island/shell.qml - Entry point for Quickshell Dynamic Island
+// Run with: qs -p ./island
+//
+// NOTE: Requires Quickshell module. For local syntax validation without
+// Quickshell, see shellPlain.qml
+
+import QtQuick 2.15
+import Quickshell.Shell
+import IslandWindow 1.0
+
+ShellRoot {
+    visible: true
+
+    IslandWindow {
+        anchors.fill: parent
+    }
+}

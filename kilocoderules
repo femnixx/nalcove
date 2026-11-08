@@ -1,0 +1,51 @@
+# Project rules: Quickshell Dynamic Island
+
+## Project
+A Dynamic Island / notch for Linux Wayland, built with Quickshell (Qt6 / QML) using wlr-layer-shell.
+Reference apps for look and features: Alcove (macOS), NotchNook, NotchX-style notch apps.
+The phased plan lives in ISLAND_PROMPT_PHASES.md. Work one phase at a time and stop at the end of each phase.
+
+## Stack (strict)
+- Quickshell + QML (Qt 6). No Tauri, React, Electron, Node, or web tech.
+- Allowed helpers: small shell commands via Quickshell.Io `Process` (brightnessctl, khal, etc.).
+- Do not add Python/C++ unless I explicitly ask.
+
+## Structure
+- Entry point: island/shell.qml (ShellRoot). Run with `qs -p ./island`.
+- island/Island.qml (window + state), IslandShape.qml, Theme.qml (singleton), components/, services/.
+- One component per file, PascalCase filenames. Register singletons in qmldir.
+
+## Window rules
+- Use PanelWindow (not ShellWindow). Anchor with `anchors { top: true }`.
+- Transparent background, `exclusionMode: ExclusionMode.Ignore`, layer Overlay, namespace "island".
+- The layer surface has a FIXED size (max expanded size + overshoot margin). Never resize it during animation.
+- Input: `mask: Region { item: hitbox }` tracking the island's current rect. The idle notch must stay inside the mask. Everything outside is click-through.
+- Keyboard focus only in "hotkey" mode (OnDemand), otherwise None.
+
+## State rules
+- `triggerMode` is one of "closed" | "hover" | "hotkey". Default "closed".
+- hover enter: closed -> hover. hover exit: hover -> closed after a 150 ms debounce. Hotkey mode ignores exit.
+- toggleHotkey(): closed/hover -> hotkey; hotkey -> closed. Escape also closes hotkey mode.
+- Hotkey must be reachable two ways: GlobalShortcut (Hyprland) and IpcHandler `qs ipc call island toggle`.
+- Activities (media, battery, timer, HUD, notification) are a separate `activity` property and must never override a locked hotkey state.
+
+## Visual rules
+- Shape is a custom `QtQuick.Shapes` path: flush top edge, concave flares at top corners, convex rounded bottom corners. Never a plain Rectangle.
+- Fill #000000, no border. Sizes live in Theme.qml (idle 200x34, hover 360x80, expanded 640x220).
+- Motion: SpringAnimation on width/height/bottomRadius (default spring 3.5, damping 0.35, epsilon 0.25). Tunables live in Theme.qml.
+- Content fades in after the shape grows and is disabled when invisible.
+
+## Code conventions
+- Colors, sizes, durations, spring values come from Theme.qml. No magic numbers in components.
+- Prefer declarative bindings over imperative JS. Keep JS functions small.
+- Services are thin wrappers around Quickshell.Services.* and expose simple properties.
+- Degrade gracefully when an optional tool is missing (khal, brightnessctl): hide the feature, never crash.
+- No polling faster than needed. When closed and idle, no running timers or animations.
+
+## Workflow
+- Before deleting files, list them and wait for my "confirm".
+- After each change run `qmllint` on touched files and `qs -p ./island` to check for load errors; report any errors.
+- Do not invent Quickshell APIs. If unsure a type or property exists, check the Quickshell docs/source and tell me what you verified.
+- Keep README.md updated with run instructions and hotkey binds for Hyprland and other compositors.
+- Make small, reviewable commits per phase. Do not refactor unrelated files.
+- When a requirement conflicts with these rules, stop and ask.

@@ -1,0 +1,11 @@
+Glyph 1.0 Glyph.qml
+singleton Theme 1.0 Theme.qml
+singleton Clock 1.0 Clock.qml
+LineSlider 1.0 LineSlider.qml
+MusicCard 1.0 MusicCard.qml
+HomeTab 1.0 HomeTab.qml
+MusicTab 1.0 MusicTab.qml
+CalendarTab 1.0 CalendarTab.qml
+NotesTab 1.0 NotesTab.qml
+ControlsTab 1.0 ControlsTab.qml
+Dashboard 1.0 Dashboard.qml

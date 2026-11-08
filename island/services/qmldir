@@ -1,0 +1,2 @@
+module Island.Services
+singleton Media Media.qml

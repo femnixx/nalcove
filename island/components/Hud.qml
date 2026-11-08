@@ -1,0 +1,18 @@
+// island/components/Hud.qml - Stub for HUD replacements (volume, brightness)
+
+import QtQuick 2.15
+import Island 1.0 as Theme
+
+Item {
+    id: hudRoot
+
+    property string type: "volume"     // "volume" | "brightness"
+    property int value: 0
+    property bool muted: false
+    property bool active: false
+
+    width: Theme.idleWidth
+    height: Theme.idleHeight
+    opacity: active ? 1 : 0
+    enabled: active
+}
