@@ -25,8 +25,34 @@ Item {
                            text: Math.round(Services.Audio.sinkVolume * 100); color: "#ffffff"; font.pixelSize: 12
                            horizontalAlignment: Text.AlignRight }
                 }
-                DeviceSelector { width: parent.width; model: Services.Audio.sinks; currentNode: Services.Audio.sink
-                                 onPicked: n => Services.Audio.setDefaultSink(n) }
+
+                Item {
+                    id: outputSelectorWrapper
+                    width: parent.width
+                    height: 32
+
+                    Rectangle {
+                        id: outputHeaderBtn
+                        width: parent.width; height: 32; radius: 10; color: "#1a1a1a"
+                        Text {
+                            anchors.fill: parent; anchors.leftMargin: 10; anchors.rightMargin: 26
+                            text: outputSelector.labelOf(outputSelector.currentNode)
+                            color: "#ffffff"; font.pixelSize: 12
+                            elide: Text.ElideRight; verticalAlignment: Text.AlignVCenter
+                        }
+                        Text { anchors.right: parent.right; anchors.rightMargin: 10; anchors.verticalCenter: parent.verticalCenter
+                               text: outputSelector.open ? "▴" : "▾"; color: "#9a9aa0" }
+                        MouseArea { anchors.fill: parent; onClicked: outputSelector.open = !outputSelector.open }
+                    }
+
+                    DeviceSelector {
+                        id: outputSelector
+                        width: parent.width
+                        model: Services.Audio.sinks
+                        currentNode: Services.Audio.sink
+                        onPicked: n => Services.Audio.setDefaultSink(n)
+                    }
+                }
 
                 Item { width: 1; height: 6 }
 
@@ -42,8 +68,33 @@ Item {
                            text: Math.round(Services.Audio.sourceVolume * 100); color: "#ffffff"; font.pixelSize: 12
                            horizontalAlignment: Text.AlignRight }
                 }
-                DeviceSelector { width: parent.width; model: Services.Audio.sources; currentNode: Services.Audio.source
-                                 onPicked: n => Services.Audio.setDefaultSource(n) }
+                Item {
+                    id: inputSelectorWrapper
+                    width: parent.width
+                    height: 32
+
+                    Rectangle {
+                        id: inputHeaderBtn
+                        width: parent.width; height: 32; radius: 10; color: "#1a1a1a"
+                        Text {
+                            anchors.fill: parent; anchors.leftMargin: 10; anchors.rightMargin: 26
+                            text: inputSelector.labelOf(inputSelector.currentNode)
+                            color: "#ffffff"; font.pixelSize: 12
+                            elide: Text.ElideRight; verticalAlignment: Text.AlignVCenter
+                        }
+                        Text { anchors.right: parent.right; anchors.rightMargin: 10; anchors.verticalCenter: parent.verticalCenter
+                               text: inputSelector.open ? "▴" : "▾"; color: "#9a9aa0" }
+                        MouseArea { anchors.fill: parent; onClicked: inputSelector.open = !inputSelector.open }
+                    }
+
+                    DeviceSelector {
+                        id: inputSelector
+                        width: parent.width
+                        model: Services.Audio.sources
+                        currentNode: Services.Audio.source
+                        onPicked: n => Services.Audio.setDefaultSource(n)
+                    }
+                }
 
                 Item { width: 1; height: 6; visible: Services.Brightness.available }
 

@@ -29,11 +29,33 @@ Rectangle {
             }
         }
 
-        DeviceSelector {
+        // Device selector with popup
+        Item {
+            id: deviceSelectorWrapper
             width: parent.width
-            model: Services.Audio.sinks
-            currentNode: Services.Audio.sink
-            onPicked: n => Services.Audio.setDefaultSink(n)
+            height: 32
+
+            Rectangle {
+                id: headerBtn
+                width: parent.width; height: 32; radius: 10; color: "#1a1a1a"
+                Text {
+                    anchors.fill: parent; anchors.leftMargin: 10; anchors.rightMargin: 26
+                    text: deviceSelector.labelOf(deviceSelector.currentNode)
+                    color: "#ffffff"; font.pixelSize: 12
+                    elide: Text.ElideRight; verticalAlignment: Text.AlignVCenter
+                }
+                Text { anchors.right: parent.right; anchors.rightMargin: 10; anchors.verticalCenter: parent.verticalCenter
+                       text: deviceSelector.open ? "▴" : "▾"; color: "#9a9aa0" }
+                MouseArea { anchors.fill: parent; onClicked: deviceSelector.open = !deviceSelector.open }
+            }
+
+            DeviceSelector {
+                id: deviceSelector
+                width: parent.width
+                model: Services.Audio.sinks
+                currentNode: Services.Audio.sink
+                onPicked: n => Services.Audio.setDefaultSink(n)
+            }
         }
     }
 }
