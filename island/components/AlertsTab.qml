@@ -17,7 +17,8 @@ Rectangle {
             spacing: 12
             Text {
                 text: "Notifications"
-                color: Theme.fg
+                color: "#ffffff"
+                opacity: 1.0
                 font.pixelSize: 18
                 font.bold: true
             }
@@ -29,7 +30,8 @@ Rectangle {
                 Text {
                     anchors.centerIn: parent
                     text: "Clear All"
-                    color: Theme.dim
+                    color: "#ffffff"
+                    opacity: 1.0
                     font.pixelSize: 12
                 }
                 MouseArea {
@@ -83,20 +85,21 @@ Rectangle {
                             spacing: 2
                             Text {
                                 text: modelData.appName || "Unknown"
-                                color: Theme.dim
+                                color: "#9a9aa0"
                                 font.pixelSize: 11
                                 font.bold: true
                             }
                             Text {
                                 text: modelData.summary || ""
-                                color: Theme.fg
+                                color: "#ffffff"
+                                opacity: 1.0
                                 font.pixelSize: 14
                                 font.bold: true
                                 elide: Text.ElideRight
                             }
                             Text {
                                 text: modelData.body || ""
-                                color: Theme.dim
+                                color: "#9a9aa0"
                                 font.pixelSize: 12
                                 wrapMode: Text.WordWrap
                                 maximumLineCount: 2
@@ -117,7 +120,8 @@ Rectangle {
                                 Text {
                                     anchors.centerIn: parent
                                     text: modelData.label
-                                    color: root.hovered ? "white" : Theme.fg
+                                    color: root.hovered ? "white" : "#ffffff"
+                                    opacity: 1.0
                                     font.pixelSize: 12
                                 }
                                 width: Math.max(60, text.implicitWidth + 24)
@@ -140,7 +144,7 @@ Rectangle {
                                 anchors.centerIn: parent
                                 name: "x"
                                 size: 14
-                                color: root.hovered ? "#ff453a" : Theme.dim
+                                color: root.hovered ? "#ff453a" : "#9a9aa0"
                             }
                             MouseArea {
                                 anchors.fill: parent
@@ -161,7 +165,8 @@ Rectangle {
             Text {
                 anchors.centerIn: parent
                 text: "No notifications"
-                color: Theme.dim
+                color: "#ffffff"
+                opacity: 1.0
                 font.pixelSize: 14
             }
         }
