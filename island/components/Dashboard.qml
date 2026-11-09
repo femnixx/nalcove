@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import Quickshell.Services.UPower
 import Quickshell.Services.Mpris
+import Quickshell.Io
 
 Item {
     id: dashboardRoot
@@ -17,6 +18,10 @@ Item {
     property string batPercentStr: "78"
     property int batPercentNum: 78
     property bool isCharging: false
+
+    // Lyrics fetcher state
+    property string liveLyricsText: "Loading..."
+    property string lastTrackedTitle: ""
 
     // Timer to poll UPower values - find any battery device
     Timer {
@@ -67,6 +72,62 @@ Item {
     function fmtTime(us) {
         const t = Math.max(0, Math.floor(us / 1000000))
         return Math.floor(t / 60) + ":" + String(t % 60).padStart(2, "0")
+    }
+
+    // Volume setter process
+    Process {
+        id: setVolProcess
+        command: ["wpctl", "set-volume", "@DEFAULT_AUDIO_SINK@", "0.5"]
+    }
+
+    function setSystemVolume(vol) {
+        setVolProcess.command = ["wpctl", "set-volume", "@DEFAULT_AUDIO_SINK@", vol.toFixed(2)]
+        setVolProcess.running = true;
+    }
+
+    // Lyrics fetcher process
+    Process {
+        id: fetchLyricsProcess
+        stdout: StdioCollector {
+            onStreamFinished: {
+                try {
+                    var data = JSON.parse(text);
+                    if (data && data.lyrics) {
+                        dashboardRoot.liveLyricsText = data.lyrics;
+                    } else {
+                        dashboardRoot.liveLyricsText = "No lyrics found for this track.";
+                    }
+                } catch(e) {
+                    dashboardRoot.liveLyricsText = "No lyrics available.";
+                }
+            }
+        }
+    }
+
+    function fetchLyrics(currentArtist, currentTitle) {
+        fetchLyricsProcess.command = ["curl", "-s", "https://api.lyrics.ovh/v1/" + encodeURIComponent(currentArtist) + "/" + encodeURIComponent(currentTitle)];
+        fetchLyricsProcess.running = true;
+    }
+
+    // Auto-fetch hook tracking titles
+    Timer {
+        interval: 2000
+        running: true
+        repeat: true
+        onTriggered: {
+            if (dashboardRoot.activePlayer && dashboardRoot.activePlayer.metadata) {
+                var currentTitle = String(dashboardRoot.activePlayer.metadata["xesam:title"] || "");
+                var currentArtist = String(dashboardRoot.activePlayer.metadata["xesam:artist"] || "");
+                if (currentTitle !== "" && currentTitle !== lastTrackedTitle) {
+                    lastTrackedTitle = currentTitle;
+                    dashboardRoot.liveLyricsText = "Searching backend...";
+                    fetchLyrics(currentArtist, currentTitle);
+                }
+            } else {
+                dashboardRoot.liveLyricsText = "None (No active media playing).";
+                lastTrackedTitle = "";
+            }
+        }
     }
 
     Rectangle {
@@ -212,7 +273,7 @@ Item {
 
         HomeTab { anchors.fill: parent; visible: page === "home" }
         
-        // --- SIMPLIFIED MEDIA PLAYER (INLINE) ---
+        // --- SPLIT MEDIA PLAYER (65/35 LAYOUT) ---
         Item {
             anchors.fill: parent
             visible: page === "music"
@@ -235,7 +296,6 @@ Item {
                         Image {
                             anchors.fill: parent
                             fillMode: Image.PreserveAspectCrop
-                            // Safe string conversion fallback
                             source: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.metadata && dashboardRoot.activePlayer.metadata["mpris:artUrl"]) ? String(dashboardRoot.activePlayer.metadata["mpris:artUrl"]) : "../icons/music.svg"
                         }
                     }
@@ -262,90 +322,143 @@ Item {
                     }
                 }
 
-                // --- DURATIONS & LYRICS REGION ---
-                Item {
-                    width: parent.width
-                    height: 20
-
-                    Text {
-                        id: posLabel
-                        text: dashboardRoot.activePlayer ? Math.floor(dashboardRoot.activePlayer.position / 60000) + ":" + String(Math.floor((dashboardRoot.activePlayer.position % 60000) / 1000)).padStart(2, '0') : "0:00"
-                        color: "#66ffffff"
-                        font.pixelSize: 10
-                        anchors.left: parent.left
-                        anchors.verticalCenter: parent.verticalCenter
-                    }
-
-                    Rectangle {
-                        id: trackBar
-                        width: parent.width - 130
-                        height: 4
-                        radius: 2
-                        color: "#22ffffff"
-                        anchors.left: posLabel.right
-                        anchors.leftMargin: 8
-                        anchors.verticalCenter: parent.verticalCenter
-
-                        Rectangle {
-                            width: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.length > 0) ? (dashboardRoot.activePlayer.position / dashboardRoot.activePlayer.length) * parent.width : 0
-                            height: parent.height
-                            radius: 2
-                            color: "#3b8bff"
-                        }
-                    }
-
-                    Text {
-                        id: durLabel
-                        text: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.length > 0) ? Math.floor(dashboardRoot.activePlayer.length / 60000) + ":" + String(Math.floor((dashboardRoot.activePlayer.length % 60000) / 1000)).padStart(2, '0') : "3:45"
-                        color: "#66ffffff"
-                        font.pixelSize: 10
-                        anchors.left: trackBar.right
-                        anchors.leftMargin: 8
-                        anchors.verticalCenter: parent.verticalCenter
-                    }
-
-                    Rectangle {
-                        anchors.right: parent.right
-                        anchors.verticalCenter: parent.verticalCenter
-                        width: 44; height: 18; radius: 5
-                        color: "#16ffffff"
-                        border.color: "#22ffffff"
-
-                        Text { text: "Lyrics"; color: "#ffffff"; font.pixelSize: 9; font.bold: true; anchors.centerIn: parent }
-                        MouseArea { anchors.fill: parent; onClicked: page = "lyrics" }
-                    }
-                }
-
-                // --- BUTTON ROW (FORCED WHITE OVERLAYS) ---
+                // ============================================================
+                // SPLIT 2-COLUMN LAYOUT: LEFT (65%) PLAYER | RIGHT (35%) LYRICS
+                // ============================================================
                 Row {
                     width: parent.width
-                    height: 40
-                    spacing: (parent.width - (24 + 40 + 24)) / 2
+                    height: 140
+                    spacing: 16
 
-                    Rectangle {
-                        width: 24; height: 24; color: "transparent"; anchors.verticalCenter: parent.verticalCenter
-                        Icon { name: "skip-back"; size: 24; color: "#ffffff"; anchors.centerIn: parent }
-                        MouseArea { anchors.fill: parent; onClicked: if (dashboardRoot.activePlayer) dashboardRoot.activePlayer.previous() }
-                    }
+                    // =========================================================
+                    // LEFT SIDE BLOCK (65% Width): TRACK INFO, PROGRESS, VOLUME
+                    // =========================================================
+                    Column {
+                        width: parent.width * 0.65 - 8
+                        spacing: 12
 
-                    Rectangle {
-                        width: 40; height: 40; radius: 20
-                        color: "#3b8bff"
-                        anchors.verticalCenter: parent.verticalCenter
+                        // 1. Duration Line Segment Layout
+                        Item {
+                            width: parent.width
+                            height: 16
 
-                        Icon { 
-                            name: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.playbackStatus === 1) ? "pause" : "play"
-                            size: 18 
-                            color: "#ffffff"
-                            anchors.centerIn: parent 
+                            Text {
+                                id: currentTimerLabel
+                                text: dashboardRoot.activePlayer ? Math.floor(dashboardRoot.activePlayer.position / 60000) + ":" + String(Math.floor((dashboardRoot.activePlayer.position % 60000) / 1000)).padStart(2, '0') : "0:00"
+                                color: "#9a9aa0"
+                                font.pixelSize: 11
+                                anchors.left: parent.left
+                                anchors.verticalCenter: parent.verticalCenter
+                            }
+
+                            Rectangle {
+                                id: progressLineGraphic
+                                width: parent.width - 80
+                                height: 4
+                                radius: 2
+                                color: "#22ffffff"
+                                anchors.left: currentTimerLabel.right
+                                anchors.leftMargin: 8
+                                anchors.verticalCenter: parent.verticalCenter
+
+                                Rectangle {
+                                    width: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.length > 0) ? (dashboardRoot.activePlayer.position / dashboardRoot.activePlayer.length) * parent.width : 0
+                                    height: parent.height
+                                    radius: 2
+                                    color: "#3b8bff"
+                                }
+                            }
+
+                            Text {
+                                text: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.length > 0) ? Math.floor(dashboardRoot.activePlayer.length / 60000) + ":" + String(Math.floor((dashboardRoot.activePlayer.length % 60000) / 1000)).padStart(2, '0') : "3:45"
+                                color: "#9a9aa0"
+                                font.pixelSize: 11
+                                anchors.right: parent.right
+                                anchors.verticalCenter: parent.verticalCenter
+                            }
+
+                            MouseArea {
+                                anchors.fill: progressLineGraphic
+                                hoverEnabled: true
+                                onClicked: (mouse) => { if (dashboardRoot.activePlayer && dashboardRoot.activePlayer.length > 0) dashboardRoot.activePlayer.position = (mouse.x / width) * dashboardRoot.activePlayer.length }
+                                onPositionChanged: (mouse) => { if (pressed && dashboardRoot.activePlayer && dashboardRoot.activePlayer.length > 0) dashboardRoot.activePlayer.position = (mouse.x / width) * dashboardRoot.activePlayer.length }
+                            }
+}
+
+                        // 2. Hardware System Interactive Volume Line Slider
+    Row {
+                            width: parent.width
+                            spacing: 10
+
+                            Icon { name: "volume"; size: 14; color: "#ffffff"; anchors.verticalCenter: parent.verticalCenter }
+
+                            Rectangle {
+                                width: parent.width - 50
+                                height: 4
+                                radius: 2
+                                color: "#22ffffff"
+                                anchors.verticalCenter: parent.verticalCenter
+
+                                Rectangle {
+                                    width: (parent.width - 2) * 0.5
+                                    height: parent.height
+                                    radius: 2
+                                    color: "#3b8bff"
+                                }
+
+                                MouseArea {
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    onClicked: (mouse) => { setSystemVolume(mouse.x / width) }
+                                    onPositionChanged: (mouse) => {
+                                        if (pressed) {
+                                            setSystemVolume(mouse.x / width);
+                                        }
+                                    }
+                                }
+                            }
                         }
-                        MouseArea { anchors.fill: parent; onClicked: if (dashboardRoot.activePlayer) dashboardRoot.activePlayer.togglePlay() }
+
+                        // 3. Central System Control Operations
+                        Row {
+                            width: parent.width
+                            spacing: 32
+                            anchors.horizontalCenter: parent.horizontalCenter
+
+                            Icon { name: "skip-back"; size: 20; color: "#ffffff" }
+                            Icon { name: "play"; size: 24; color: "#3b8bff" }
+                            Icon { name: "skip-forward"; size: 20; color: "#ffffff" }
+                        }
                     }
 
+                    // =========================================================
+                    // RIGHT SIDE BLOCK (35% Width): LIVE SCROLLING LYRICS VIEW
+                    // =========================================================
                     Rectangle {
-                        width: 24; height: 24; color: "transparent"; anchors.verticalCenter: parent.verticalCenter
-                        Icon { name: "skip-forward"; size: 24; color: "#ffffff"; anchors.centerIn: parent }
-                        MouseArea { anchors.fill: parent; onClicked: if (dashboardRoot.activePlayer) dashboardRoot.activePlayer.next() }
+                        width: parent.width * 0.35 - 8
+                        height: parent.height
+                        color: "#11ffffff"
+                        border.color: "#1affffff"
+                        radius: 12
+                        clip: true
+
+                        Flickable {
+                            anchors.fill: parent
+                            anchors.margins: 10
+                            contentWidth: parent.width - 20
+                            contentHeight: lyricsText.implicitHeight
+                            clip: true
+
+                            Text {
+                                id: lyricsText
+                                width: parent.width - 20
+                                text: dashboardRoot.liveLyricsText
+                                color: "#e4e4e6"
+                                font.pixelSize: 11
+                                wrapMode: Text.WordWrap
+                                lineHeight: 1.3
+                            }
+                        }
                     }
                 }
             }
