@@ -1,47 +1,24 @@
-// island/services/Notifications.qml - Notifications service with DBus portal check
-
+// island/services/Notifications.qml
 pragma Singleton
-import QtQuick 2.15
+import QtQuick
+import Quickshell
 import Quickshell.Services.Notifications
-import Quickshell.Io
 
-Item {
-    id: notificationsService
+Singleton {
+    id: root
+    readonly property var list: server.trackedNotifications.values
+    readonly property int count: list.length
 
-    // Check if freedesktop Notifications portal is available
-    property bool portalAvailable: false
-
-    // Process for checking DBus portal
-    Process {
-        id: portalCheckProc
-        command: ["busctl", "--user", "list", "--acquired"]
-        stdout: StdioCollector {
-            onStreamFinished: {
-                if (text && (text.indexOf("org.freedesktop.Notifications") !== -1 ||
-                             text.indexOf("org.kde.plasma.Notifications") !== -1)) {
-                    notificationsService.portalAvailable = true
-                    console.log("Notification portal available")
-                } else {
-                    notificationsService.portalAvailable = false
-                    console.warn("No notification daemon found on DBus. Install mako, dunst, or enable plasma notifications.")
-                }
-            }
-        }
+    NotificationServer {
+        id: server
+        keepOnReload: true
+        bodySupported: true
+        imageSupported: true
+        actionsSupported: true
+        onNotification: n => { n.tracked = true }
     }
-
-    Component.onCompleted: portalCheckProc.running = true
-
-    // Re-check portal periodically
-    Timer {
-        interval: 30000
-        running: true
-        repeat: true
-        onTriggered: portalCheckProc.running = true
-    }
-
-    readonly property var notifications: Notifications.notifications
 
     function clearAll() {
-        Notifications.clearAll()
+        for (const n of list.slice()) n.dismiss()
     }
 }

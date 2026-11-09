@@ -1,8 +1,7 @@
 import QtQuick
 import QtQuick.Controls
-import Quickshell.Services.UPower
-import Quickshell.Services.Mpris
 import Quickshell.Io
+import "../services" as Services
 
 Item {
     id: dashboardRoot
@@ -10,14 +9,6 @@ Item {
     property bool pinned: false
     property bool active: false
     anchors.fill: parent
-
-    // Target the primary active player instance safely
-    property var activePlayer: (Mpris.players && Mpris.players.length > 0) ? Mpris.players[0] : null
-
-    // Safe battery backing variables
-    property string batPercentStr: "78"
-    property int batPercentNum: 78
-    property bool isCharging: false
 
     // Lyrics fetcher state
     property string liveLyricsText: "Loading..."
@@ -47,50 +38,8 @@ Item {
         onTriggered: readSystemVolume.running = true
     }
 
-    // Timer to poll UPower values - find any battery device
-    Timer {
-        interval: 5000
-        running: true
-        repeat: true
-        onTriggered: { updateBatteryInfo(); }
-        Component.onCompleted: { updateBatteryInfo(); }
-    }
-
-    function updateBatteryInfo() {
-        var found = false;
-        if (UPower.devices) {
-            for (var i = 0; i < UPower.devices.length; i++) {
-                var dev = UPower.devices[i];
-                if (dev.ready && dev.type !== 0) { // Not line power (0)
-                    if (dev.type === 2 || dev.type === 1 || dev.type === 3) {
-                        var pct = Math.round(dev.percentage * 100);
-                        dashboardRoot.batPercentStr = pct.toString();
-                        dashboardRoot.batPercentNum = pct;
-                        dashboardRoot.isCharging = (dev.isCharging === true);
-                        found = true;
-                        console.log("Found battery device: type=" + dev.type + " name=" + dev.name + " percent=" + pct);
-                        break;
-                    }
-                }
-            }
-        }
-        if (!found && UPower.displayDevice && UPower.displayDevice.ready) {
-            var pct = Math.round(UPower.displayDevice.percentage * 100);
-            dashboardRoot.batPercentStr = pct.toString();
-            dashboardRoot.batPercentNum = pct;
-            dashboardRoot.isCharging = (UPower.displayDevice.isCharging === true);
-            console.log("Using displayDevice: percent=" + pct);
-        }
-        if (UPower.devices && dashboardRoot.batPercentNum === 78) {
-            for (var j = 0; j < UPower.devices.length; j++) {
-                var d = UPower.devices[j];
-                console.log("Device " + j + ": type=" + d.type + " name=" + d.name + " ready=" + d.ready + " percent=" + (d.percentage * 100) + " charging=" + d.isCharging);
-            }
-        }
-    }
-
-    function fmtTime(us) {
-        const t = Math.max(0, Math.floor(us / 1000000))
+    function fmtTime(s) {
+        const t = Math.max(0, Math.floor(s))
         return Math.floor(t / 60) + ":" + String(t % 60).padStart(2, "0")
     }
 
@@ -129,19 +78,17 @@ Item {
         fetchLyricsProcess.running = true;
     }
 
-    // Auto-fetch hook tracking titles
+    // Auto-fetch hook tracking titles - uses Media service
     Timer {
         interval: 2000
         running: true
         repeat: true
         onTriggered: {
-            if (dashboardRoot.activePlayer && dashboardRoot.activePlayer.metadata) {
-                var currentTitle = String(dashboardRoot.activePlayer.metadata["xesam:title"] || "");
-                var currentArtist = String(dashboardRoot.activePlayer.metadata["xesam:artist"] || "");
-                if (currentTitle !== "" && currentTitle !== lastTrackedTitle) {
-                    lastTrackedTitle = currentTitle;
+            if (Services.Media.hasPlayer && Services.Media.title !== "") {
+                if (Services.Media.title !== lastTrackedTitle) {
+                    lastTrackedTitle = Services.Media.title;
                     dashboardRoot.liveLyricsText = "Searching backend...";
-                    fetchLyrics(currentArtist, currentTitle);
+                    fetchLyrics(Services.Media.artist, Services.Media.title);
                 }
             } else {
                 dashboardRoot.liveLyricsText = "None (No active media playing).";
@@ -252,7 +199,7 @@ Item {
         }
     }
 
-// Separator line below utility row
+    // Separator line below utility row
     Rectangle {
         x: 20; y: 98
         width: 740; height: 1
@@ -272,7 +219,7 @@ Item {
             width: 740
             height: 280
             anchors.horizontalCenter: parent.horizontalCenter
-            y: 8  // Lifted up from 20
+            y: 8
             visible: page === "music"
 
             Row {
@@ -287,8 +234,8 @@ Item {
 
                     Column {
                         anchors.fill: parent
-                        anchors.margins: 12  // Reduced from 16
-                        spacing: 8  // Reduced from 12
+                        anchors.margins: 12
+                        spacing: 8
 
                         // Track Details - Thumbnail + Title/Artist
                         Row {
@@ -297,7 +244,7 @@ Item {
                                 width: 110; height: 110; radius: 14; color: "#2c2c2e"; clip: true
                                 Image {
                                     anchors.fill: parent; fillMode: Image.PreserveAspectCrop
-                                    source: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.metadata && dashboardRoot.activePlayer.metadata["mpris:artUrl"]) ? String(dashboardRoot.activePlayer.metadata["mpris:artUrl"]) : ""
+                                    source: Services.Media.artUrl
                                     asynchronous: true
                                     cache: true
                                 }
@@ -305,8 +252,8 @@ Item {
                             }
                             Column {
                                 width: parent.width - 126; anchors.verticalCenter: parent.verticalCenter; spacing: 4
-                                Text { text: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.metadata && dashboardRoot.activePlayer.metadata["xesam:title"]) ? String(dashboardRoot.activePlayer.metadata["xesam:title"]) : "Spotify / Browser Idle"; color: "#ffffff"; font.pixelSize: 16; font.bold: true; elide: Text.ElideRight; width: parent.width }
-                                Text { text: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.metadata && dashboardRoot.activePlayer.metadata["xesam:artist"]) ? String(dashboardRoot.activePlayer.metadata["xesam:artist"]) : "Start playing a track..."; color: "#9a9aa0"; font.pixelSize: 13; elide: Text.ElideRight; width: parent.width }
+                                Text { text: Services.Media.hasPlayer ? Services.Media.title : "Nothing playing"; color: "#ffffff"; font.pixelSize: 16; font.bold: true; elide: Text.ElideRight; width: parent.width }
+                                Text { text: Services.Media.artist !== "" ? Services.Media.artist : "Start playing a track..."; color: "#9a9aa0"; font.pixelSize: 13; elide: Text.ElideRight; width: parent.width }
                             }
                         }
 
@@ -315,25 +262,30 @@ Item {
                             width: parent.width; height: 44
                             spacing: (parent.width - (24 + 24 + 40 + 24 + 24)) / 4
 
+                            // Shuffle
                             Item { width: 24; height: 24; anchors.verticalCenter: parent.verticalCenter
-                                Icon { name: "media-playlist-shuffle"; size: 20; color: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.shuffle) ? "#3b8bff" : "#9a9aa0"; anchors.centerIn: parent }
-                                MouseArea { anchors.fill: parent; onClicked: if (dashboardRoot.activePlayer) dashboardRoot.activePlayer.shuffle = !dashboardRoot.activePlayer.shuffle }
+                                Icon { name: "shuffle"; size: 20; color: Services.Media.shuffleOn ? "#3b8bff" : "#9a9aa0"; anchors.centerIn: parent }
+                                MouseArea { anchors.fill: parent; onClicked: Services.Media.toggleShuffle() }
                             }
+                            // Previous
                             Item { width: 24; height: 24; anchors.verticalCenter: parent.verticalCenter
                                 Icon { name: "media-skip-backward"; size: 24; color: "#9a9aa0"; anchors.centerIn: parent }
-                                MouseArea { anchors.fill: parent; onClicked: if (dashboardRoot.activePlayer) dashboardRoot.activePlayer.previous() }
+                                MouseArea { anchors.fill: parent; onClicked: Services.Media.previous() }
                             }
+                            // Play/Pause
                             Item { width: 40; height: 40; anchors.verticalCenter: parent.verticalCenter
-                                Icon { name: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.playbackStatus === 1) ? "media-playback-pause" : "media-playback-start"; size: 32; color: "#ffffff"; anchors.centerIn: parent }
-                                MouseArea { anchors.fill: parent; onClicked: if (dashboardRoot.activePlayer) dashboardRoot.activePlayer.togglePlay() }
+                                Icon { name: Services.Media.isPlaying ? "pause" : "play"; size: 32; color: "#ffffff"; anchors.centerIn: parent }
+                                MouseArea { anchors.fill: parent; onClicked: Services.Media.togglePlay() }
                             }
+                            // Next
                             Item { width: 24; height: 24; anchors.verticalCenter: parent.verticalCenter
                                 Icon { name: "media-skip-forward"; size: 24; color: "#9a9aa0"; anchors.centerIn: parent }
-                                MouseArea { anchors.fill: parent; onClicked: if (dashboardRoot.activePlayer) dashboardRoot.activePlayer.next() }
+                                MouseArea { anchors.fill: parent; onClicked: Services.Media.next() }
                             }
+                            // Repeat
                             Item { width: 24; height: 24; anchors.verticalCenter: parent.verticalCenter
-                                Icon { name: "media-playlist-repeat"; size: 20; color: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.loopStatus === 1) ? "#3b8bff" : "#9a9aa0"; anchors.centerIn: parent }
-                                MouseArea { anchors.fill: parent; onClicked: if (dashboardRoot.activePlayer) dashboardRoot.activePlayer.loopStatus = (dashboardRoot.activePlayer.loopStatus === 1) ? 0 : 1 }
+                                Icon { name: "repeat"; size: 20; color: Services.Media.repeatOn ? "#3b8bff" : "#9a9aa0"; anchors.centerIn: parent }
+                                MouseArea { anchors.fill: parent; onClicked: Services.Media.toggleRepeat() }
                             }
                         }
 
@@ -341,19 +293,19 @@ Item {
                         Column {
                             width: parent.width; height: 40; spacing: 6
                             Slider {
-                                id: trackProgressSlider; width: parent.width; height: 14; value: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.length > 0) ? (dashboardRoot.activePlayer.position / dashboardRoot.activePlayer.length) : 0
+                                id: trackProgressSlider; width: parent.width; height: 14; value: Services.Media.length > 0 ? Services.Media.position / Services.Media.length : 0
                                 background: Rectangle { height: 5; radius: 3; color: "#22ffffff"; Rectangle { width: trackProgressSlider.visualPosition * parent.width; height: 5; color: "#ffffff"; radius: 3 } }
                                 handle: Rectangle { x: trackProgressSlider.visualPosition * (trackProgressSlider.width - width); y: -5; width: 14; height: 14; radius: 7; color: "#ffffff" }
                                 onValueChanged: {
-                                    if (dashboardRoot.activePlayer && dashboardRoot.activePlayer.length > 0) {
-                                        dashboardRoot.activePlayer.position = value * dashboardRoot.activePlayer.length;
+                                    if (Services.Media.length > 0) {
+                                        Services.Media.seek(value * Services.Media.length);
                                     }
                                 }
                             }
                             Item {
                                 width: parent.width; height: 14
-                                Text { text: dashboardRoot.activePlayer ? Math.floor(dashboardRoot.activePlayer.position / 60000) + ":" + String(Math.floor((dashboardRoot.activePlayer.position % 60000) / 1000)).padStart(2, '0') : "0:00"; color: "#66ffffff"; font.pixelSize: 11 }
-                                Text { text: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.length > 0) ? Math.floor(dashboardRoot.activePlayer.length / 60000) + ":" + String(Math.floor((dashboardRoot.activePlayer.length % 60000) / 1000)).padStart(2, '0') : "-0:00"; color: "#66ffffff"; font.pixelSize: 11; anchors.right: parent.right }
+                                Text { text: fmtTime(Services.Media.position); color: "#66ffffff"; font.pixelSize: 11 }
+                                Text { text: Services.Media.length > 0 ? fmtTime(Services.Media.length) : "-0:00"; color: "#66ffffff"; font.pixelSize: 11; anchors.right: parent.right }
                             }
                         }
 
@@ -380,8 +332,8 @@ Item {
                 // RIGHT: Lyrics Card
                 Rectangle {
                     width: 290
-                    height: parent.height - 16  // Lifted up
-                    y: 0  // Top aligned instead of vertically centered
+                    height: parent.height - 16
+                    y: 0
                     color: "#16ffffff"
                     border.color: Theme.cardBorder
                     border.width: 1

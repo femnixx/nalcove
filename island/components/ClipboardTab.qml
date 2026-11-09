@@ -9,194 +9,20 @@ Rectangle {
     radius: Theme.cardRadius
     clip: true
 
-    property bool useCliphist: false
+    property var entries: []
 
-    ListModel {
-        id: clipboardModel
-    }
-
-    // Check if cliphist is available (primary method like Noctalia)
     Process {
-        id: checkCliphistProc
-        command: ["sh", "-c", "command -v cliphist >/dev/null 2>&1"]
-        onRunningChanged: {
-            if (!running) {
-                if (exitCode === 0) {
-                    root.useCliphist = true
-                    loadHistoryProc.running = true
-                    watchProc.running = true
-                } else {
-                    // Fallback: poll clipboard every 2000ms (less aggressive)
-                    pollTimer.running = true
-                }
-            }
-        }
-    }
-
-    // Load history from cliphist on startup
-    Process {
-        id: loadHistoryProc
+        id: listProc
         command: ["cliphist", "list"]
         stdout: StdioCollector {
-            onStreamFinished: {
-                if (text && text.trim()) {
-                    var lines = text.trim().split("\n")
-                    for (var i = 0; i < lines.length && i < 200; i++) {
-                        var line = lines[i].trim()
-                        if (line) {
-                            var parts = line.split("\t")
-                            if (parts.length >= 2) {
-                                var id = parts[0]
-                                var content = parts.slice(1).join("\t")
-                                if (content.startsWith("[image]") || content.startsWith("[IMAGE]")) {
-                                    clipboardModel.append({ type: "image", cliphistId: id, content: content, time: "" })
-                                } else {
-                                    clipboardModel.append({ type: "text", cliphistId: id, content: content, time: "" })
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+            onStreamFinished: root.entries = text.trim() === "" ? [] : text.trim().split("\n")
         }
     }
+    Process { id: copyProc }
+    Process { id: wipeProc; command: ["cliphist", "wipe"]; onRunningChanged: if (!running) listProc.running = true }
 
-    // Watch for clipboard changes using wl-paste --watch (cliphist mode)
-    Process {
-        id: watchProc
-        command: ["bash", "-c", "wl-paste --watch cliphist store"]
-        onRunningChanged: {
-            if (!running && root.useCliphist) {
-                reviveTimer.start()
-            }
-        }
-    }
-
-    Timer {
-        id: reviveTimer
-        interval: 3000
-        onTriggered: if (root.useCliphist) watchProc.running = true
-    }
-
-    // Fallback: poll clipboard every 2000ms (non-consuming check first)
-    Timer {
-        id: pollTimer
-        interval: 2000
-        running: false
-        repeat: true
-        onTriggered: {
-            if (!root.useCliphist) {
-                // First check if clipboard has text type without consuming
-                checkClipboardTypeProc.running = true
-            }
-        }
-    }
-
-    // Check clipboard type first (non-consuming)
-    Process {
-        id: checkClipboardTypeProc
-        command: ["wl-paste", "--list-types"]
-        stdout: StdioCollector {
-            onStreamFinished: {
-                if (text && text.indexOf("text") !== -1) {
-                    pollTextClipboard.running = true
-                }
-                if (text && text.indexOf("image") !== -1) {
-                    pollImageClipboard.running = true
-                }
-            }
-        }
-    }
-
-    // Poll clipboard for text (only after confirming type)
-    Process {
-        id: pollTextClipboard
-        command: ["wl-paste", "-t", "text"]
-        stdout: StdioCollector {
-            onStreamFinished: {
-                if (text && text.trim()) {
-                    var t = text.trim()
-                    var exists = false
-                    for (var i = 0; i < clipboardModel.count; i++) {
-                        var item = clipboardModel.get(i)
-                        if (item && item.type === "text" && item.content === t) {
-                            exists = true
-                            break
-                        }
-                    }
-                    if (!exists) {
-                        clipboardModel.insert(0, { type: "text", cliphistId: "", content: t, time: new Date().toLocaleTimeString() })
-                        if (clipboardModel.count > 200) clipboardModel.remove(clipboardModel.count - 1)
-                    }
-                }
-            }
-        }
-    }
-
-    // Poll clipboard for images
-    Process {
-        id: pollImageClipboard
-        command: ["sh", "-c", "wl-paste -t image/png > /tmp/clipboard_img_$(date +%s).png 2>/dev/null && echo /tmp/clipboard_img_$(date +%s).png"]
-        stdout: StdioCollector {
-            onStreamFinished: {
-                if (text && text.trim() && text.trim().startsWith("/tmp/")) {
-                    var filename = text.trim()
-                    var exists = false
-                    for (var i = 0; i < clipboardModel.count; i++) {
-                        var item = clipboardModel.get(i)
-                        if (item && item.type === "image" && item.path === filename) {
-                            exists = true
-                            break
-                        }
-                    }
-                    if (!exists) {
-                        clipboardModel.insert(0, { type: "image", cliphistId: "", path: filename, time: new Date().toLocaleTimeString() })
-                        if (clipboardModel.count > 200) clipboardModel.remove(clipboardModel.count - 1)
-                    }
-                }
-            }
-        }
-    }
-
-    // Wipe process for cliphist
-    Process {
-        id: wipeProc
-        command: ["cliphist", "wipe"]
-    }
-
-    // Copy selected entry to clipboard
-    Process {
-        id: copyTextProc
-        command: ["wl-copy"]
-    }
-
-    Process {
-        id: copyImageProc
-        command: ["wl-copy", "-t", "image/png"]
-    }
-
-    function copyToClipboard(text) {
-        copyTextProc.command = ["wl-copy", text]
-        copyTextProc.running = true
-    }
-
-    function copyImageToClipboard(cliphistId) {
-        if (root.useCliphist && cliphistId) {
-            copyImageProc.command = ["bash", "-c", "cliphist decode " + cliphistId + " | wl-copy -t image/png"]
-            copyImageProc.running = true
-        }
-    }
-
-    function clearHistory() {
-        if (root.useCliphist) {
-            wipeProc.onCompleted = function() {
-                if (exitCode === 0) clipboardModel.clear()
-            }
-            wipeProc.running = true
-        } else {
-            clipboardModel.clear()
-        }
-    }
+    // refresh whenever the tab becomes visible
+    onVisibleChanged: if (visible) listProc.running = true
 
     ColumnLayout {
         anchors.fill: parent
@@ -227,7 +53,7 @@ Rectangle {
                 }
                 MouseArea {
                     anchors.fill: parent
-                    onClicked: clearHistory()
+                    onClicked: wipeProc.running = true
                 }
             }
         }
@@ -235,120 +61,37 @@ Rectangle {
         ListView {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            model: clipboardModel
+            model: root.entries
             spacing: 6
+            clip: true
             delegate: Rectangle {
-                width: ListView.view.width
-                height: Math.max(72, contentColumn.implicitHeight + 16)
-                color: Theme.cardHi
-                radius: 10
-                clip: true
-
-                property bool hovered: false
-
-                Column {
-                    id: contentColumn
+                width: ListView.view.width; height: 36; radius: 10
+                color: "#16ffffff"
+                Text {
+                    anchors.fill: parent; anchors.margins: 10
+                    text: modelData.replace(/^\d+\t/, "")
+                    color: "#ffffff"; elide: Text.ElideRight
+                    verticalAlignment: Text.AlignVCenter
+                }
+                MouseArea {
                     anchors.fill: parent
-                    anchors.margins: 12
-                    spacing: 8
-
-                    Loader {
-                        width: parent.width
-                        sourceComponent: modelData && modelData.type === "image" ? imageDelegate : textDelegate
-                    }
-
-                    Component {
-                        id: textDelegate
-                        Text {
-                            id: textItem
-                            width: parent.width - 80
-                            text: modelData && modelData.content ? modelData.content : ""
-                            color: "#ffffff"
-                            opacity: 1.0
-                            font.pixelSize: 13
-                            wrapMode: Text.WordWrap
-                            maximumLineCount: 4
-                            elide: Text.ElideRight
-                        }
-                    }
-
-                    Component {
-                        id: imageDelegate
-                        Image {
-                            width: Math.min(parent.width, 300)
-                            height: 160
-                            source: modelData && modelData.path ? "file://" + modelData.path : ""
-                            fillMode: Image.PreserveAspectFit
-                            asynchronous: true
-                        }
-                    }
-
-                    Row {
-                        anchors.right: parent.right
-                        spacing: 8
-
-                        Text {
-                            text: modelData && modelData.time ? modelData.time : ""
-                            color: "#9a9aa0"
-                            font.pixelSize: 10
-                            visible: !root.hovered
-                        }
-
-                        Rectangle {
-                            width: 32; height: 32; radius: 16
-                            color: root.hovered ? Theme.accent : "transparent"
-                            border.color: Theme.border; border.width: 1
-                            Icon {
-                                anchors.centerIn: parent
-                                name: modelData && modelData.type === "image" ? "download" : "copy"
-                                size: 14
-                                color: root.hovered ? "white" : "#9a9aa0"
-                            }
-                            MouseArea {
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                onEntered: root.hovered = true
-                                onExited: root.hovered = false
-                                onClicked: {
-                                    if (modelData && modelData.type === "text" && modelData.content) {
-                                        copyToClipboard(modelData.content)
-                                    }
-                                }
-                            }
-                        }
-
-                        Rectangle {
-                            width: 32; height: 32; radius: 16
-                            color: root.hovered ? "#ff453a20" : "transparent"
-                            border.color: Theme.border; border.width: 1
-                            Icon {
-                                anchors.centerIn: parent
-                                name: "trash"
-                                size: 14
-                                color: root.hovered ? "#ff453a" : "#9a9aa0"
-                            }
-                            MouseArea {
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                onEntered: root.hovered = true
-                                onExited: root.hovered = false
-                                onClicked: clipboardModel.remove(index)
-                            }
-                        }
+                    onClicked: {
+                        // entry id is the number before the tab
+                        copyProc.command = ["sh", "-c", "printf '%s' \"$1\" | cliphist decode | wl-copy", "sh", modelData]
+                        copyProc.running = true
                     }
                 }
             }
         }
 
         Item {
-            visible: clipboardModel.count === 0
+            visible: root.entries.length === 0
             Layout.fillWidth: true
             Layout.fillHeight: true
             Text {
                 anchors.centerIn: parent
                 text: "Clipboard is empty"
-                color: "#ffffff"
-                opacity: 1.0
+                color: "#9a9aa0"
                 font.pixelSize: 14
             }
         }
