@@ -16,7 +16,7 @@ ShellRoot {
         id: islandWindow
 
         anchors { top: true; left: true; right: true }
-        implicitHeight: 340
+        implicitHeight: 470
         color: "transparent"
         exclusionMode: ExclusionMode.Ignore
         WlrLayershell.layer: WlrLayer.Overlay
@@ -39,10 +39,10 @@ ShellRoot {
         // State machine: "closed" | "hover" | "hotkey"
         property string triggerMode: "closed"
 
-        property real currentWidth: triggerMode === "hotkey" ? 760
+        property real currentWidth: triggerMode === "hotkey" ? 780
             : (triggerMode === "hover" ? 360 : (Media.isPlaying ? 270 : 200))
-        property real currentHeight: triggerMode === "hotkey" ? 280 : (triggerMode === "hover" ? 80 : 34)
-        property real currentBottomRadius: triggerMode === "closed" ? 14 : 28
+        property real currentHeight: triggerMode === "hotkey" ? 400 : (triggerMode === "hover" ? 80 : 34)
+        property real currentBottomRadius: triggerMode === "closed" ? 14 : 32
 
         Behavior on currentWidth {
             SpringAnimation { spring: 3.5; damping: 0.35; epsilon: 0.25 }
@@ -108,7 +108,7 @@ ShellRoot {
                     property real r: Math.max(0, islandWindow.currentBottomRadius)
 
                     strokeWidth: 0
-                    fillColor: "#000000"
+                    fillColor: islandWindow.triggerMode === "hotkey" ? Theme.islandFill : "#000000"
                     startX: -f
                     startY: 0
 
