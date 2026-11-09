@@ -2,7 +2,7 @@ import QtQuick
 import "../services" as Services
 
 Rectangle {
-    radius: 18; color: "#16ffffff"; border.color: "#22ffffff"; border.width: 1
+    radius: 18; color: "#1a1a1a"; border.color: "#2a2a2a"; border.width: 1
     visible: Services.Brightness.available
 
     Row {

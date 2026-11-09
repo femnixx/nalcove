@@ -16,7 +16,7 @@ Item {
 
     Rectangle {
         id: header
-        width: parent.width; height: 32; radius: 10; color: "#1e1e1e"
+        width: parent.width; height: 32; radius: 10; color: "#1a1a1a"
         Text {
             anchors.fill: parent; anchors.leftMargin: 10; anchors.rightMargin: 26
             text: root.labelOf(root.currentNode)
@@ -33,7 +33,7 @@ Item {
         width: parent.width
         height: list.implicitHeight + 8
         y: root.dropUp ? -height - 4 : header.height + 4
-        radius: 10; color: "#1e1e1e"; border.color: "#333333"; border.width: 1
+        radius: 10; color: "#1a1a1a"; border.color: "#2a2a2a"; border.width: 2
 
         Column {
             id: list
@@ -43,7 +43,7 @@ Item {
                 model: root.model
                 delegate: Rectangle {
                     width: list.width; height: 30; radius: 8
-                    color: ma.containsMouse ? "#333333" : "#1e1e1e"
+                    color: ma.containsMouse ? "#2a2a2a" : "#1a1a1a"
                     property bool isCur: root.currentNode && modelData.id === root.currentNode.id
                     Text {
                         anchors.fill: parent; anchors.leftMargin: 10; anchors.rightMargin: 10
