@@ -24,14 +24,15 @@ Rectangle {
                     var t = text.trim()
                     var exists = false
                     for (var i = 0; i < clipboardModel.count; i++) {
-                        if (clipboardModel.get(i).text === t) {
+                        var item = clipboardModel.get(i)
+                        if (item && item.text === t) {
                             exists = true
                             break
                         }
                     }
                     if (!exists) {
                         clipboardModel.insert(0, { text: t, time: new Date().toLocaleTimeString() })
-                        if (clipboardModel.count > 50) clipboardModel.remove(clipboardModel.count - 1)
+                        if (clipboardModel.count > 200) clipboardModel.remove(clipboardModel.count - 1)
                     }
                 }
             }
@@ -64,7 +65,7 @@ Rectangle {
                 font.pixelSize: 18
                 font.bold: true
             }
-            Item { width: 40 }
+            Item { Layout.fillWidth: true }
             Rectangle {
                 width: 100; height: 28; radius: 14
                 color: Theme.cardHi
@@ -102,7 +103,7 @@ Rectangle {
                     anchors.left: parent.left
                     anchors.leftMargin: 16
                     anchors.verticalCenter: parent.verticalCenter
-                    text: modelData.text
+                    text: modelData && modelData.text ? modelData.text : ""
                     color: Theme.fg
                     font.pixelSize: 13
                     wrapMode: Text.WordWrap
@@ -117,7 +118,7 @@ Rectangle {
                     spacing: 8
 
                     Text {
-                        text: modelData.time
+                        text: modelData && modelData.time ? modelData.time : ""
                         color: Theme.dim
                         font.pixelSize: 10
                     }
@@ -138,8 +139,10 @@ Rectangle {
                             onEntered: root.hovered = true
                             onExited: root.hovered = false
                             onClicked: {
-                                root.copyText = modelData.text
-                                copyProc.running = true
+                                if (modelData && modelData.text) {
+                                    root.copyText = modelData.text
+                                    copyProc.running = true
+                                }
                             }
                         }
                     }

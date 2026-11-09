@@ -340,6 +340,9 @@ Item {
                             }
                         }
 
+                        // Spacer - push controls down
+                        Item { width: parent.width; height: 8 }
+
                         // Section 2: Controls - Right below track info
                         Row {
                             width: parent.width; height: 44
@@ -426,9 +429,9 @@ Item {
                 // ==========================================
                 Rectangle {
                     width: 290
-                    height: parent.height - 32
+                    height: parent.height - 48
                     anchors.top: parent.top
-                    anchors.topMargin: 16
+                    anchors.topMargin: 8
                     color: "#16ffffff"
                     border.color: Theme.cardBorder
                     border.width: 1
