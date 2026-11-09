@@ -40,21 +40,24 @@ Rectangle {
                 width: parent.width; height: 32; radius: 10; color: "#1a1a1a"
                 Text {
                     anchors.fill: parent; anchors.leftMargin: 10; anchors.rightMargin: 26
-                    text: deviceSelector.labelOf(deviceSelector.currentNode)
+                    text: outputSelector.labelOf(outputSelector.currentNode)
                     color: "#ffffff"; font.pixelSize: 12
                     elide: Text.ElideRight; verticalAlignment: Text.AlignVCenter
                 }
                 Text { anchors.right: parent.right; anchors.rightMargin: 10; anchors.verticalCenter: parent.verticalCenter
-                       text: deviceSelector.visible ? "▴" : "▾"; color: "#9a9aa0" }
-                MouseArea { anchors.fill: parent; onClicked: deviceSelector.visible ? deviceSelector.close() : deviceSelector.open() }
+                       text: outputSelector.open ? "▴" : "▾"; color: "#9a9aa0" }
+                MouseArea { anchors.fill: parent; onClicked: outputSelector.open ? outputSelector.close() : outputSelector.open() }
             }
 
             DeviceSelector {
-                id: deviceSelector
+                id: outputSelector
                 width: parent.width
                 model: Services.Audio.sinks
                 currentNode: Services.Audio.sink
                 onPicked: n => Services.Audio.setDefaultSink(n)
+                // Position popup below the header button
+                x: headerBtn.x
+                y: headerBtn.y + headerBtn.height + 4
             }
         }
     }

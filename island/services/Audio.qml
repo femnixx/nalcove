@@ -7,7 +7,6 @@ Singleton {
     id: root
 
     // Audio properties are only available while an object is tracked
-    // Track all nodes so their audio properties are available
     PwObjectTracker { objects: Pipewire.nodes }
 
     // Filter function for sinks and sources
@@ -22,8 +21,31 @@ Singleton {
         return result
     }
 
-    readonly property var sinks: filterNodes(Pipewire.nodes, true)
-    readonly property var sources: filterNodes(Pipewire.nodes, false)
+    // Use ListModel for sinks and sources so PwObjectTracker can track them
+    ListModel { id: sinksModel }
+    ListModel { id: sourcesModel }
+
+    // Update models when Pipewire.nodes changes
+    Connections {
+        target: Pipewire.nodes
+        function onRowsInserted() { updateModels() }
+        function onRowsRemoved() { updateModels() }
+    }
+
+    function updateModels() {
+        sinksModel.clear()
+        sourcesModel.clear()
+        for (var i = 0; i < Pipewire.nodes.count; i++) {
+            var node = Pipewire.nodes.get(i)
+            if (node && !node.isStream && node.audio) {
+                if (node.isSink) sinksModel.append(node)
+                else sourcesModel.append(node)
+            }
+        }
+    }
+
+    // Initialize
+    Component.onCompleted: updateModels()
 
     readonly property var sink: Pipewire.defaultAudioSink
     readonly property var source: Pipewire.defaultAudioSource
@@ -42,11 +64,7 @@ Singleton {
     function setDefaultSink(n)   { Pipewire.preferredDefaultAudioSink = n }
     function setDefaultSource(n) { Pipewire.preferredDefaultAudioSource = n }
 
-    // Track all sinks and sources so their audio properties are bound
-    PwObjectTracker {
-        objects: root.sinks
-    }
-    PwObjectTracker {
-        objects: root.sources
-    }
+    // Track sinks and sources via ListModels
+    PwObjectTracker { objects: sinksModel }
+    PwObjectTracker { objects: sourcesModel }
 }
