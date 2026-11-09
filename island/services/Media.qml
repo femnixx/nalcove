@@ -23,9 +23,16 @@ Item {
 
     readonly property string title: active?.trackTitle || ""
     readonly property string artist: active?.trackArtist || ""
+    readonly property string album: active?.trackAlbum || ""
     readonly property string artUrl: active?.trackArtUrl || ""
     readonly property real position: active?.position ?? 0
     readonly property real length: active?.length ?? 0
+    readonly property real volume: active?.volume ?? 1.0
+
+    readonly property bool canShuffle: active?.canShuffle ?? false
+    readonly property bool shuffle: active?.shuffle ?? false
+    readonly property bool canRepeat: active?.canRepeat ?? false
+    readonly property int loopStatus: active?.loopStatus ?? 0
 
     function playPause() {
         if (active?.canTogglePlaying) active.togglePlaying();
@@ -35,5 +42,22 @@ Item {
     }
     function previous() {
         if (active?.canGoPrevious) active.previous();
+    }
+    function shuffle() {
+        if (active?.canShuffle) active.shuffle = !active.shuffle;
+    }
+    function repeat() {
+        if (active?.canRepeat) {
+            const modes = [0, 1, 2]; // None, Track, Playlist
+            const current = active.loopStatus;
+            const next = modes[(modes.indexOf(current) + 1) % modes.length];
+            active.loopStatus = next;
+        }
+    }
+    function seek(pos) {
+        if (active?.canSeek) active.position = pos * 1000000; // MPRIS uses microseconds
+    }
+    function setVolume(vol) {
+        if (active) active.volume = Math.max(0, Math.min(1, vol));
     }
 }
