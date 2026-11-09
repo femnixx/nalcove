@@ -45,8 +45,8 @@ Rectangle {
                     elide: Text.ElideRight; verticalAlignment: Text.AlignVCenter
                 }
                 Text { anchors.right: parent.right; anchors.rightMargin: 10; anchors.verticalCenter: parent.verticalCenter
-                       text: deviceSelector.open ? "▴" : "▾"; color: "#9a9aa0" }
-                MouseArea { anchors.fill: parent; onClicked: deviceSelector.open = !deviceSelector.open }
+                       text: deviceSelector.visible ? "▴" : "▾"; color: "#9a9aa0" }
+                MouseArea { anchors.fill: parent; onClicked: deviceSelector.visible ? deviceSelector.close() : deviceSelector.open() }
             }
 
             DeviceSelector {

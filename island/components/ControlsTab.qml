@@ -41,8 +41,8 @@ Item {
                             elide: Text.ElideRight; verticalAlignment: Text.AlignVCenter
                         }
                         Text { anchors.right: parent.right; anchors.rightMargin: 10; anchors.verticalCenter: parent.verticalCenter
-                               text: outputSelector.open ? "▴" : "▾"; color: "#9a9aa0" }
-                        MouseArea { anchors.fill: parent; onClicked: outputSelector.open = !outputSelector.open }
+                               text: outputSelector.visible ? "▴" : "▾"; color: "#9a9aa0" }
+                        MouseArea { anchors.fill: parent; onClicked: outputSelector.visible ? outputSelector.close() : outputSelector.open() }
                     }
 
                     DeviceSelector {
@@ -83,8 +83,8 @@ Item {
                             elide: Text.ElideRight; verticalAlignment: Text.AlignVCenter
                         }
                         Text { anchors.right: parent.right; anchors.rightMargin: 10; anchors.verticalCenter: parent.verticalCenter
-                               text: inputSelector.open ? "▴" : "▾"; color: "#9a9aa0" }
-                        MouseArea { anchors.fill: parent; onClicked: inputSelector.open = !inputSelector.open }
+                               text: inputSelector.visible ? "▴" : "▾"; color: "#9a9aa0" }
+                        MouseArea { anchors.fill: parent; onClicked: inputSelector.visible ? inputSelector.close() : inputSelector.open() }
                     }
 
                     DeviceSelector {

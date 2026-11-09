@@ -63,10 +63,5 @@ Popup {
         }
     }
 
-    // Header button - external to popup
-    Component.onCompleted: {
-        if (root.currentNode) {
-            // The header button is managed externally
-        }
-    }
+    // function labelOf(n) { return n ? (n.description || n.nickname || n.name) : "No device" }
 }
