@@ -41,7 +41,7 @@ Rectangle {
         }
     }
 
-    // Image clipboard monitor - simplified approach using wl-paste to file
+    // Image clipboard monitor
     Process {
         id: pasteImageCmd
         command: ["sh", "-c", "wl-paste -t image/png > /tmp/clipboard_img_$(date +%s).png 2>/dev/null && echo /tmp/clipboard_img_$(date +%s).png"]
@@ -121,7 +121,7 @@ Rectangle {
             model: clipboardModel
             spacing: 6
             delegate: Rectangle {
-                width: parent.width
+                width: parent ? parent.width : 400
                 height: Math.max(72, contentColumn.implicitHeight + 16)
                 color: Theme.cardHi
                 radius: 10
@@ -148,6 +148,7 @@ Rectangle {
                             width: parent.width - 80
                             text: modelData && modelData.text ? modelData.text : ""
                             color: "#ffffff"
+                            opacity: 1.0
                             font.pixelSize: 13
                             wrapMode: Text.WordWrap
                             maximumLineCount: 4

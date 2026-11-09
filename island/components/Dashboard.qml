@@ -52,12 +52,8 @@ Item {
         interval: 5000
         running: true
         repeat: true
-        onTriggered: {
-            updateBatteryInfo();
-        }
-        Component.onCompleted: {
-            updateBatteryInfo();
-        }
+        onTriggered: { updateBatteryInfo(); }
+        Component.onCompleted: { updateBatteryInfo(); }
     }
 
     function updateBatteryInfo() {
@@ -154,141 +150,6 @@ Item {
         }
     }
 
-    Rectangle {
-        x: 20; y: 14
-        width: 740; height: 96
-        color: "transparent"
-        border.color: Theme.border
-        border.width: 1
-        radius: 14
-
-        // --- ROW 1: TOP NAVIGATION ICONS ---
-        Row {
-            x: 16; y: 8
-            spacing: 8
-            
-            Rectangle {
-                width: 44; height: 36; radius: 8
-                color: page === "home" ? Theme.accentFill : "transparent"
-                border.color: page === "home" ? Theme.accent : "transparent"; border.width: 1
-                Icon { name: "home"; size: 20; anchors.centerIn: parent; color: Theme.fg }
-                MouseArea { anchors.fill: parent; onClicked: page = "home" }
-            }
-            Rectangle {
-                width: 44; height: 36; radius: 8
-                color: page === "music" ? Theme.accentFill : "transparent"
-                border.color: page === "music" ? Theme.accent : "transparent"; border.width: 1
-                Icon { name: "music"; size: 20; anchors.centerIn: parent; color: Theme.fg }
-                MouseArea { anchors.fill: parent; onClicked: page = "music" }
-            }
-            Rectangle {
-                width: 44; height: 36; radius: 8
-                color: page === "clipboard" ? Theme.accentFill : "transparent"
-                border.color: page === "clipboard" ? Theme.accent : "transparent"; border.width: 1
-                Icon { name: "clipboard"; size: 20; anchors.centerIn: parent; color: Theme.fg }
-                MouseArea { anchors.fill: parent; onClicked: page = "clipboard" }
-            }
-            Rectangle {
-                width: 44; height: 36; radius: 8
-                color: page === "alerts" ? Theme.accentFill : "transparent"
-                border.color: page === "alerts" ? Theme.accent : "transparent"; border.width: 1
-                Icon { name: "bell"; size: 20; anchors.centerIn: parent; color: Theme.fg }
-                MouseArea { anchors.fill: parent; onClicked: page = "alerts" }
-            }
-            Rectangle {
-                width: 44; height: 36; radius: 8
-                color: page === "shelf" ? Theme.accentFill : "transparent"
-                border.color: page === "shelf" ? Theme.accent : "transparent"; border.width: 1
-                Icon { name: "folder"; size: 20; anchors.centerIn: parent; color: Theme.fg }
-                MouseArea { anchors.fill: parent; onClicked: page = "shelf" }
-            }
-            Rectangle {
-                width: 44; height: 36; radius: 8
-                color: page === "notes" ? Theme.accentFill : "transparent"
-                border.color: page === "notes" ? Theme.accent : "transparent"; border.width: 1
-                Icon { name: "notebook"; size: 20; anchors.centerIn: parent; color: Theme.fg }
-                MouseArea { anchors.fill: parent; onClicked: page = "notes" }
-            }
-            Rectangle {
-                width: 44; height: 36; radius: 8
-                color: page === "controls" ? Theme.accentFill : "transparent"
-                border.color: page === "controls" ? Theme.accent : "transparent"; border.width: 1
-                Icon { name: "layers"; size: 20; anchors.centerIn: parent; color: Theme.fg }
-                MouseArea { anchors.fill: parent; onClicked: page = "controls" }
-            }
-        }
-
-        // --- ROW 1 RIGHT-SIDE: BATTERY & CLOCK ---
-        Row {
-            x: 480; y: 16
-            spacing: 12
-
-            Text {
-                text: Qt.formatDateTime(Clock.now, "ddd d MMM  h:mm AP")
-                color: Theme.dim
-                font.pixelSize: 13
-            }
-
-            Text {
-                text: dashboardRoot.batPercentStr + "%"
-                color: dashboardRoot.isCharging ? Theme.good : (dashboardRoot.batPercentNum < 20 ? "#ff453a" : Theme.fg)
-                font.pixelSize: 13
-                font.bold: true
-            }
-
-            Icon {
-                name: dashboardRoot.isCharging ? "battery-charge" : "battery"
-                size: 16
-                color: dashboardRoot.isCharging ? Theme.good : (dashboardRoot.batPercentNum < 20 ? "#ff453a" : Theme.fg)
-            }
-        }
-
-        // --- ROW 2: INNER SECTION LINE ---
-        Rectangle {
-            x: 0; y: 52
-            width: 740; height: 1
-            color: Theme.cardBorder
-        }
-
-        // --- ROW 3: UTILITY NAVIGATION ICONS ---
-        Row {
-            x: 16; y: 64
-            width: 700
-            spacing: 24
-
-            Rectangle {
-                width: 20; height: 20; color: "transparent"
-                Icon { name: "calendar"; size: 16; color: Theme.fg }
-                MouseArea { anchors.fill: parent; onClicked: page = "calendar" }
-            }
-            Rectangle {
-                width: 20; height: 20; color: "transparent"
-                Icon { name: "search"; size: 16; color: Theme.fg }
-                MouseArea { anchors.fill: parent; onClicked: page = "search" }
-            }
-            Rectangle {
-                width: 20; height: 20; color: "transparent"
-                Icon { name: "volume"; size: 16; color: Theme.fg }
-                MouseArea { anchors.fill: parent; onClicked: page = "volume" }
-            }
-            Rectangle {
-                width: 20; height: 20; color: "transparent"
-                Icon { name: "bluetooth"; size: 16; color: Theme.fg }
-                MouseArea { anchors.fill: parent; onClicked: page = "bluetooth" }
-            }
-            Rectangle {
-                width: 20; height: 20; color: "transparent"
-                Icon { name: "activity"; size: 16; color: Theme.fg }
-                MouseArea { anchors.fill: parent; onClicked: page = "system" }
-            }
-            Rectangle {
-                width: 20; height: 20; color: "transparent"
-                Icon { name: "settings"; size: 16; color: Theme.fg }
-                MouseArea { anchors.fill: parent; onClicked: page = "settings" }
-            }
-        }
-    }
-
     // --- TOP BAR: Navigation Tabs ---
     Rectangle {
         id: tabBar
@@ -354,20 +215,36 @@ Item {
         }
     }
 
+    // --- UTILITY ROW: Lower icons ---
+    Row {
+        id: utilityRow
+        x: 20; y: 60
+        width: 740
+        height: 24
+        spacing: 20
+
+        Icon { name: "calendar"; size: 16; color: "#9a9aa0"; MouseArea { anchors.fill: parent; onClicked: page = "calendar" } }
+        Icon { name: "search"; size: 16; color: "#9a9aa0"; MouseArea { anchors.fill: parent; onClicked: page = "search" } }
+        Icon { name: "volume"; size: 16; color: "#9a9aa0"; MouseArea { anchors.fill: parent; onClicked: page = "volume" } }
+        Icon { name: "bluetooth"; size: 16; color: "#9a9aa0"; MouseArea { anchors.fill: parent; onClicked: page = "bluetooth" } }
+        Icon { name: "activity"; size: 16; color: "#9a9aa0"; MouseArea { anchors.fill: parent; onClicked: page = "system" } }
+        Icon { name: "settings"; size: 16; color: "#9a9aa0"; MouseArea { anchors.fill: parent; onClicked: page = "settings" } }
+    }
+
     // --- CONTENT AREA: Tab panels ---
     Item {
-        x: 20; y: 70
+        x: 20; y: 88
         width: 740
-        height: parent.height - 90
+        height: parent.height - 110
 
         HomeTab { anchors.fill: parent; visible: page === "home" }
         
-        // --- DYNAMIC RESPONSIVE SPLIT MEDIA PLAYER WITH SHELF ---
+        // --- MUSIC TAB ---
         Item {
             width: 740
             height: 280
             anchors.horizontalCenter: parent.horizontalCenter
-            y: 8
+            y: 20
             visible: page === "music"
 
             Row {
@@ -375,19 +252,17 @@ Item {
                 height: parent.height
                 spacing: 20
 
-                // ==========================================
-                // LEFT CONTAINER: MEDIA ENGINE (no background)
-                // ==========================================
+                // LEFT: Media Engine
                 Item {
                     width: 430
                     height: parent.height
 
                     Column {
                         anchors.fill: parent
-                        anchors.margins: 8
-                        spacing: 4
+                        anchors.margins: 16
+                        spacing: 12
 
-                        // Section 1: Track Details Layout - Thumbnail + Title/Artist
+                        // Track Details - Thumbnail + Title/Artist
                         Row {
                             width: parent.width; height: 110; spacing: 16
                             Rectangle {
@@ -405,51 +280,34 @@ Item {
                             }
                         }
 
-                        // Spacer - push controls down
-                        Item { width: parent.width; height: 8 }
-
-                        // Section 2: Controls - Right below track info
+                        // Controls
                         Row {
                             width: parent.width; height: 44
                             spacing: (parent.width - (24 + 24 + 40 + 24 + 24)) / 4
 
-                            // Shuffle
-                            Item {
-                                width: 24; height: 24; anchors.verticalCenter: parent.verticalCenter
+                            Item { width: 24; height: 24; anchors.verticalCenter: parent.verticalCenter
                                 Icon { name: "media-playlist-shuffle"; size: 20; color: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.shuffle) ? "#3b8bff" : "#ffffff"; anchors.centerIn: parent }
                                 MouseArea { anchors.fill: parent; onClicked: if (dashboardRoot.activePlayer) dashboardRoot.activePlayer.shuffle = !dashboardRoot.activePlayer.shuffle }
                             }
-
-                            // Skip Backward
-                            Item {
-                                width: 24; height: 24; anchors.verticalCenter: parent.verticalCenter
+                            Item { width: 24; height: 24; anchors.verticalCenter: parent.verticalCenter
                                 Icon { name: "media-skip-backward"; size: 24; color: "#ffffff"; anchors.centerIn: parent }
                                 MouseArea { anchors.fill: parent; onClicked: if (dashboardRoot.activePlayer) dashboardRoot.activePlayer.previous() }
                             }
-
-                            // Play/Pause - large icon, no background
-                            Item {
-                                width: 40; height: 40; anchors.verticalCenter: parent.verticalCenter
+                            Item { width: 40; height: 40; anchors.verticalCenter: parent.verticalCenter
                                 Icon { name: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.playbackStatus === 1) ? "media-playback-pause" : "media-playback-start"; size: 32; color: "#ffffff"; anchors.centerIn: parent }
                                 MouseArea { anchors.fill: parent; onClicked: if (dashboardRoot.activePlayer) dashboardRoot.activePlayer.togglePlay() }
                             }
-
-                            // Skip Forward
-                            Item {
-                                width: 24; height: 24; anchors.verticalCenter: parent.verticalCenter
+                            Item { width: 24; height: 24; anchors.verticalCenter: parent.verticalCenter
                                 Icon { name: "media-skip-forward"; size: 24; color: "#ffffff"; anchors.centerIn: parent }
                                 MouseArea { anchors.fill: parent; onClicked: if (dashboardRoot.activePlayer) dashboardRoot.activePlayer.next() }
                             }
-
-                            // Repeat
-                            Item {
-                                width: 24; height: 24; anchors.verticalCenter: parent.verticalCenter
+                            Item { width: 24; height: 24; anchors.verticalCenter: parent.verticalCenter
                                 Icon { name: "media-playlist-repeat"; size: 20; color: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.loopStatus === 1) ? "#3b8bff" : "#ffffff"; anchors.centerIn: parent }
                                 MouseArea { anchors.fill: parent; onClicked: if (dashboardRoot.activePlayer) dashboardRoot.activePlayer.loopStatus = (dashboardRoot.activePlayer.loopStatus === 1) ? 0 : 1 }
                             }
                         }
 
-                        // Section 3: Progress Timeline Bar
+                        // Progress Bar
                         Column {
                             width: parent.width; height: 40; spacing: 6
                             Slider {
@@ -469,7 +327,7 @@ Item {
                             }
                         }
 
-                        // Section 4: Volume Bar
+                        // Volume
                         Row {
                             width: parent.width; height: 24; spacing: 12
                             Icon { name: "audio-volume-high"; size: 16; color: "#ffffff" }
@@ -489,26 +347,21 @@ Item {
                     }
                 }
 
-                // ==========================================
-                // RIGHT CONTAINER: LYRICS (only this has background/border)
-                // ==========================================
+                // RIGHT: Lyrics Card
                 Rectangle {
                     width: 290
-                    height: parent.height - 48
-                    anchors.top: parent.top
-                    anchors.topMargin: 8
+                    height: parent.height - 20
+                    anchors.verticalCenter: parent.verticalCenter
                     color: "#16ffffff"
                     border.color: Theme.cardBorder
                     border.width: 1
                     radius: 18
                     clip: true
 
-                    // Dynamic content depending on selected page state
                     Item {
                         anchors.fill: parent
                         anchors.margins: 18
 
-                        // View 1: Show Lyrics if page isn't "shelf"
                         ScrollView {
                             anchors.fill: parent
                             visible: page !== "shelf"
@@ -520,33 +373,23 @@ Item {
                             }
                         }
 
-                        // View 2: Mac-style File Shelf Staging Area
                         Column {
                             anchors.fill: parent
                             visible: page === "shelf"
                             spacing: 16
 
-                            Text {
-                                text: "Notch File Shelf"
-                                color: "#ffffff"; font.bold: true; font.pixelSize: 15
-                            }
+                            Text { text: "Notch File Shelf"; color: "#ffffff"; font.bold: true; font.pixelSize: 15 }
 
-                            // Dropzone box representation
                             Rectangle {
                                 width: parent.width; height: 140; radius: 12
                                 color: "#11ffffff"; border.color: "#33ffffff"; border.width: 1
-                                
-                                Column {
-                                    anchors.centerIn: parent; spacing: 8
+                                Column { anchors.centerIn: parent; spacing: 8
                                     Icon { name: "folder-download"; size: 28; color: "#66ffffff" }
                                     Text { text: "Drag files here to stage"; color: "#66ffffff"; font.pixelSize: 12 }
                                 }
                             }
 
-                            Text {
-                                text: "Staged files copy into ~/Downloads/NotchShelf/ automatically."
-                                color: "#44ffffff"; font.pixelSize: 11; wrapMode: Text.Wrap; width: parent.width
-                            }
+                            Text { text: "Staged files copy into ~/Downloads/NotchShelf/ automatically."; color: "#44ffffff"; font.pixelSize: 11; wrapMode: Text.Wrap; width: parent.width }
                         }
                     }
                 }
@@ -562,13 +405,10 @@ Item {
         BluetoothTab { anchors.fill: parent; visible: page === "bluetooth" }
 
         // Placeholder tabs
-        Item { visible: page === "search"; anchors.fill: parent
-            Text { anchors.centerIn: parent; text: "Search"; color: Theme.dim; font.pixelSize: 14 } }
-        Item { visible: page === "system"; anchors.fill: parent
-            Text { anchors.centerIn: parent; text: "Activity"; color: Theme.dim; font.pixelSize: 14 } }
-        Item { visible: page === "settings"; anchors.fill: parent
-            Text { anchors.centerIn: parent; text: "Settings"; color: Theme.dim; font.pixelSize: 14 } }
-        Item { visible: page === "lyrics"; anchors.fill: parent
-            Text { anchors.centerIn: parent; text: "Lyrics"; color: Theme.dim; font.pixelSize: 14 } }
+        Item { visible: page === "search"; anchors.fill: parent; Text { anchors.centerIn: parent; text: "Search"; color: Theme.dim; font.pixelSize: 14 } }
+        Item { visible: page === "volume"; anchors.fill: parent; Text { anchors.centerIn: parent; text: "Volume"; color: Theme.dim; font.pixelSize: 14 } }
+        Item { visible: page === "system"; anchors.fill: parent; Text { anchors.centerIn: parent; text: "Activity"; color: Theme.dim; font.pixelSize: 14 } }
+        Item { visible: page === "settings"; anchors.fill: parent; Text { anchors.centerIn: parent; text: "Settings"; color: Theme.dim; font.pixelSize: 14 } }
+        Item { visible: page === "lyrics"; anchors.fill: parent; Text { anchors.centerIn: parent; text: "Lyrics"; color: Theme.dim; font.pixelSize: 14 } }
     }
 }
