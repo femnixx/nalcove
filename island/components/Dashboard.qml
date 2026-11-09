@@ -300,9 +300,9 @@ Item {
         // --- DYNAMIC RESPONSIVE SPLIT MEDIA PLAYER WITH SHELF ---
         Item {
             x: 20
-            y: Math.min(110, parent.height * 0.3)
+            y: Math.min(80, parent.height * 0.25)
             width: 740
-            height: Math.min(250, parent.height - y - 20)
+            height: Math.min(280, parent.height - y - 20)
             visible: page === "music"
 
             Row {
@@ -323,36 +323,36 @@ Item {
 
                     Column {
                         anchors.fill: parent
-                        anchors.margins: 14
+                        anchors.margins: 18
                         
                         // Flex row distributing height percentages across components safely
-                        spacing: Math.max(4, (parent.height - (52 + 32 + 36 + 20 + 28)) / 4)
+                        spacing: Math.max(8, (parent.height - (72 + 40 + 44 + 24 + 40)) / 4)
 
                         // Section 1: Track Details Layout
                         Row {
-                            width: parent.width; height: 52; spacing: 12
+                            width: parent.width; height: 72; spacing: 16
                             Rectangle {
-                                width: 52; height: 52; radius: 10; color: "#2c2c2e"; clip: true
+                                width: 72; height: 72; radius: 12; color: "#2c2c2e"; clip: true
                                 Image {
                                     anchors.fill: parent; fillMode: Image.PreserveAspectCrop
                                     source: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.metadata && dashboardRoot.activePlayer.metadata["mpris:artUrl"]) ? String(dashboardRoot.activePlayer.metadata["mpris:artUrl"]) : ""
                                 }
-                                Icon { name: "media-playlist-normal"; size: 24; anchors.centerIn: parent; color: "#ffffff"; visible: parent.children[0].status !== Image.Ready }
+                                Icon { name: "media-playlist-normal"; size: 32; anchors.centerIn: parent; color: "#ffffff"; visible: parent.children[0].status !== Image.Ready }
                             }
                             Column {
-                                width: parent.width - 64; anchors.verticalCenter: parent.verticalCenter; spacing: 2
-                                Text { text: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.metadata && dashboardRoot.activePlayer.metadata["xesam:title"]) ? String(dashboardRoot.activePlayer.metadata["xesam:title"]) : "Spotify / Browser Idle"; color: "#ffffff"; font.pixelSize: 13; font.bold: true; elide: Text.ElideRight; width: parent.width }
-                                Text { text: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.metadata && dashboardRoot.activePlayer.metadata["xesam:artist"]) ? String(dashboardRoot.activePlayer.metadata["xesam:artist"]) : "Start playing a track..."; color: "#9a9aa0"; font.pixelSize: 11; elide: Text.ElideRight; width: parent.width }
+                                width: parent.width - 88; anchors.verticalCenter: parent.verticalCenter; spacing: 4
+                                Text { text: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.metadata && dashboardRoot.activePlayer.metadata["xesam:title"]) ? String(dashboardRoot.activePlayer.metadata["xesam:title"]) : "Spotify / Browser Idle"; color: "#ffffff"; font.pixelSize: 16; font.bold: true; elide: Text.ElideRight; width: parent.width }
+                                Text { text: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.metadata && dashboardRoot.activePlayer.metadata["xesam:artist"]) ? String(dashboardRoot.activePlayer.metadata["xesam:artist"]) : "Start playing a track..."; color: "#9a9aa0"; font.pixelSize: 13; elide: Text.ElideRight; width: parent.width }
                             }
                         }
 
                         // Section 2: Progress Timeline Bar
                         Column {
-                            width: parent.width; height: 32; spacing: 4
+                            width: parent.width; height: 40; spacing: 6
                             Slider {
-                                id: trackProgressSlider; width: parent.width; height: 12; value: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.length > 0) ? (dashboardRoot.activePlayer.position / dashboardRoot.activePlayer.length) : 0
-                                background: Rectangle { height: 4; radius: 2; color: "#22ffffff"; Rectangle { width: trackProgressSlider.visualPosition * parent.width; height: 4; color: "#ffffff"; radius: 2 } }
-                                handle: Rectangle { x: trackProgressSlider.visualPosition * (trackProgressSlider.width - width); y: -4; width: 10; height: 10; radius: 5; color: "#ffffff" }
+                                id: trackProgressSlider; width: parent.width; height: 14; value: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.length > 0) ? (dashboardRoot.activePlayer.position / dashboardRoot.activePlayer.length) : 0
+                                background: Rectangle { height: 5; radius: 3; color: "#22ffffff"; Rectangle { width: trackProgressSlider.visualPosition * parent.width; height: 5; color: "#ffffff"; radius: 3 } }
+                                handle: Rectangle { x: trackProgressSlider.visualPosition * (trackProgressSlider.width - width); y: -5; width: 14; height: 14; radius: 7; color: "#ffffff" }
                                 onValueChanged: {
                                     if (dashboardRoot.activePlayer && dashboardRoot.activePlayer.length > 0) {
                                         dashboardRoot.activePlayer.position = value * dashboardRoot.activePlayer.length;
@@ -360,39 +360,39 @@ Item {
                                 }
                             }
                             Item {
-                                width: parent.width; height: 12
-                                Text { text: dashboardRoot.activePlayer ? Math.floor(dashboardRoot.activePlayer.position / 60000) + ":" + String(Math.floor((dashboardRoot.activePlayer.position % 60000) / 1000)).padStart(2, '0') : "0:00"; color: "#66ffffff"; font.pixelSize: 10 }
-                                Text { text: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.length > 0) ? Math.floor(dashboardRoot.activePlayer.length / 60000) + ":" + String(Math.floor((dashboardRoot.activePlayer.length % 60000) / 1000)).padStart(2, '0') : "-0:00"; color: "#66ffffff"; font.pixelSize: 10; anchors.right: parent.right }
+                                width: parent.width; height: 14
+                                Text { text: dashboardRoot.activePlayer ? Math.floor(dashboardRoot.activePlayer.position / 60000) + ":" + String(Math.floor((dashboardRoot.activePlayer.position % 60000) / 1000)).padStart(2, '0') : "0:00"; color: "#66ffffff"; font.pixelSize: 11 }
+                                Text { text: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.length > 0) ? Math.floor(dashboardRoot.activePlayer.length / 60000) + ":" + String(Math.floor((dashboardRoot.activePlayer.length % 60000) / 1000)).padStart(2, '0') : "-0:00"; color: "#66ffffff"; font.pixelSize: 11; anchors.right: parent.right }
                             }
                         }
 
                         // Section 3: Central Player Controls
                         Row {
-                            width: parent.width; height: 36
-                            spacing: (parent.width - (20 + 20 + 36 + 20 + 20)) / 4
+                            width: parent.width; height: 44
+                            spacing: (parent.width - (24 + 24 + 40 + 24 + 24)) / 4
 
-                            Icon { name: "media-playlist-shuffle"; size: 16; color: "#66ffffff"; anchors.verticalCenter: parent.verticalCenter }
-                            Icon { name: "media-skip-backward"; size: 18; color: "#ffffff"; anchors.verticalCenter: parent.verticalCenter }
+                            Icon { name: "media-playlist-shuffle"; size: 18; color: "#66ffffff"; anchors.verticalCenter: parent.verticalCenter }
+                            Icon { name: "media-skip-backward"; size: 22; color: "#ffffff"; anchors.verticalCenter: parent.verticalCenter }
                             Rectangle {
-                                width: 36; height: 36; radius: 18; color: "#ffffff"; anchors.verticalCenter: parent.verticalCenter
-                                Icon { name: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.playbackStatus === 1) ? "media-playback-pause" : "media-playback-start"; size: 14; color: "#000000"; anchors.centerIn: parent }
+                                width: 40; height: 40; radius: 20; color: "#ffffff"; anchors.verticalCenter: parent.verticalCenter
+                                Icon { name: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.playbackStatus === 1) ? "media-playback-pause" : "media-playback-start"; size: 18; color: "#000000"; anchors.centerIn: parent }
                                 MouseArea { anchors.fill: parent; onClicked: if (dashboardRoot.activePlayer) dashboardRoot.activePlayer.togglePlay() }
                             }
-                            Icon { name: "media-skip-forward"; size: 18; color: "#ffffff"; anchors.verticalCenter: parent.verticalCenter }
-                            Icon { name: "media-playlist-repeat"; size: 16; color: "#66ffffff"; anchors.verticalCenter: parent.verticalCenter }
+                            Icon { name: "media-skip-forward"; size: 22; color: "#ffffff"; anchors.verticalCenter: parent.verticalCenter }
+                            Icon { name: "media-playlist-repeat"; size: 18; color: "#66ffffff"; anchors.verticalCenter: parent.verticalCenter }
                         }
 
                         // Section 4: Pure System Blue Volume Bar (Bypasses hardcoded clip zones)
                         Row {
-                            width: parent.width; height: 20; spacing: 10
-                            Icon { name: "audio-volume-high"; size: 14; color: "#ffffff"; anchors.verticalCenter: parent.verticalCenter }
+                            width: parent.width; height: 24; spacing: 12
+                            Icon { name: "audio-volume-high"; size: 16; color: "#ffffff"; anchors.verticalCenter: parent.verticalCenter }
                             Slider {
-                                id: hardwareVolumeSlider; width: parent.width - 24; value: systemVolumeLevel; anchors.verticalCenter: parent.verticalCenter
+                                id: hardwareVolumeSlider; width: parent.width - 28; value: systemVolumeLevel; anchors.verticalCenter: parent.verticalCenter
                                 background: Rectangle { 
-                                    height: 4; radius: 2; color: "#22ffffff"
-                                    Rectangle { width: hardwareVolumeSlider.visualPosition * parent.width; height: 4; color: "#3b8bff"; radius: 2 } 
+                                    height: 5; radius: 3; color: "#22ffffff"
+                                    Rectangle { width: hardwareVolumeSlider.visualPosition * parent.width; height: 5; color: "#3b8bff"; radius: 3 } 
                                 }
-                                handle: Rectangle { x: hardwareVolumeSlider.visualPosition * (hardwareVolumeSlider.width - width); y: -4; width: 10; height: 10; radius: 5; color: "#ffffff" }
+                                handle: Rectangle { x: hardwareVolumeSlider.visualPosition * (hardwareVolumeSlider.width - width); y: -5; width: 12; height: 12; radius: 6; color: "#ffffff" }
                                 onValueChanged: {
                                     systemVolumeLevel = value;
                                     setSystemVolume(value);
@@ -417,7 +417,7 @@ Item {
                     // Dynamic content depending on selected page state
                     Item {
                         anchors.fill: parent
-                        anchors.margins: 16
+                        anchors.margins: 18
 
                         // View 1: Show Lyrics if page isn't "shelf"
                         ScrollView {
@@ -435,28 +435,28 @@ Item {
                         Column {
                             anchors.fill: parent
                             visible: page === "shelf"
-                            spacing: 12
+                            spacing: 16
 
                             Text {
                                 text: "Notch File Shelf"
-                                color: "#ffffff"; font.bold: true; font.pixelSize: 13
+                                color: "#ffffff"; font.bold: true; font.pixelSize: 15
                             }
 
                             // Dropzone box representation
                             Rectangle {
-                                width: parent.width; height: 120; radius: 10
+                                width: parent.width; height: 140; radius: 12
                                 color: "#11ffffff"; border.color: "#33ffffff"; border.width: 1
                                 
                                 Column {
-                                    anchors.centerIn: parent; spacing: 6
-                                    Icon { name: "folder-download"; size: 24; color: "#66ffffff" }
-                                    Text { text: "Drag files here to stage"; color: "#66ffffff"; font.pixelSize: 11 }
+                                    anchors.centerIn: parent; spacing: 8
+                                    Icon { name: "folder-download"; size: 28; color: "#66ffffff" }
+                                    Text { text: "Drag files here to stage"; color: "#66ffffff"; font.pixelSize: 12 }
                                 }
                             }
 
                             Text {
                                 text: "Staged files copy into ~/Downloads/NotchShelf/ automatically."
-                                color: "#44ffffff"; font.pixelSize: 10; wrapMode: Text.Wrap; width: parent.width
+                                color: "#44ffffff"; font.pixelSize: 11; wrapMode: Text.Wrap; width: parent.width
                             }
                         }
                     }
