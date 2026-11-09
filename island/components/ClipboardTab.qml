@@ -10,11 +10,13 @@ Rectangle {
     clip: true
 
     property string copyText: ""
+    property var clipboardHistory: []
 
     ListModel {
         id: clipboardModel
     }
 
+    // Text clipboard monitor
     Process {
         id: pasteCmd
         command: ["wl-paste", "-t", "text"]
@@ -25,13 +27,38 @@ Rectangle {
                     var exists = false
                     for (var i = 0; i < clipboardModel.count; i++) {
                         var item = clipboardModel.get(i)
-                        if (item && item.text === t) {
+                        if (item && item.type === "text" && item.text === t) {
                             exists = true
                             break
                         }
                     }
                     if (!exists) {
-                        clipboardModel.insert(0, { text: t, time: new Date().toLocaleTimeString() })
+                        clipboardModel.insert(0, { type: "text", text: t, time: new Date().toLocaleTimeString() })
+                        if (clipboardModel.count > 200) clipboardModel.remove(clipboardModel.count - 1)
+                    }
+                }
+            }
+        }
+    }
+
+    // Image clipboard monitor - simplified approach using wl-paste to file
+    Process {
+        id: pasteImageCmd
+        command: ["sh", "-c", "wl-paste -t image/png > /tmp/clipboard_img_$(date +%s).png 2>/dev/null && echo /tmp/clipboard_img_$(date +%s).png"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                if (text && text.trim() && text.trim().startsWith("/tmp/")) {
+                    var filename = text.trim()
+                    var exists = false
+                    for (var i = 0; i < clipboardModel.count; i++) {
+                        var item = clipboardModel.get(i)
+                        if (item && item.type === "image" && item.path === filename) {
+                            exists = true
+                            break
+                        }
+                    }
+                    if (!exists) {
+                        clipboardModel.insert(0, { type: "image", path: filename, time: new Date().toLocaleTimeString() })
                         if (clipboardModel.count > 200) clipboardModel.remove(clipboardModel.count - 1)
                     }
                 }
@@ -48,7 +75,10 @@ Rectangle {
         interval: 1000
         running: true
         repeat: true
-        onTriggered: { pasteCmd.running = true }
+        onTriggered: { 
+            pasteCmd.running = true
+            pasteImageCmd.running = true
+        }
     }
 
     ColumnLayout {
@@ -90,79 +120,106 @@ Rectangle {
             spacing: 6
             delegate: Rectangle {
                 width: parent.width
-                height: Math.max(56, textItem.implicitHeight + 24)
+                height: Math.max(72, contentColumn.implicitHeight + 16)
                 color: Theme.cardHi
                 radius: 10
                 clip: true
 
                 property bool hovered: false
 
-                Text {
-                    id: textItem
-                    width: parent.width - 80
-                    anchors.left: parent.left
-                    anchors.leftMargin: 16
-                    anchors.verticalCenter: parent.verticalCenter
-                    text: modelData && modelData.text ? modelData.text : ""
-                    color: Theme.fg
-                    font.pixelSize: 13
-                    wrapMode: Text.WordWrap
-                    maximumLineCount: 3
-                    elide: Text.ElideRight
-                }
-
-                Row {
-                    anchors.right: parent.right
-                    anchors.rightMargin: 12
-                    anchors.verticalCenter: parent.verticalCenter
+                Column {
+                    id: contentColumn
+                    anchors.fill: parent
+                    anchors.margins: 12
                     spacing: 8
 
-                    Text {
-                        text: modelData && modelData.time ? modelData.time : ""
-                        color: Theme.dim
-                        font.pixelSize: 10
+                    // Text or Image content
+                    Loader {
+                        width: parent.width
+                        sourceComponent: modelData && modelData.type === "image" ? imageDelegate : textDelegate
                     }
 
-                    Rectangle {
-                        width: 32; height: 32; radius: 16
-                        color: root.hovered ? Theme.accent : "transparent"
-                        border.color: Theme.border; border.width: 1
-                        Icon {
-                            anchors.centerIn: parent
-                            name: "copy"
-                            size: 14
-                            color: root.hovered ? "white" : Theme.dim
+                    Component {
+                        id: textDelegate
+                        Text {
+                            id: textItem
+                            width: parent.width - 80
+                            text: modelData && modelData.text ? modelData.text : ""
+                            color: "#ffffff"
+                            font.pixelSize: 13
+                            wrapMode: Text.WordWrap
+                            maximumLineCount: 4
+                            elide: Text.ElideRight
                         }
-                        MouseArea {
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            onEntered: root.hovered = true
-                            onExited: root.hovered = false
-                            onClicked: {
-                                if (modelData && modelData.text) {
-                                    root.copyText = modelData.text
-                                    copyProc.running = true
+                    }
+
+                    Component {
+                        id: imageDelegate
+                        Image {
+                            width: Math.min(parent.width, 300)
+                            height: 160
+                            source: modelData && modelData.path ? "file://" + modelData.path : ""
+                            fillMode: Image.PreserveAspectFit
+                            asynchronous: true
+                        }
+                    }
+
+                    Row {
+                        anchors.right: parent.right
+                        spacing: 8
+
+                        Text {
+                            text: modelData && modelData.time ? modelData.time : ""
+                            color: "#9a9aa0"
+                            font.pixelSize: 10
+                            visible: !root.hovered
+                        }
+
+                        Rectangle {
+                            width: 32; height: 32; radius: 16
+                            color: root.hovered ? Theme.accent : "transparent"
+                            border.color: Theme.border; border.width: 1
+                            Icon {
+                                anchors.centerIn: parent
+                                name: modelData && modelData.type === "image" ? "download" : "copy"
+                                size: 14
+                                color: root.hovered ? "white" : "#9a9aa0"
+                            }
+                            MouseArea {
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                onEntered: root.hovered = true
+                                onExited: root.hovered = false
+                                onClicked: {
+                                    if (modelData) {
+                                        if (modelData.type === "text" && modelData.text) {
+                                            root.copyText = modelData.text
+                                            copyProc.running = true
+                                        } else if (modelData.type === "image" && modelData.path) {
+                                            var copyImg = Qt.openUrlExternally("file://" + modelData.path)
+                                        }
+                                    }
                                 }
                             }
                         }
-                    }
 
-                    Rectangle {
-                        width: 32; height: 32; radius: 16
-                        color: root.hovered ? "#ff453a20" : "transparent"
-                        border.color: Theme.border; border.width: 1
-                        Icon {
-                            anchors.centerIn: parent
-                            name: "trash"
-                            size: 14
-                            color: root.hovered ? "#ff453a" : Theme.dim
-                        }
-                        MouseArea {
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            onEntered: root.hovered = true
-                            onExited: root.hovered = false
-                            onClicked: clipboardModel.remove(index)
+                        Rectangle {
+                            width: 32; height: 32; radius: 16
+                            color: root.hovered ? "#ff453a20" : "transparent"
+                            border.color: Theme.border; border.width: 1
+                            Icon {
+                                anchors.centerIn: parent
+                                name: "trash"
+                                size: 14
+                                color: root.hovered ? "#ff453a" : "#9a9aa0"
+                            }
+                            MouseArea {
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                onEntered: root.hovered = true
+                                onExited: root.hovered = false
+                                onClicked: clipboardModel.remove(index)
+                            }
                         }
                     }
                 }
@@ -176,7 +233,7 @@ Rectangle {
             Text {
                 anchors.centerIn: parent
                 text: "Clipboard is empty"
-                color: Theme.dim
+                color: "#9a9aa0"
                 font.pixelSize: 14
             }
         }
