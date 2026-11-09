@@ -25,6 +25,17 @@ ShellRoot {
             ? WlrKeyboardFocus.OnDemand
             : WlrKeyboardFocus.None
 
+        // Close the island as soon as the user clicks outside it.
+        MouseArea {
+            anchors.fill: parent
+            propagateComposedEvents: false
+            z: -1
+            onClicked: {
+                if (islandWindow.triggerMode === "hotkey")
+                    islandWindow.triggerMode = "closed"
+            }
+        }
+
         // State machine: "closed" | "hover" | "hotkey"
         property string triggerMode: "closed"
 
@@ -73,7 +84,7 @@ ShellRoot {
 
         Item {
             anchors.fill: parent
-            focus: true
+            focus: islandWindow.triggerMode === "hotkey"
             Keys.onEscapePressed: islandWindow.triggerMode = "closed"
         }
 
