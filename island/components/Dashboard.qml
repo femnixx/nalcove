@@ -39,6 +39,23 @@ Item {
         font.pixelSize: 12
     }
 
+    // Horizontal swipe on touchpad/mouse switches tabs (next on left-swipe, prev on right-swipe)
+    DragHandler {
+        id: swipeNav
+        target: null
+        yAxis.enabled: false
+        property real lastDx: 0
+        onTranslationChanged: lastDx = translation.x
+        onActiveChanged: {
+            if (active) return
+            if (lastDx > 60) {
+                root.tab = Math.max(0, root.tab - 1)
+            } else if (lastDx < -60) {
+                root.tab = Math.min(root.tabs.length - 1, root.tab + 1)
+            }
+        }
+    }
+
     Item {
         x: 20; y: 54
         width: 720; height: 208

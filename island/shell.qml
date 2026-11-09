@@ -213,6 +213,11 @@ ShellRoot {
                         }
                     }
 
+                    MouseArea {
+                        anchors.fill: parent
+                        onClicked: islandWindow.triggerMode = "hotkey"
+                    }
+
                     ClippingRectangle {
                         x: 14; y: 12
                         width: 56; height: 56
