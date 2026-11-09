@@ -11,6 +11,9 @@ Singleton {
         objects: [Pipewire.defaultAudioSink, Pipewire.defaultAudioSource]
     }
 
+    // Also track all nodes for the device dropdowns
+    PwObjectTracker { objects: Pipewire.nodes.values }
+
     // Filter function for sinks and sources
     function filterNodes(nodes, isSink) {
         var result = []
