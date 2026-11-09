@@ -8,6 +8,11 @@ Rectangle {
     color: Theme.card
     radius: Theme.cardRadius
 
+    function fmt(s) {
+        const t = Math.max(0, Math.floor(s / 1000000))
+        return Math.floor(t / 60) + ":" + String(t % 60).padStart(2, "0")
+    }
+
     ClippingRectangle {
         x: 14; y: 14
         width: 100; height: 100
@@ -42,20 +47,9 @@ Rectangle {
         }
     }
 
-    Item {
-        x: 14; y: 134
-        width: root.width - 28; height: 4
-        visible: Media.hasPlayer
-        Rectangle { anchors.fill: parent; radius: 2; color: Theme.track }
-        Rectangle {
-            height: parent.height; radius: 2; color: Theme.fg
-            width: Media.length > 0 ? parent.width * Math.min(1, Media.position / Media.length) : 0
-        }
-    }
-
     Row {
         x: (root.width - width) / 2
-        y: 154
+        y: 130
         spacing: 28
         visible: Media.hasPlayer
 

@@ -25,6 +25,7 @@ Item {
     readonly property string artist: active?.trackArtist || ""
     readonly property string album: active?.trackAlbum || ""
     readonly property string artUrl: active?.trackArtUrl || ""
+    readonly property string lyrics: active?.trackLyrics || ""
     readonly property real position: active?.position ?? 0
     readonly property real length: active?.length ?? 0
     readonly property real volume: active?.volume ?? 1.0

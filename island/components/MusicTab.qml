@@ -8,9 +8,11 @@ Rectangle {
     color: Theme.card
     radius: Theme.cardRadius
     readonly property real rightW: width - 220 - 24
+    property string musicPage: "playing" // "playing" or "lyrics"
 
     function fmt(s) {
-        const t = Math.max(0, Math.floor(s))
+        // MPRIS position is in microseconds, convert to seconds
+        const t = Math.max(0, Math.floor(s / 1000000))
         return Math.floor(t / 60) + ":" + String(t % 60).padStart(2, "0")
     }
 
@@ -77,11 +79,57 @@ Rectangle {
         }
     }
 
+    // Tab bar for Playing / Lyrics
+    Row {
+        x: 220; y: 28
+        width: root.rightW; height: 32
+        spacing: 0
+
+        Rectangle {
+            width: root.rightW / 2; height: parent.height
+            radius: 6
+            color: root.musicPage === "playing" ? Theme.accent : "transparent"
+            border.color: root.musicPage === "playing" ? "transparent" : Theme.border
+            border.width: 1
+            Text {
+                anchors.centerIn: parent
+                text: "Playing"
+                color: root.musicPage === "playing" ? "white" : Theme.fg
+                font.pixelSize: 12
+                font.bold: true
+            }
+            MouseArea {
+                anchors.fill: parent
+                onClicked: root.musicPage = "playing"
+            }
+        }
+
+        Rectangle {
+            width: root.rightW / 2; height: parent.height
+            radius: 6
+            color: root.musicPage === "lyrics" ? Theme.accent : "transparent"
+            border.color: root.musicPage === "lyrics" ? "transparent" : Theme.border
+            border.width: 1
+            Text {
+                anchors.centerIn: parent
+                text: "Lyrics"
+                color: root.musicPage === "lyrics" ? "white" : Theme.fg
+                font.pixelSize: 12
+                font.bold: true
+            }
+            MouseArea {
+                anchors.fill: parent
+                onClicked: root.musicPage = "lyrics"
+            }
+        }
+    }
+
     // Track info
     Column {
-        x: 220; y: 30
+        x: 220; y: 66
         width: root.rightW
         spacing: 6
+        visible: root.musicPage === "playing"
 
         Text {
             width: parent.width
@@ -115,7 +163,7 @@ Rectangle {
     Item {
         x: 220; y: 112
         width: root.rightW; height: 28
-        visible: Media.hasPlayer
+        visible: Media.hasPlayer && root.musicPage === "playing"
 
         Row {
             anchors.fill: parent
@@ -139,7 +187,7 @@ Rectangle {
                 Rectangle {
                     y: 0; height: 4; radius: 2
                     color: Theme.accent
-                    width: Media.length > 0 ? (parent.width - 2) * Math.min(1, Media.position / Media.length) : 0
+                    width: Media.length > 0 ? (parent.width - 2) * Math.min(1, (Media.position / 1000000) / Media.length) : 0
                 }
                 MouseArea {
                     anchors.fill: parent
@@ -164,7 +212,7 @@ Rectangle {
         x: 220 + (root.rightW - width) / 2
         y: 150
         spacing: 28
-        visible: Media.hasPlayer
+        visible: Media.hasPlayer && root.musicPage === "playing"
 
         // Shuffle
         Item {
@@ -220,7 +268,7 @@ Rectangle {
     Item {
         x: 220; y: 210
         width: root.rightW; height: 36
-        visible: Media.hasPlayer
+        visible: Media.hasPlayer && root.musicPage === "playing"
 
         Row {
             anchors.fill: parent
@@ -249,6 +297,52 @@ Rectangle {
             }
 
             Glyph { anchors.verticalCenter: parent.verticalCenter; width: 16; height: 16; kind: "volume"; color: Theme.dim }
+        }
+    }
+
+    // Lyrics page
+    Item {
+        x: 220; y: 66
+        width: root.rightW; height: parent.height - 90
+        visible: root.musicPage === "lyrics"
+
+        Column {
+            anchors.fill: parent
+            anchors.margins: 20
+            spacing: 12
+
+            Text {
+                width: parent.width
+                text: "Lyrics"
+                color: Theme.fg
+                font.pixelSize: 18
+                font.bold: true
+            }
+
+            Rectangle {
+                width: parent.width
+                height: parent.height - 40
+                radius: 12
+                color: Theme.cardHi
+                border.color: Theme.border
+                border.width: 1
+
+                Flickable {
+                    anchors.fill: parent
+                    anchors.margins: 16
+                    contentHeight: lyricsText.implicitHeight
+                    clip: true
+
+                    Text {
+                        id: lyricsText
+                        width: parent.width
+                        text: Media.lyrics || "No lyrics available for this track"
+                        color: Theme.fg
+                        font.pixelSize: 14
+                        wrapMode: Text.WordWrap
+                    }
+                }
+            }
         }
     }
 }
