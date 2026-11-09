@@ -50,21 +50,38 @@ Singleton {
     readonly property var sink: Pipewire.defaultAudioSink
     readonly property var source: Pipewire.defaultAudioSource
 
-    readonly property real sinkVolume: sink && sink.audio ? sink.audio.volume : 0
-    readonly property bool sinkMuted: sink && sink.audio ? sink.audio.muted : false
-    readonly property real sourceVolume: source && source.audio ? source.audio.volume : 0
-    readonly property bool sourceMuted: source && source.audio ? source.audio.muted : false
+    // Readiness checks - only true when node is bound and has audio interface
+    readonly property bool sinkReady: sink !== null && sink.ready && sink.audio !== null
+    readonly property bool sourceReady: source !== null && source.ready && source.audio !== null
+
+    // Volume/muted properties - only return values when ready
+    readonly property real sinkVolume: sinkReady ? sink.audio.volume : 0
+    readonly property bool sinkMuted: sinkReady ? sink.audio.muted : false
+    readonly property real sourceVolume: sourceReady ? source.audio.volume : 0
+    readonly property bool sourceMuted: sourceReady ? source.audio.muted : false
 
     function label(n) { return n ? (n.description || n.nickname || n.name) : "No device" }
 
-    function setSinkVolume(v)   { if (sink && sink.audio) sink.audio.volume = Math.max(0, Math.min(1, v)) }
-    function setSourceVolume(v) { if (source && source.audio) source.audio.volume = Math.max(0, Math.min(1, v)) }
-    function toggleSinkMute()   { if (sink && sink.audio) sink.audio.muted = !sink.audio.muted }
-    function toggleSourceMute() { if (source && source.audio) source.audio.muted = !source.audio.muted }
-    function setDefaultSink(n)   { Pipewire.preferredDefaultAudioSink = n }
+    function setSinkVolume(v) {
+        if (!sinkReady) return
+        sink.audio.volume = Math.max(0, Math.min(1, v))
+    }
+    function setSourceVolume(v) {
+        if (!sourceReady) return
+        source.audio.volume = Math.max(0, Math.min(1, v))
+    }
+    function toggleSinkMute() {
+        if (!sinkReady) return
+        sink.audio.muted = !sink.audio.muted
+    }
+    function toggleSourceMute() {
+        if (!sourceReady) return
+        source.audio.muted = !source.audio.muted
+    }
+    function setDefaultSink(n)   { Pipewire.pferredDefaultAudioSink = n }
     function setDefaultSource(n) { Pipewire.preferredDefaultAudioSource = n }
 
-    // Track sinks and sources via ListModels
+    // Track sinks and sources via ListModels for PwObjectTracker
     PwObjectTracker { objects: sinksModel }
     PwObjectTracker { objects: sourcesModel }
 }

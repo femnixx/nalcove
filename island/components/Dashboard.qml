@@ -280,7 +280,8 @@ Item {
                                 width: parent.width - 18 - 34 - 20
                                 anchors.verticalCenter: parent.verticalCenter
                                 value: Services.Audio.sinkVolume
-                                onMoved: Services.Audio.setSinkVolume(value)
+                                enabled: Services.Audio.sinkReady
+                                onMoved: if (Services.Audio.sinkReady) Services.Audio.setSinkVolume(value)
                             }
                             Text {
                                 width: 34; anchors.verticalCenter: parent.verticalCenter

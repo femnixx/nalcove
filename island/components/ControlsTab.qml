@@ -23,11 +23,9 @@ Item {
                     MouseArea { anchors.fill: parent; onClicked: Services.Audio.toggleSinkMute() } }
                 FlatSlider { 
                     width: parent.width - 22 - 34 - 20; anchors.verticalCenter: parent.verticalCenter
-                    value: Services.Audio.sink ? Services.Audio.sinkVolume : 0
-                    enabled: Services.Audio.sink !== null
-                    onMoved: { 
-                        if (Services.Audio.sink) Services.Audio.setSinkVolume(value) 
-                    } 
+                    value: Services.Audio.sinkVolume
+                    enabled: Services.Audio.sinkReady
+                    onMoved: if (Services.Audio.sinkReady) Services.Audio.setSinkVolume(value)
                 }
                 Text { width: 34; anchors.verticalCenter: parent.verticalCenter
                        text: Math.round(Services.Audio.sinkVolume * 100); color: "#ffffff"; font.pixelSize: 12
@@ -73,11 +71,9 @@ Item {
                     MouseArea { anchors.fill: parent; onClicked: Services.Audio.toggleSourceMute() } }
                 FlatSlider { 
                     width: parent.width - 22 - 34 - 20; anchors.verticalCenter: parent.verticalCenter
-                    value: Services.Audio.source ? Services.Audio.sourceVolume : 0
-                    enabled: Services.Audio.source !== null
-                    onMoved: { 
-                        if (Services.Audio.source) Services.Audio.setSourceVolume(value) 
-                    } 
+                    value: Services.Audio.sourceVolume
+                    enabled: Services.Audio.sourceReady
+                    onMoved: if (Services.Audio.sourceReady) Services.Audio.setSourceVolume(value)
                 }
                 Text { width: 34; anchors.verticalCenter: parent.verticalCenter
                        text: Math.round(Services.Audio.sourceVolume * 100); color: "#ffffff"; font.pixelSize: 12
