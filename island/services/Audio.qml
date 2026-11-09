@@ -6,7 +6,8 @@ import Quickshell.Services.Pipewire
 Singleton {
     id: root
 
-    // audio properties are only available while an object is tracked
+    // Audio properties are only available while an object is tracked
+    // Track all nodes so their audio properties are available
     PwObjectTracker { objects: Pipewire.nodes }
 
     // Filter function for sinks and sources
@@ -40,4 +41,12 @@ Singleton {
     function toggleSourceMute() { if (source && source.audio) source.audio.muted = !source.audio.muted }
     function setDefaultSink(n)   { Pipewire.preferredDefaultAudioSink = n }
     function setDefaultSource(n) { Pipewire.preferredDefaultAudioSource = n }
+
+    // Track all sinks and sources so their audio properties are bound
+    PwObjectTracker {
+        objects: root.sinks
+    }
+    PwObjectTracker {
+        objects: root.sources
+    }
 }
