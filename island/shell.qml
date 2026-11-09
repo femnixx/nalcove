@@ -1,6 +1,7 @@
 // island/shell.qml - Quickshell Dynamic Island (niri / any wlr-layer-shell compositor)
 // Run with: qs -p ./island
 // Toggle:   qs -p ./island ipc call island toggle
+//@ pragma IconTheme "Papirus-Dark"
 
 import Quickshell
 import Quickshell.Wayland

@@ -317,53 +317,43 @@ Item {
                     border.width: 1
                     radius: 18
 
-                    Item {
+                    Column {
                         anchors.fill: parent
-                        anchors.margins: 16
+                        anchors.margins: 14
+                        spacing: 10
 
-                        // 1. Thumbnail Art + Track Meta Info Layout
+                        // 1. Media Artwork & Text Information
                         Row {
-                            id: metaRow
-                            width: parent.width; height: 80; spacing: 14
-
+                            width: parent.width; height: 64; spacing: 12
                             Rectangle {
-                                width: 80; height: 80; radius: 12
-                                color: "#2c2c2e"; clip: true
+                                width: 64; height: 64; radius: 10; color: "#2c2c2e"; clip: true
                                 Image {
                                     anchors.fill: parent; fillMode: Image.PreserveAspectCrop
-                                    source: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.metadata && dashboardRoot.activePlayer.metadata["mpris:artUrl"]) ? String(dashboardRoot.activePlayer.metadata["mpris:artUrl"]) : "../icons/music.svg"
+                                    source: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.metadata && dashboardRoot.activePlayer.metadata["mpris:artUrl"]) ? String(dashboardRoot.activePlayer.metadata["mpris:artUrl"]) : ""
                                 }
+                                // Transparent fallback system icon overlay if no art exists
+                                Icon { name: "media-playlist-normal"; size: 28; anchors.centerIn: parent; color: "#ffffff"; visible: parent.children[0].status !== Image.Ready }
                             }
-
                             Column {
-                                width: parent.width - 94
-                                anchors.verticalCenter: parent.verticalCenter
-                                spacing: 4
-
+                                width: parent.width - 76; anchors.verticalCenter: parent.verticalCenter; spacing: 2
                                 Text {
                                     text: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.metadata && dashboardRoot.activePlayer.metadata["xesam:title"]) ? String(dashboardRoot.activePlayer.metadata["xesam:title"]) : "Spotify / Browser Idle"
-                                    color: "#ffffff"; font.pixelSize: 15; font.bold: true; elide: Text.ElideRight; width: parent.width
+                                    color: "#ffffff"; font.pixelSize: 14; font.bold: true; elide: Text.ElideRight; width: parent.width
                                 }
                                 Text {
                                     text: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.metadata && dashboardRoot.activePlayer.metadata["xesam:artist"]) ? String(dashboardRoot.activePlayer.metadata["xesam:artist"]) : "Start playing a track..."
-                                    color: "#9a9aa0"; font.pixelSize: 12; elide: Text.ElideRight; width: parent.width
+                                    color: "#9a9aa0"; font.pixelSize: 11; elide: Text.ElideRight; width: parent.width
                                 }
                             }
                         }
 
-                        // 2. Centered Progress Timeline
+                        // 2. Timeline Progress Section
                         Column {
-                            id: progressStack
-                            width: parent.width; y: 96; spacing: 6
-
+                            width: parent.width; spacing: 4
                             Slider {
-                                id: trackProgressSlider
-                                width: parent.width; height: 16
+                                id: trackProgressSlider; width: parent.width; height: 12
                                 value: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.length > 0) ? (dashboardRoot.activePlayer.position / dashboardRoot.activePlayer.length) : 0
-                                background: Rectangle { 
-                                    height: 4; radius: 2; color: "#22ffffff"
-                                    Rectangle { width: trackProgressSlider.visualPosition * parent.width; height: 4; color: "#ffffff"; radius: 2 } 
-                                }
+                                background: Rectangle { height: 4; radius: 2; color: "#22ffffff"; Rectangle { width: trackProgressSlider.visualPosition * parent.width; height: 4; color: "#ffffff"; radius: 2 } }
                                 handle: Rectangle { x: trackProgressSlider.visualPosition * (trackProgressSlider.width - width); y: -4; width: 12; height: 12; radius: 6; color: "#ffffff" }
                                 onValueChanged: {
                                     if (dashboardRoot.activePlayer && dashboardRoot.activePlayer.length > 0) {
@@ -371,72 +361,54 @@ Item {
                                     }
                                 }
                             }
-
                             Item {
-                                width: parent.width; height: 16
+                                width: parent.width; height: 12
                                 Text {
                                     text: dashboardRoot.activePlayer ? Math.floor(dashboardRoot.activePlayer.position / 60000) + ":" + String(Math.floor((dashboardRoot.activePlayer.position % 60000) / 1000)).padStart(2, '0') : "0:00"
-                                    color: "#66ffffff"; font.pixelSize: 11
+                                    color: "#66ffffff"; font.pixelSize: 10
                                 }
                                 Text {
                                     text: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.length > 0) ? Math.floor(dashboardRoot.activePlayer.length / 60000) + ":" + String(Math.floor((dashboardRoot.activePlayer.length % 60000) / 1000)).padStart(2, '0') : "-0:00"
-                                    color: "#66ffffff"; font.pixelSize: 11; anchors.right: parent.right
+                                    color: "#66ffffff"; font.pixelSize: 10; anchors.right: parent.right
                                 }
                             }
                         }
 
-                        // 3. Spaced Player Control Toggles Row
+                        // 3. Spaced Player Control Buttons (Using standard theme tokens)
                         Row {
-                            id: controlRow
-                            y: 144; height: 44; width: parent.width
-                            spacing: (parent.width - (24 + 24 + 44 + 24 + 24)) / 4
+                            width: parent.width; height: 36
+                            spacing: (parent.width - (20 + 20 + 36 + 20 + 20)) / 4
 
-                            Icon { name: "shuffle"; size: 18; color: "#66ffffff"; anchors.verticalCenter: parent.verticalCenter }
-                            
+                            Icon { name: "media-playlist-shuffle"; size: 16; color: "#66ffffff"; anchors.verticalCenter: parent.verticalCenter }
                             Rectangle {
-                                width: 24; height: 24; color: "transparent"; anchors.verticalCenter: parent.verticalCenter
-                                Icon { name: "skip-back"; size: 24; color: "#ffffff"; anchors.centerIn: parent }
+                                width: 20; height: 20; color: "transparent"; anchors.verticalCenter: parent.verticalCenter
+                                Icon { name: "media-skip-backward"; size: 20; color: "#ffffff"; anchors.centerIn: parent }
                                 MouseArea { anchors.fill: parent; onClicked: if (dashboardRoot.activePlayer) dashboardRoot.activePlayer.previous() }
                             }
-
                             Rectangle {
-                                width: 44; height: 44; radius: 22; color: "#ffffff"; anchors.verticalCenter: parent.verticalCenter
-                                Icon { 
-                                    name: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.playbackStatus === 1) ? "pause" : "play"
-                                    size: 20 
-                                    color: "#000000"
-                                    anchors.centerIn: parent 
-                                }
+                                width: 36; height: 36; radius: 18; color: "#ffffff"; anchors.verticalCenter: parent.verticalCenter
+                                Icon { name: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.playbackStatus === 1) ? "media-playback-pause" : "media-playback-start"; size: 16; color: "#000000"; anchors.centerIn: parent }
                                 MouseArea { anchors.fill: parent; onClicked: if (dashboardRoot.activePlayer) dashboardRoot.activePlayer.togglePlay() }
                             }
-
                             Rectangle {
-                                width: 24; height: 24; color: "transparent"; anchors.verticalCenter: parent.verticalCenter
-                                Icon { name: "skip-forward"; size: 24; color: "#ffffff"; anchors.centerIn: parent }
+                                width: 20; height: 20; color: "transparent"; anchors.verticalCenter: parent.verticalCenter
+                                Icon { name: "media-skip-forward"; size: 20; color: "#ffffff"; anchors.centerIn: parent }
                                 MouseArea { anchors.fill: parent; onClicked: if (dashboardRoot.activePlayer) dashboardRoot.activePlayer.next() }
                             }
-
-                            Icon { name: "repeat"; size: 18; color: "#66ffffff"; anchors.verticalCenter: parent.verticalCenter }
+                            Icon { name: "media-playlist-repeat"; size: 16; color: "#66ffffff"; anchors.verticalCenter: parent.verticalCenter }
                         }
 
-                        // 4. Interactive Live System Volume Bar Slider Row
+                        // 4. THE BLUE VOLUME SLIDER ROW (BROUGHT INSIDE VIEW BOUNDS)
                         Row {
-                            width: parent.width; anchors.bottom: parent.bottom; height: 24; spacing: 10
-
-                            Icon { name: "volume"; size: 14; color: "#ffffff"; anchors.verticalCenter: parent.verticalCenter }
-
+                            width: parent.width; height: 20; spacing: 10
+                            Icon { name: "audio-volume-high"; size: 14; color: "#ffffff"; anchors.verticalCenter: parent.verticalCenter }
                             Slider {
-                                id: hardwareVolumeSlider
-                                width: parent.width - 24
-                                value: systemVolumeLevel
-                                anchors.verticalCenter: parent.verticalCenter
-                                
+                                id: hardwareVolumeSlider; width: parent.width - 24; value: systemVolumeLevel; anchors.verticalCenter: parent.verticalCenter
                                 background: Rectangle { 
                                     height: 5; radius: 3; color: "#22ffffff"
                                     Rectangle { width: hardwareVolumeSlider.visualPosition * parent.width; height: 5; color: "#3b8bff"; radius: 3 } 
                                 }
                                 handle: Rectangle { x: hardwareVolumeSlider.visualPosition * (hardwareVolumeSlider.width - width); y: -4; width: 12; height: 12; radius: 6; color: "#ffffff" }
-
                                 onValueChanged: {
                                     systemVolumeLevel = value;
                                     setSystemVolume(value);
