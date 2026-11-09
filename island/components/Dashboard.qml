@@ -300,9 +300,9 @@ Item {
         // --- DYNAMIC RESPONSIVE SPLIT MEDIA PLAYER WITH SHELF ---
         Item {
             width: 740
-            height: Math.min(380, parent.height - 60)
+            height: 360
             anchors.horizontalCenter: parent.horizontalCenter
-            y: 30
+            y: 20
             visible: page === "music"
 
             Row {
