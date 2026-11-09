@@ -1,7 +1,8 @@
 import QtQuick
 import "../services"
+import "../components"
 
-// Alcove-style Home: music card | week strip | clock
+// Alcove-style Home: music card | week strip + weather | clock
 Item {
     id: root
 
@@ -18,61 +19,62 @@ Item {
 
     MusicCard { x: 0; y: 0; width: 270; height: root.height }
 
-    // Week strip card
-    Rectangle {
+    // Week strip + Weather card (stacked vertically)
+    Item {
         x: 282; y: 0
         width: 270; height: root.height
-        color: Theme.card
-        radius: Theme.cardRadius
 
-        Text {
-            x: 18; y: 14
-            text: Qt.formatDate(Clock.now, "MMMM")
-            color: Theme.fg
-            font.pixelSize: 20
-            font.bold: true
-        }
+        // Week strip card
+        Rectangle {
+            x: 0; y: 0
+            width: 270; height: root.height / 2 - 6
+            color: Theme.card
+            radius: Theme.cardRadius
 
-        Row {
-            x: 18; y: 60
-            spacing: 4
-            Repeater {
-                model: root.weekDays()
-                delegate: Item {
-                    width: 30; height: 56
-                    Text {
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        y: 0
-                        text: modelData.letter
-                        color: Theme.dim
-                        font.pixelSize: 11
-                    }
-                    Rectangle {
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        y: 20
-                        width: 30; height: 30; radius: 15
-                        color: modelData.today ? Theme.accent : "transparent"
+            Text {
+                x: 18; y: 14
+                text: Qt.formatDate(Clock.now, "MMMM")
+                color: Theme.fg
+                font.pixelSize: 20
+                font.bold: true
+            }
+
+            Row {
+                x: 18; y: 50
+                spacing: 4
+                Repeater {
+                    model: root.weekDays()
+                    delegate: Item {
+                        width: 30; height: 56
                         Text {
-                            anchors.centerIn: parent
-                            text: modelData.num
-                            color: Theme.fg
-                            font.pixelSize: 13
-                            font.bold: modelData.today
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            y: 0
+                            text: modelData.letter
+                            color: Theme.dim
+                            font.pixelSize: 11
+                        }
+                        Rectangle {
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            y: 20
+                            width: 30; height: 30; radius: 15
+                            color: modelData.today ? Theme.accent : "transparent"
+                            Text {
+                                anchors.centerIn: parent
+                                text: modelData.num
+                                color: Theme.fg
+                                font.pixelSize: 13
+                                font.bold: modelData.today
+                            }
                         }
                     }
                 }
             }
         }
 
-        Rectangle { x: 18; y: 136; width: parent.width - 36; height: 1; color: Theme.track }
-
-        Text {
-            x: 18; y: 150
-            width: parent.width - 36
-            horizontalAlignment: Text.AlignHCenter
-            text: "Nothing for today"
-            color: Theme.dim
-            font.pixelSize: 12
+        // Weather card
+        WeatherCard {
+            x: 0; y: root.height / 2 + 6
+            width: 270; height: root.height / 2 - 6
         }
     }
 

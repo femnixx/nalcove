@@ -66,12 +66,14 @@ Rectangle {
         }
         Rectangle {
             width: 36; height: 36; radius: 18
-            color: "white"
+            color: "transparent"
+            border.color: Theme.fg
+            border.width: 2
             Glyph {
                 anchors.centerIn: parent
                 width: 14; height: 14
                 kind: Media.isPlaying ? "pause" : "play"
-                color: "black"
+                color: Theme.fg
             }
             MouseArea { anchors.fill: parent; onClicked: Media.playPause() }
         }

@@ -1,27 +1,28 @@
 import QtQuick
 import QtQuick.Effects
 
-// island/components/Icon.qml - recolored SVG icon from island/icons/*.svg
-// Usage: Icon { name: "home"; color: Theme.accent; size: 20 }
 Item {
     id: root
     property string name: ""
-    property color color: Theme.fg
-    property int size: 18
+    property color color: "#ffffff"
+    property int size: 16
+
     width: size
     height: size
 
     Image {
         id: img
-        visible: false
         source: "../icons/" + name + ".svg"
-        sourceSize: Qt.size(size * 2, size * 2)
-        asynchronous: true
+        anchors.fill: parent
+        sourceSize: Qt.size(root.size * 2, root.size * 2)
+        fillMode: Image.PreserveAspectFit
+        mipmap: true
+        visible: false
     }
 
     MultiEffect {
-        source: img
         anchors.fill: parent
+        source: img
         colorization: 1.0
         colorizationColor: root.color
     }

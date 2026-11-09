@@ -8,6 +8,7 @@ import Quickshell.Io
 import Quickshell.Widgets
 import QtQuick
 import QtQuick.Shapes
+import QtQuick.Controls
 import "services"
 import "components"
 
@@ -31,7 +32,8 @@ ShellRoot {
             propagateComposedEvents: false
             z: -1
             onClicked: {
-                if (islandWindow.triggerMode === "hotkey")
+                // Ignore outside clicks while the dashboard is pinned open.
+                if (islandWindow.triggerMode === "hotkey" && !fullView.pinned)
                     islandWindow.triggerMode = "closed"
             }
         }
@@ -69,6 +71,12 @@ ShellRoot {
         }
 
         function toggleHotkey() {
+            // While pinned the island stays locked open: toggle unpins first, then closes.
+            if (fullView.pinned) {
+                fullView.pinned = false
+                islandWindow.triggerMode = "closed"
+                return
+            }
             triggerMode = (triggerMode === "hotkey") ? "closed" : "hotkey"
         }
 
@@ -85,7 +93,7 @@ ShellRoot {
         Item {
             anchors.fill: parent
             focus: islandWindow.triggerMode === "hotkey"
-            Keys.onEscapePressed: islandWindow.triggerMode = "closed"
+            Keys.onEscapePressed: { if (!fullView.pinned) islandWindow.triggerMode = "closed" }
         }
 
         Item {
@@ -180,7 +188,7 @@ ShellRoot {
                                 Rectangle {
                                     width: 3
                                     radius: 1.5
-                                    color: "white"
+                                    color: Theme.fg
                                     anchors.centerIn: parent
                                     height: 4 + index * 2
                                     SequentialAnimation on height {
@@ -251,7 +259,7 @@ ShellRoot {
                         Text {
                             width: parent.width
                             text: Media.hasPlayer ? Media.title : "Nothing playing"
-                            color: "white"
+                            color: Theme.fg
                             font.pixelSize: 13
                             font.bold: true
                             elide: Text.ElideRight
@@ -259,7 +267,7 @@ ShellRoot {
                         Text {
                             width: parent.width
                             text: Media.artist
-                            color: "#9a9a9f"
+                            color: Theme.dim
                             font.pixelSize: 11
                             elide: Text.ElideRight
                         }
@@ -273,6 +281,7 @@ ShellRoot {
                             anchors.centerIn: parent
                             width: 16; height: 16
                             kind: Media.isPlaying ? "pause" : "play"
+                            color: Theme.fg
                         }
                         MouseArea {
                             anchors.fill: parent
@@ -324,6 +333,18 @@ ShellRoot {
         IpcHandler {
             target: "island"
             function toggle(): void { islandWindow.toggleHotkey() }
+        }
+
+        // Global keybind: Ctrl+Alt+Space toggles the island open/closed.
+        // If already expanded (hotkey or hover), it instantly shrinks back to closed.
+        Shortcut {
+            sequence: "Ctrl+Alt+Space"
+            onActivated: {
+                if (islandWindow.triggerMode === "closed")
+                    islandWindow.triggerMode = "hotkey"
+                else
+                    islandWindow.triggerMode = "closed"
+            }
         }
     }
 }

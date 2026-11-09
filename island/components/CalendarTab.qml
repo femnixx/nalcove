@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Controls
 
 // Month grid + today card
 Item {
