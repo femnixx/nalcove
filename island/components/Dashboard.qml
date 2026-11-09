@@ -299,10 +299,10 @@ Item {
         
         // --- DYNAMIC RESPONSIVE SPLIT MEDIA PLAYER WITH SHELF ---
         Item {
-            x: 20
-            y: Math.min(80, parent.height * 0.25)
             width: 740
-            height: Math.min(280, parent.height - y - 20)
+            height: Math.min(320, parent.height - 80)
+            anchors.horizontalCenter: parent.horizontalCenter
+            y: 50
             visible: page === "music"
 
             Row {
@@ -311,38 +311,34 @@ Item {
                 spacing: 20
 
                 // ==========================================
-                // LEFT CONTAINER: DYNAMIC FLUID MEDIA ENGINE
+                // LEFT CONTAINER: MEDIA ENGINE (no background)
                 // ==========================================
-                Rectangle {
+                Item {
                     width: 430
                     height: parent.height
-                    color: "#16ffffff"
-                    border.color: Theme.cardBorder
-                    border.width: 1
-                    radius: 18
 
                     Column {
                         anchors.fill: parent
                         anchors.margins: 18
                         
                         // Flex row distributing height percentages across components safely
-                        spacing: Math.max(8, (parent.height - (72 + 40 + 44 + 24 + 40)) / 4)
+                        spacing: Math.max(8, (parent.height - (150 + 40 + 44 + 24 + 40)) / 4)
 
-                        // Section 1: Track Details Layout
+                        // Section 1: Track Details Layout - Smaller thumbnail (150x150)
                         Row {
-                            width: parent.width; height: 72; spacing: 16
+                            width: parent.width; height: 150; spacing: 16
                             Rectangle {
-                                width: 72; height: 72; radius: 12; color: "#2c2c2e"; clip: true
+                                width: 150; height: 150; radius: 16; color: "#2c2c2e"; clip: true
                                 Image {
                                     anchors.fill: parent; fillMode: Image.PreserveAspectCrop
                                     source: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.metadata && dashboardRoot.activePlayer.metadata["mpris:artUrl"]) ? String(dashboardRoot.activePlayer.metadata["mpris:artUrl"]) : ""
                                 }
-                                Icon { name: "media-playlist-normal"; size: 32; anchors.centerIn: parent; color: "#ffffff"; visible: parent.children[0].status !== Image.Ready }
+                                Icon { name: "media-playlist-normal"; size: 40; anchors.centerIn: parent; color: "#ffffff"; visible: parent.children[0].status !== Image.Ready }
                             }
                             Column {
-                                width: parent.width - 88; anchors.verticalCenter: parent.verticalCenter; spacing: 4
-                                Text { text: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.metadata && dashboardRoot.activePlayer.metadata["xesam:title"]) ? String(dashboardRoot.activePlayer.metadata["xesam:title"]) : "Spotify / Browser Idle"; color: "#ffffff"; font.pixelSize: 16; font.bold: true; elide: Text.ElideRight; width: parent.width }
-                                Text { text: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.metadata && dashboardRoot.activePlayer.metadata["xesam:artist"]) ? String(dashboardRoot.activePlayer.metadata["xesam:artist"]) : "Start playing a track..."; color: "#9a9aa0"; font.pixelSize: 13; elide: Text.ElideRight; width: parent.width }
+                                width: parent.width - 166; anchors.verticalCenter: parent.verticalCenter; spacing: 8
+                                Text { text: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.metadata && dashboardRoot.activePlayer.metadata["xesam:title"]) ? String(dashboardRoot.activePlayer.metadata["xesam:title"]) : "Spotify / Browser Idle"; color: "#ffffff"; font.pixelSize: 18; font.bold: true; elide: Text.ElideRight; width: parent.width }
+                                Text { text: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.metadata && dashboardRoot.activePlayer.metadata["xesam:artist"]) ? String(dashboardRoot.activePlayer.metadata["xesam:artist"]) : "Start playing a track..."; color: "#9a9aa0"; font.pixelSize: 14; elide: Text.ElideRight; width: parent.width }
                             }
                         }
 
@@ -366,61 +362,53 @@ Item {
                             }
                         }
 
-                        // Section 3: Central Player Controls - All icons contained in fixed-size items
+                        // Section 3: Central Player Controls - No backgrounds, just icons
                         Row {
                             width: parent.width; height: 44
-                            spacing: 0
-                            // 5 equal segments for: shuffle | skip-back | play/pause | skip-forward | repeat
-                            Repeater {
-                                model: 5
-                                Rectangle {
-                                    width: parent.width / 5; height: parent.height
-                                    // Shuffle
-                                    Item {
-                                        anchors.fill: parent
-                                        visible: index === 0
-                                        Icon { name: "media-playlist-shuffle"; size: 18; color: "#66ffffff"; anchors.centerIn: parent }
-                                    }
-                                    // Skip Backward
-                                    Rectangle {
-                                        width: 24; height: 24; color: "transparent"; anchors.centerIn: parent
-                                        visible: index === 1
-                                        Icon { name: "media-skip-backward"; size: 22; color: "#ffffff"; anchors.centerIn: parent }
-                                        MouseArea { anchors.fill: parent; onClicked: if (dashboardRoot.activePlayer) dashboardRoot.activePlayer.previous() }
-                                    }
-                                    // Play/Pause - centered circle
-                                    Rectangle {
-                                        width: 40; height: 40; radius: 20; color: "#ffffff"; anchors.centerIn: parent
-                                        visible: index === 2
-                                        Icon { name: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.playbackStatus === 1) ? "media-playback-pause" : "media-playback-start"; size: 18; color: "#000000"; anchors.centerIn: parent }
-                                        MouseArea { anchors.fill: parent; onClicked: if (dashboardRoot.activePlayer) dashboardRoot.activePlayer.togglePlay() }
-                                    }
-                                    // Skip Forward
-                                    Rectangle {
-                                        width: 24; height: 24; color: "transparent"; anchors.centerIn: parent
-                                        visible: index === 3
-                                        Icon { name: "media-skip-forward"; size: 22; color: "#ffffff"; anchors.centerIn: parent }
-                                        MouseArea { anchors.fill: parent; onClicked: if (dashboardRoot.activePlayer) dashboardRoot.activePlayer.next() }
-                                    }
-                                    // Repeat
-                                    Item {
-                                        anchors.fill: parent
-                                        visible: index === 4
-                                        Icon { name: "media-playlist-repeat"; size: 18; color: "#66ffffff"; anchors.centerIn: parent }
-                                    }
-                                }
+                            spacing: (parent.width - (24 + 24 + 40 + 24 + 24)) / 4
+
+                            // Shuffle
+                            Item {
+                                width: 24; height: 24; anchors.verticalCenter: parent.verticalCenter
+                                Icon { name: "media-playlist-shuffle"; size: 20; color: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.shuffle) ? "#3b8bff" : "#66ffffff"; anchors.centerIn: parent }
+                                MouseArea { anchors.fill: parent; onClicked: if (dashboardRoot.activePlayer) dashboardRoot.activePlayer.shuffle = !dashboardRoot.activePlayer.shuffle }
+                            }
+
+                            // Skip Backward
+                            Item {
+                                width: 24; height: 24; anchors.verticalCenter: parent.verticalCenter
+                                Icon { name: "media-skip-backward"; size: 24; color: "#ffffff"; anchors.centerIn: parent }
+                                MouseArea { anchors.fill: parent; onClicked: if (dashboardRoot.activePlayer) dashboardRoot.activePlayer.previous() }
+                            }
+
+                            // Play/Pause - large icon, no background
+                            Item {
+                                width: 40; height: 40; anchors.verticalCenter: parent.verticalCenter
+                                Icon { name: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.playbackStatus === 1) ? "media-playback-pause" : "media-playback-start"; size: 32; color: "#ffffff"; anchors.centerIn: parent }
+                                MouseArea { anchors.fill: parent; onClicked: if (dashboardRoot.activePlayer) dashboardRoot.activePlayer.togglePlay() }
+                            }
+
+                            // Skip Forward
+                            Item {
+                                width: 24; height: 24; anchors.verticalCenter: parent.verticalCenter
+                                Icon { name: "media-skip-forward"; size: 24; color: "#ffffff"; anchors.centerIn: parent }
+                                MouseArea { anchors.fill: parent; onClicked: if (dashboardRoot.activePlayer) dashboardRoot.activePlayer.next() }
+                            }
+
+                            // Repeat
+                            Item {
+                                width: 24; height: 24; anchors.verticalCenter: parent.verticalCenter
+                                Icon { name: "media-playlist-repeat"; size: 20; color: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.loopStatus === 1) ? "#3b8bff" : "#66ffffff"; anchors.centerIn: parent }
+                                MouseArea { anchors.fill: parent; onClicked: if (dashboardRoot.activePlayer) dashboardRoot.activePlayer.loopStatus = (dashboardRoot.activePlayer.loopStatus === 1) ? 0 : 1 }
                             }
                         }
 
-                        // Section 4: Pure System Blue Volume Bar (Bypasses hardcoded clip zones)
+                        // Section 4: Pure System Blue Volume Bar
                         Row {
                             width: parent.width; height: 24; spacing: 12
-                            Rectangle {
-                                width: 24; height: parent.height
-                                Icon { name: "audio-volume-high"; size: 16; color: "#ffffff"; anchors.centerIn: parent }
-                            }
+                            Icon { name: "audio-volume-high"; size: 16; color: "#ffffff" }
                             Slider {
-                                id: hardwareVolumeSlider; width: parent.width - 28 - 24; value: systemVolumeLevel; anchors.verticalCenter: parent.verticalCenter
+                                id: hardwareVolumeSlider; width: parent.width - 24 - 24; value: systemVolumeLevel; anchors.verticalCenter: parent.verticalCenter
                                 background: Rectangle { 
                                     height: 5; radius: 3; color: "#22ffffff"
                                     Rectangle { width: hardwareVolumeSlider.visualPosition * parent.width; height: 5; color: "#3b8bff"; radius: 3 } 
@@ -436,7 +424,7 @@ Item {
                 }
 
                 // ==========================================
-                // RIGHT CONTAINER: LYRICS & SHELF VIEWPORT
+                // RIGHT CONTAINER: LYRICS (only this has background/border)
                 // ==========================================
                 Rectangle {
                     width: 290
