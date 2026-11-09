@@ -1,12 +1,18 @@
 import QtQuick
 import QtQuick.Controls
+import "../services"
 
 // Month grid + today card
 Item {
     id: root
+    clip: true
 
-    function cells() {
-        const n = Clock.now
+    // Rebuild only when the day changes
+    readonly property int today: Clock.now.getDate()
+    readonly property var cellList: { today; return buildCells() }
+
+    function buildCells() {
+        const n = new Date()
         const first = new Date(n.getFullYear(), n.getMonth(), 1)
         const offset = (first.getDay() + 6) % 7
         const total = new Date(n.getFullYear(), n.getMonth() + 1, 0).getDate()
@@ -16,11 +22,17 @@ Item {
         return out
     }
 
+    readonly property real gap: 12
+    readonly property real leftW: (width - gap) * 0.53
+
     Rectangle {
+        id: monthCard
         x: 0; y: 0
-        width: 380; height: root.height
+        width: root.leftW; height: root.height
         color: Theme.card
         radius: Theme.cardRadius
+
+        readonly property real cell: (width - 40) / 7
 
         Text {
             x: 20; y: 12
@@ -34,7 +46,7 @@ Item {
             Repeater {
                 model: ["M", "T", "W", "T", "F", "S", "S"]
                 delegate: Item {
-                    width: 48; height: 16
+                    width: monthCard.cell; height: 16
                     Text { anchors.centerIn: parent; text: modelData; color: Theme.dim; font.pixelSize: 11 }
                 }
             }
@@ -43,13 +55,14 @@ Item {
             x: 20; y: 64
             columns: 7
             Repeater {
-                model: root.cells()
+                model: root.cellList
                 delegate: Item {
-                    width: 48; height: 23
+                    width: monthCard.cell
+                    height: Math.min(26, (monthCard.height - 72) / 6)
                     Rectangle {
                         anchors.centerIn: parent
                         width: 22; height: 22; radius: 11
-                        visible: modelData === Clock.now.getDate()
+                        visible: modelData === root.today
                         color: Theme.accent
                     }
                     Text {
@@ -65,8 +78,8 @@ Item {
     }
 
     Rectangle {
-        x: 392; y: 0
-        width: 328; height: root.height
+        x: root.leftW + root.gap; y: 0
+        width: root.width - x; height: root.height
         color: Theme.card
         radius: Theme.cardRadius
 

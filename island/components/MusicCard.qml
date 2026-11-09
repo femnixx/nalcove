@@ -1,40 +1,43 @@
 import QtQuick
 import Quickshell.Widgets
 import "../services"
+import "../components"
 
-// Compact Alcove-style music card (used on the Home tab)
+// Compact Alcove-style music card (Home tab)
 Rectangle {
     id: root
     color: Theme.card
     radius: Theme.cardRadius
+    clip: true
 
-    function fmt(s) {
-        const t = Math.max(0, Math.floor(s / 1000000))
-        return Math.floor(t / 60) + ":" + String(t % 60).padStart(2, "0")
-    }
+    readonly property int art: Math.min(72, Math.round(height * 0.32))
 
     ClippingRectangle {
+        id: artBox
         x: 14; y: 14
-        width: 100; height: 100
-        radius: 14
+        width: root.art; height: root.art
+        radius: 12
         color: "#222222"
         Image {
             anchors.fill: parent
             source: Media.artUrl
             fillMode: Image.PreserveAspectCrop
             asynchronous: true
+            cache: false
+            sourceSize: Qt.size(160, 160)
         }
     }
 
     Column {
-        x: 126; y: 22
-        width: root.width - 126 - 14
-        spacing: 4
+        x: artBox.x + artBox.width + 12
+        y: 16
+        width: root.width - x - 14
+        spacing: 3
         Text {
             width: parent.width
-            text: Media.hasPlayer ? Media.title : "Nothing playing"
+            text: Media.hasPlayer && Media.title !== "" ? Media.title : "Nothing playing"
             color: Theme.fg
-            font.pixelSize: 14
+            font.pixelSize: 13
             font.bold: true
             elide: Text.ElideRight
         }
@@ -42,15 +45,16 @@ Rectangle {
             width: parent.width
             text: Media.artist
             color: Theme.dim
-            font.pixelSize: 12
+            font.pixelSize: 11
             elide: Text.ElideRight
         }
     }
 
     Row {
-        x: (root.width - width) / 2
-        y: 130
-        spacing: 28
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: 16
+        spacing: 24
         visible: Media.hasPlayer
 
         Item {
@@ -69,7 +73,7 @@ Rectangle {
                 kind: Media.isPlaying ? "pause" : "play"
                 color: Theme.fg
             }
-            MouseArea { anchors.fill: parent; onClicked: Media.playPause() }
+            MouseArea { anchors.fill: parent; onClicked: Media.togglePlay() }
         }
         Item {
             width: 36; height: 36

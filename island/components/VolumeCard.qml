@@ -4,6 +4,8 @@ import "../services" as Services
 Rectangle {
     radius: 18; color: "#16ffffff"; border.color: "#22ffffff"; border.width: 1
 
+    signal outputClicked()
+
     Column {
         anchors.fill: parent; anchors.margins: 12; spacing: 10
 

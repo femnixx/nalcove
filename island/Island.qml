@@ -4,7 +4,6 @@
 import QtQuick 2.15
 import Quickshell.Window
 import Quickshell.WlrLayershell
-import Quickshell.Hyprland
 import Quickshell.Ipc
 import Island 1.0 as Theme
 
@@ -85,6 +84,9 @@ PanelWindow {
         // Center at top of window, offset by overshoot margin
         x: (parent.width - width) / 2
         y: Theme.overshootMargin
+
+        // Opaque fill (95% opacity)
+        fillColor: "#f2101012"
     }
 
     // Hitbox tracks current animated rect + padding
@@ -116,6 +118,15 @@ PanelWindow {
             if (triggerMode === "hover") {
                 hoverDebounceTimer.restart()
             }
+        }
+    }
+
+    // DropArea for shelf - tracks animated shape
+    DropArea {
+        anchors.fill: islandShape
+        onEntered: {
+            if (triggerMode !== "hotkey") triggerMode = "hotkey"
+            openPage("shelf")
         }
     }
 
@@ -174,6 +185,9 @@ PanelWindow {
     }
 
     onTriggerModeChanged: updateKeyboardFocus()
+
+    // Page navigation signal from DropArea
+    signal openPage(string page)
 
     // Stub: expanded content placeholder
     Item {
