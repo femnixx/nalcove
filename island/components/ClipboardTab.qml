@@ -18,7 +18,7 @@ Rectangle {
     // Check if cliphist is available (primary method like Noctalia)
     Process {
         id: checkCliphistProc
-        command: ["sh", "-c", "command -v cliphist"]
+        command: ["sh", "-c", "command -v cliphist >/dev/null 2>&1"]
         onRunningChanged: {
             if (!running) {
                 if (exitCode === 0) {
@@ -26,7 +26,7 @@ Rectangle {
                     loadHistoryProc.running = true
                     watchProc.running = true
                 } else {
-                    // Fallback: poll clipboard every 800ms
+                    // Fallback: poll clipboard every 2000ms (less aggressive)
                     pollTimer.running = true
                 }
             }
@@ -78,21 +78,37 @@ Rectangle {
         onTriggered: if (root.useCliphist) watchProc.running = true
     }
 
-    // Fallback: poll clipboard every 800ms (doesn't consume clipboard)
+    // Fallback: poll clipboard every 2000ms (non-consuming check first)
     Timer {
         id: pollTimer
-        interval: 800
+        interval: 2000
         running: false
         repeat: true
         onTriggered: {
             if (!root.useCliphist) {
-                pollTextClipboard.running = true
-                pollImageClipboard.running = true
+                // First check if clipboard has text type without consuming
+                checkClipboardTypeProc.running = true
             }
         }
     }
 
-    // Poll clipboard for text (using wl-paste --list-types first to check)
+    // Check clipboard type first (non-consuming)
+    Process {
+        id: checkClipboardTypeProc
+        command: ["wl-paste", "--list-types"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                if (text && text.indexOf("text") !== -1) {
+                    pollTextClipboard.running = true
+                }
+                if (text && text.indexOf("image") !== -1) {
+                    pollImageClipboard.running = true
+                }
+            }
+        }
+    }
+
+    // Poll clipboard for text (only after confirming type)
     Process {
         id: pollTextClipboard
         command: ["wl-paste", "-t", "text"]
@@ -115,12 +131,6 @@ Rectangle {
                 }
             }
         }
-    }
-
-    // Wipe process for cliphist
-    Process {
-        id: wipeProc
-        command: ["cliphist", "wipe"]
     }
 
     // Poll clipboard for images
@@ -146,6 +156,12 @@ Rectangle {
                 }
             }
         }
+    }
+
+    // Wipe process for cliphist
+    Process {
+        id: wipeProc
+        command: ["cliphist", "wipe"]
     }
 
     // Copy selected entry to clipboard
