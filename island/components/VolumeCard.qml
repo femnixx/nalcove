@@ -20,7 +20,8 @@ Rectangle {
                 width: parent.width - 22 - 34 - 20
                 anchors.verticalCenter: parent.verticalCenter
                 value: Services.Audio.sinkVolume
-                onMoved: Services.Audio.setSinkVolume(value)
+                enabled: Services.Audio.sinkReady
+                onMoved: if (Services.Audio.sinkReady) Services.Audio.setSinkVolume(value)
             }
             Text {
                 width: 34; anchors.verticalCenter: parent.verticalCenter
@@ -44,9 +45,18 @@ Rectangle {
                     color: "#ffffff"; font.pixelSize: 12
                     elide: Text.ElideRight; verticalAlignment: Text.AlignVCenter
                 }
-                Text { anchors.right: parent.right; anchors.rightMargin: 10; anchors.verticalCenter: parent.verticalCenter
-                       text: outputSelector.open ? "▴" : "▾"; color: "#9a9aa0" }
-                MouseArea { anchors.fill: parent; onClicked: outputSelector.open ? outputSelector.close() : outputSelector.open() }
+                Text { 
+                    anchors.right: parent.right; anchors.rightMargin: 10; anchors.verticalCenter: parent.verticalCenter
+                    text: outputSelector.open ? "▴" : "▾"; color: "#9a9aa0" 
+                }
+                MouseArea { 
+                    anchors.fill: parent; 
+                    onClicked: { 
+                        outputSelector.x = headerBtn.mapToItem(null, 0, 0).x
+                        outputSelector.y = headerBtn.mapToItem(null, 0, headerBtn.height).y
+                        outputSelector.open ? outputSelector.close() : outputSelector.open() 
+                    } 
+                }
             }
 
             DeviceSelector {
@@ -55,9 +65,6 @@ Rectangle {
                 model: Services.Audio.sinks
                 currentNode: Services.Audio.sink
                 onPicked: n => Services.Audio.setDefaultSink(n)
-                // Position popup below the header button
-                x: headerBtn.x
-                y: headerBtn.y + headerBtn.height + 4
             }
         }
     }

@@ -62,6 +62,4 @@ Popup {
             }
         }
     }
-
-    // function labelOf(n) { return n ? (n.description || n.nickname || n.name) : "No device" }
 }

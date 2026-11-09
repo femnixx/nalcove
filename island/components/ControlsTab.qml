@@ -47,8 +47,12 @@ Item {
                         elide: Text.ElideRight; verticalAlignment: Text.AlignVCenter
                     }
                     Text { anchors.right: parent.right; anchors.rightMargin: 10; anchors.verticalCenter: parent.verticalCenter
-                           text: outputSelector.visible ? "▴" : "▾"; color: "#9a9aa0" }
-                    MouseArea { anchors.fill: parent; onClicked: outputSelector.visible ? outputSelector.close() : outputSelector.open() }
+                           text: outputSelector.open ? "▴" : "▾"; color: "#9a9aa0" }
+                    MouseArea { anchors.fill: parent; onClicked: { 
+                        outputSelector.x = outputHeaderBtn.mapToItem(null, 0, 0).x
+                        outputSelector.y = outputHeaderBtn.mapToItem(null, 0, outputHeaderBtn.height).y
+                        outputSelector.open ? outputSelector.close() : outputSelector.open() 
+                    } }
                 }
 
                 DeviceSelector {
@@ -94,8 +98,12 @@ Item {
                         elide: Text.ElideRight; verticalAlignment: Text.AlignVCenter
                     }
                     Text { anchors.right: parent.right; anchors.rightMargin: 10; anchors.verticalCenter: parent.verticalCenter
-                           text: inputSelector.visible ? "▴" : "▾"; color: "#9a9aa0" }
-                    MouseArea { anchors.fill: parent; onClicked: inputSelector.visible ? inputSelector.close() : inputSelector.open() }
+                           text: inputSelector.open ? "▴" : "▾"; color: "#9a9aa0" }
+                    MouseArea { anchors.fill: parent; onClicked: { 
+                        inputSelector.x = inputHeaderBtn.mapToItem(null, 0, 0).x
+                        inputSelector.y = inputHeaderBtn.mapToItem(null, 0, inputHeaderBtn.height).y
+                        inputSelector.open ? inputSelector.close() : inputSelector.open() 
+                    } }
                 }
 
                 DeviceSelector {
