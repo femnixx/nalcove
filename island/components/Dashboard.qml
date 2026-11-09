@@ -125,13 +125,6 @@ Item {
                 Icon { name: "layers"; size: 20; anchors.centerIn: parent; color: Theme.fg }
                 MouseArea { anchors.fill: parent; onClicked: page = "controls" }
             }
-            Rectangle {
-                width: 44; height: 36; radius: 8
-                color: page === "bluetooth" ? Theme.accentFill : "transparent"
-                border.color: page === "bluetooth" ? Theme.accent : "transparent"; border.width: 1
-                Icon { name: "bluetooth"; size: 20; anchors.centerIn: parent; color: Theme.fg }
-                MouseArea { anchors.fill: parent; onClicked: page = "bluetooth" }
-            }
         }
 
         // --- ROW 1 RIGHT-SIDE: BATTERY & CLOCK ---
@@ -186,11 +179,6 @@ Item {
                 width: 20; height: 20; color: "transparent"
                 Icon { name: "volume"; size: 16; color: Theme.fg }
                 MouseArea { anchors.fill: parent; onClicked: page = "volume" }
-            }
-            Rectangle {
-                width: 20; height: 20; color: "transparent"
-                Icon { name: "bluetooth"; size: 16; color: Theme.fg }
-                MouseArea { anchors.fill: parent; onClicked: page = "bluetooth" }
             }
             Rectangle {
                 width: 20; height: 20; color: "transparent"
