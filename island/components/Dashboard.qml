@@ -302,7 +302,7 @@ Item {
             width: 740
             height: 280
             anchors.horizontalCenter: parent.horizontalCenter
-            y: 20
+            y: 8
             visible: page === "music"
 
             Row {
@@ -348,7 +348,7 @@ Item {
                             // Shuffle
                             Item {
                                 width: 24; height: 24; anchors.verticalCenter: parent.verticalCenter
-                                Icon { name: "media-playlist-shuffle"; size: 20; color: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.shuffle) ? "#3b8bff" : "#66ffffff"; anchors.centerIn: parent }
+                                Icon { name: "media-playlist-shuffle"; size: 20; color: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.shuffle) ? "#3b8bff" : "#ffffff"; anchors.centerIn: parent }
                                 MouseArea { anchors.fill: parent; onClicked: if (dashboardRoot.activePlayer) dashboardRoot.activePlayer.shuffle = !dashboardRoot.activePlayer.shuffle }
                             }
 
@@ -376,7 +376,7 @@ Item {
                             // Repeat
                             Item {
                                 width: 24; height: 24; anchors.verticalCenter: parent.verticalCenter
-                                Icon { name: "media-playlist-repeat"; size: 20; color: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.loopStatus === 1) ? "#3b8bff" : "#66ffffff"; anchors.centerIn: parent }
+                                Icon { name: "media-playlist-repeat"; size: 20; color: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.loopStatus === 1) ? "#3b8bff" : "#ffffff"; anchors.centerIn: parent }
                                 MouseArea { anchors.fill: parent; onClicked: if (dashboardRoot.activePlayer) dashboardRoot.activePlayer.loopStatus = (dashboardRoot.activePlayer.loopStatus === 1) ? 0 : 1 }
                             }
                         }
