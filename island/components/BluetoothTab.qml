@@ -1,207 +1,57 @@
 import QtQuick
-import Quickshell.Io
+import Quickshell.Bluetooth
 
-Rectangle {
+Item {
     id: root
-    color: Theme.card
-    radius: Theme.cardRadius
+    readonly property var adapter: Bluetooth.defaultAdapter
+    readonly property var devices: Bluetooth.devices.values.filter(d => d.paired || d.connected)
 
-    property var devices: []
-    property bool powered: false
-
-    function parseDevices(output) {
-        var lines = output.trim().split("\n")
-        var result = []
-        for (var i = 0; i < lines.length; i++) {
-            var line = lines[i].trim()
-            if (line.startsWith("Device ")) {
-                var parts = line.split(" ")
-                var mac = parts[1]
-                var name = parts.slice(2).join(" ")
-                var connected = false
-                var paired = false
-                for (var j = i + 1; j < lines.length && !lines[j].startsWith("Device "); j++) {
-                    if (lines[j].includes("Connected: yes")) connected = true
-                    if (lines[j].includes("Paired: yes")) paired = true
-                }
-                result.push({ address: mac, name: name, connected: connected, paired: paired, icon: "bluetooth" })
-            }
+    Row {
+        id: header; spacing: 10; width: parent.width
+        Text { text: "Bluetooth"; color: "#ffffff"; font.pixelSize: 15; font.bold: true
+               anchors.verticalCenter: parent.verticalCenter }
+        Rectangle {
+            visible: root.adapter !== null
+            width: 40; height: 22; radius: 11
+            color: root.adapter && root.adapter.enabled ? "#3b8bff" : "#33ffffff"
+            Rectangle { width: 18; height: 18; radius: 9; color: "#ffffff"; y: 2
+                        x: root.adapter && root.adapter.enabled ? parent.width - width - 2 : 2
+                        Behavior on x { NumberAnimation { duration: 120 } } }
+            MouseArea { anchors.fill: parent; onClicked: root.adapter.enabled = !root.adapter.enabled }
         }
-        return result
-    }
-
-    Process {
-        id: btList
-        command: ["bluetoothctl", "devices"]
-        stdout: StdioCollector {
-            onStreamFinished: {
-                root.devices = parseDevices(text)
-            }
+        Rectangle {
+            visible: root.adapter && root.adapter.enabled
+            width: 60; height: 22; radius: 11; color: "#22ffffff"
+            Text { anchors.centerIn: parent; color: "#ffffff"; font.pixelSize: 11
+                   text: root.adapter && root.adapter.discovering ? "Stop" : "Scan" }
+            MouseArea { anchors.fill: parent; onClicked: root.adapter.discovering = !root.adapter.discovering }
         }
     }
 
-    Process {
-        id: btPower
-        command: ["bluetoothctl", "show"]
-        stdout: StdioCollector {
-            onStreamFinished: {
-                root.powered = text.includes("Powered: yes")
+    ListView {
+        anchors { top: header.bottom; topMargin: 10; left: parent.left; right: parent.right; bottom: parent.bottom }
+        model: root.devices
+        spacing: 6; clip: true
+        delegate: Rectangle {
+            width: ListView.view.width; height: 40; radius: 10
+            color: modelData.connected ? "#223b8bff" : "#16ffffff"
+            Text { anchors.left: parent.left; anchors.leftMargin: 12; anchors.verticalCenter: parent.verticalCenter
+                   width: parent.width - 90; elide: Text.ElideRight
+                   text: modelData.name || modelData.address; color: "#ffffff"; font.pixelSize: 12 }
+            Text { anchors.right: parent.right; anchors.rightMargin: 12; anchors.verticalCenter: parent.verticalCenter
+                   color: "#9a9aa0"; font.pixelSize: 11
+                   text: modelData.connected
+                         ? (modelData.batteryAvailable ? Math.round(modelData.battery * 100) + "%" : "On")
+                         : "Off" }
+            MouseArea {
+                anchors.fill: parent
+                onClicked: modelData.connected ? modelData.disconnect() : modelData.connect()
             }
         }
     }
 
-    Process {
-        id: btPowerCmd
-    }
-
-    Process {
-        id: btConnectCmd
-        property string address: ""
-        property string cmd: ""
-        command: ["bluetoothctl", btConnectCmd.cmd, btConnectCmd.address]
-    }
-
-    Timer {
-        id: refreshTimer
-        interval: 1000
-        onTriggered: refresh()
-    }
-
-    Component.onCompleted: {
-        btList.running = true
-        btPower.running = true
-    }
-
-    function refresh() {
-        btList.running = true
-        btPower.running = true
-    }
-
-    function onCmdFinished() {
-        refresh()
-    }
-
-    Column {
-        anchors.fill: parent
-        anchors.margins: 24
-        spacing: 16
-
-        Text {
-            text: "Bluetooth"
-            color: Theme.fg
-            font.pixelSize: 20
-            font.bold: true
-        }
-
-        Row {
-            spacing: 12
-            Text {
-                text: root.powered ? "On" : "Off"
-                color: root.powered ? Theme.good : Theme.dim
-                font.pixelSize: 14
-                font.bold: true
-            }
-            Rectangle {
-                width: 50; height: 28; radius: 14
-                color: root.powered ? Theme.accent : Theme.cardHi
-                border.color: Theme.border; border.width: 1
-                Rectangle {
-                    x: root.powered ? width - 24 : 2
-                    y: 2
-                    width: 24; height: 24; radius: 12
-                    color: "white"
-                    Behavior on x { SpringAnimation { spring: 3; damping: 0.5 } }
-                }
-                MouseArea {
-                    anchors.fill: parent
-                    onClicked: {
-                        btPowerCmd.command = ["bluetoothctl", root.powered ? "power off" : "power on"]
-                        btPowerCmd.running = true
-                        refreshTimer.restart()
-                    }
-                }
-            }
-        }
-
-        ListView {
-            width: parent.width
-            height: parent.height - 120
-            model: root.devices
-            spacing: 8
-            delegate: Rectangle {
-                width: parent.width
-                height: 56
-                color: Theme.cardHi
-                radius: 10
-                Row {
-                    anchors.fill: parent
-                    anchors.margins: 16
-                    spacing: 12
-                    Icon {
-                        name: modelData.icon || "bluetooth"
-                        size: 24
-                        color: Theme.fg
-                    }
-                    Column {
-                        anchors.verticalCenter: parent.verticalCenter
-                        spacing: 2
-                        Text {
-                            text: modelData.name || "Unknown"
-                            color: Theme.fg
-                            font.pixelSize: 14
-                            font.bold: true
-                        }
-                        Text {
-                            text: modelData.connected ? "Connected" : (modelData.paired ? "Paired" : "Available")
-                            color: modelData.connected ? Theme.good : Theme.dim
-                            font.pixelSize: 12
-                        }
-                    }
-                    Item { width: 40 }
-                    Rectangle {
-                        visible: !modelData.connected
-                        width: 70; height: 30; radius: 15
-                        color: modelData.paired ? Theme.accent : Theme.cardHi
-                        border.color: Theme.border; border.width: 1
-                        Text {
-                            anchors.centerIn: parent
-                            text: modelData.paired ? "Connect" : "Pair"
-                            color: Theme.fg
-                            font.pixelSize: 12
-                        }
-                        MouseArea {
-                            anchors.fill: parent
-                            onClicked: {
-                                btConnectCmd.address = modelData.address
-                                btConnectCmd.cmd = modelData.paired ? "connect" : "pair"
-                                btConnectCmd.running = true
-                                refreshTimer.restart()
-                            }
-                        }
-                    }
-                    Rectangle {
-                        visible: modelData.connected
-                        width: 70; height: 30; radius: 15
-                        color: "#ff453a20"
-                        border.color: "#ff453a"; border.width: 1
-                        Text {
-                            anchors.centerIn: parent
-                            text: "Disconnect"
-                            color: "#ff453a"
-                            font.pixelSize: 12
-                        }
-                        MouseArea {
-                            anchors.fill: parent
-                            onClicked: {
-                                btConnectCmd.address = modelData.address
-                                btConnectCmd.cmd = "disconnect"
-                                btConnectCmd.running = true
-                                refreshTimer.restart()
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
+    Text { anchors.centerIn: parent
+           visible: root.adapter === null || root.devices.length === 0
+           color: "#66ffffff"; font.pixelSize: 12
+           text: root.adapter === null ? "No Bluetooth adapter found" : "No paired devices" }
 }

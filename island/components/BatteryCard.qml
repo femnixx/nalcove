@@ -1,12 +1,10 @@
 import QtQuick
+import "../services" as Services
 import Quickshell.Services.UPower
 
 Rectangle {
-    id: card
     implicitWidth: 150; implicitHeight: 110
-    radius: 18
-    color: "#16ffffff"
-    border.color: "#22ffffff"; border.width: 1
+    radius: 18; color: "#16ffffff"; border.color: "#22ffffff"; border.width: 1
 
     readonly property var dev: UPower.displayDevice
     readonly property real pct: dev && dev.ready ? dev.percentage : 0     // 0..1
@@ -30,38 +28,32 @@ Rectangle {
     }
 
     Column {
-        anchors.centerIn: parent
-        spacing: 8
+        anchors.centerIn: parent; spacing: 8
 
         Row {
-            anchors.horizontalCenter: parent.horizontalCenter
-            spacing: 2
+            anchors.horizontalCenter: parent.horizontalCenter; spacing: 2
             Rectangle {
                 width: 56; height: 26; radius: 7
                 color: "transparent"; border.color: "#aaffffff"; border.width: 2
                 Rectangle {
                     x: 3; y: 3; height: parent.height - 6; radius: 4
-                    width: Math.max(4, (parent.width - 6) * card.pct)
-                    color: card.accent
+                    width: Math.max(4, (parent.width - 6) * pct)
+                    color: accent
                     Behavior on width { NumberAnimation { duration: 300 } }
                 }
-                Text {
-                    anchors.centerIn: parent
-                    visible: card.charging
-                    text: "⚡"; font.pixelSize: 14; color: "#000000"
-                }
+                Text { visible: charging; anchors.centerIn: parent; text: "⚡"; font.pixelSize: 14; color: "#000000" }
             }
             Rectangle { width: 3; height: 10; radius: 1; color: "#aaffffff"; anchors.verticalCenter: parent.verticalCenter }
         }
 
         Text {
             anchors.horizontalCenter: parent.horizontalCenter
-            text: Math.round(card.pct * 100) + "%"
-            color: card.accent; font.pixelSize: 22; font.bold: true
+            text: Math.round(pct * 100) + "%"
+            color: accent; font.pixelSize: 22; font.bold: true
         }
         Text {
             anchors.horizontalCenter: parent.horizontalCenter
-            text: card.status
+            text: status
             color: "#9a9aa0"; font.pixelSize: 11
         }
     }

@@ -109,4 +109,14 @@ Item {
             }
         }
     }
+
+    // Right side: Volume, Brightness, Battery
+    Column {
+        x: 726; y: 0
+        spacing: 12
+
+        VolumeCard { width: 156; height: 90 }
+        BrightnessCard { width: 156; height: 44 }
+        BatteryCard { width: 156; height: 110 }
+    }
 }

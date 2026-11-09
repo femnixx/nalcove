@@ -15,8 +15,8 @@ Singleton {
     readonly property bool isPlaying: active ? active.isPlaying : false
     readonly property string title: active ? (active.trackTitle || "") : ""
     readonly property string artist: active ? (active.trackArtist || "") : ""
-    readonly property real position: active ? active.position : 0   // seconds
-    readonly property real length: active ? active.length : 0       // seconds
+    property real position: active ? active.position : 0   // seconds
+    property real length: active ? active.length : 0       // seconds
     readonly property bool shuffleOn: active ? active.shuffle : false
     readonly property bool repeatOn: active ? active.loopState !== MprisLoopState.None : false
 
@@ -36,7 +36,13 @@ Singleton {
         running: root.isPlaying && root.tracking
         interval: 500
         repeat: true
-        onTriggered: if (root.active) root.active.positionChanged()
+        onTriggered: {
+            if (root.active) {
+                root.active.positionChanged()
+                root.position = root.active.position
+                root.length = root.active.length
+            }
+        }
     }
 
     function togglePlay() { if (active && active.canTogglePlaying) active.togglePlaying() }
@@ -48,4 +54,7 @@ Singleton {
         active.loopState = (active.loopState === MprisLoopState.None) ? MprisLoopState.Playlist : MprisLoopState.None
     }
     function seek(sec) { if (active && active.canSeek) active.position = sec }
+
+    // compatibility with older callers
+    function playPause() { togglePlay() }
 }

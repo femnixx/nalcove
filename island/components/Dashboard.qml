@@ -14,44 +14,9 @@ Item {
     property string liveLyricsText: "Loading..."
     property string lastTrackedTitle: ""
 
-    // System volume real-time reader
-    property real systemVolumeLevel: 0.50
-
-    Process {
-        id: readSystemVolume
-        command: ["wpctl", "get-volume", "@DEFAULT_AUDIO_SINK@"]
-        stdout: StdioCollector {
-            onStreamFinished: {
-                var line = text;
-                var parts = line.trim().split(" ");
-                if (parts.length >= 2) {
-                    var val = parseFloat(parts[1]);
-                    if (!isNaN(val)) { systemVolumeLevel = val; }
-                }
-            }
-        }
-    }
-
-    // Poll volume every 2 seconds to capture hardware button changes
-    Timer {
-        interval: 2000; running: true; repeat: true
-        onTriggered: readSystemVolume.running = true
-    }
-
     function fmtTime(s) {
         const t = Math.max(0, Math.floor(s))
         return Math.floor(t / 60) + ":" + String(t % 60).padStart(2, "0")
-    }
-
-    // Volume setter process
-    Process {
-        id: setVolProcess
-        command: ["wpctl", "set-volume", "@DEFAULT_AUDIO_SINK@", "0.5"]
-    }
-
-    function setSystemVolume(vol) {
-        setVolProcess.command = ["wpctl", "set-volume", "@DEFAULT_AUDIO_SINK@", vol.toFixed(2)]
-        setVolProcess.running = true;
     }
 
     // Lyrics fetcher process
@@ -78,7 +43,7 @@ Item {
         fetchLyricsProcess.running = true;
     }
 
-    // Auto-fetch hook tracking titles - uses Media service
+    // Auto-fetch hook tracking titles - uses Services.Media
     Timer {
         interval: 2000
         running: true
@@ -174,9 +139,7 @@ Item {
             model: [
                 ["calendar", "calendar", "Calendar"],
                 ["search", "search", "Search"],
-                ["volume", "volume", "Volume"],
-                ["bluetooth", "bluetooth", "Bluetooth"],
-                ["activity", "activity", "System"],
+                ["system", "activity", "System"],
                 ["settings", "settings", "Settings"]
             ]
             delegate: Item {
@@ -296,7 +259,7 @@ Item {
                                 id: trackProgressSlider; width: parent.width; height: 14; value: Services.Media.length > 0 ? Services.Media.position / Services.Media.length : 0
                                 background: Rectangle { height: 5; radius: 3; color: "#22ffffff"; Rectangle { width: trackProgressSlider.visualPosition * parent.width; height: 5; color: "#ffffff"; radius: 3 } }
                                 handle: Rectangle { x: trackProgressSlider.visualPosition * (trackProgressSlider.width - width); y: -5; width: 14; height: 14; radius: 7; color: "#ffffff" }
-                                onValueChanged: {
+                                onMoved: {
                                     if (Services.Media.length > 0) {
                                         Services.Media.seek(value * Services.Media.length);
                                     }
@@ -312,18 +275,17 @@ Item {
                         // Volume
                         Row {
                             width: parent.width; height: 24; spacing: 12
-                            Icon { name: "audio-volume-high"; size: 16; color: "#ffffff" }
-                            Slider {
-                                id: hardwareVolumeSlider; width: parent.width - 24 - 24; value: systemVolumeLevel; anchors.verticalCenter: parent.verticalCenter
-                                background: Rectangle { 
-                                    height: 5; radius: 3; color: "#22ffffff"
-                                    Rectangle { width: hardwareVolumeSlider.visualPosition * parent.width; height: 5; color: "#3b8bff"; radius: 3 } 
-                                }
-                                handle: Rectangle { x: hardwareVolumeSlider.visualPosition * (hardwareVolumeSlider.width - width); y: -5; width: 12; height: 12; radius: 6; color: "#ffffff" }
-                                onValueChanged: {
-                                    systemVolumeLevel = value;
-                                    setSystemVolume(value);
-                                }
+                            Icon { name: "volume"; size: 16; color: "#ffffff"; opacity: Services.Audio.sinkMuted ? 0.5 : 1.0 }
+                            FlatSlider {
+                                width: parent.width - 18 - 34 - 20
+                                anchors.verticalCenter: parent.verticalCenter
+                                value: Services.Audio.sinkVolume
+                                onMoved: Services.Audio.setSinkVolume(value)
+                            }
+                            Text {
+                                width: 34; anchors.verticalCenter: parent.verticalCenter
+                                text: Math.round(Services.Audio.sinkVolume * 100)
+                                color: "#ffffff"; font.pixelSize: 12; horizontalAlignment: Text.AlignRight
                             }
                         }
                     }
@@ -384,13 +346,10 @@ Item {
         NotesTab { anchors.fill: parent; visible: page === "notes" }
         CalendarTab { anchors.fill: parent; visible: page === "calendar" }
         ControlsTab { anchors.fill: parent; visible: page === "controls" }
-        BluetoothTab { anchors.fill: parent; visible: page === "bluetooth" }
+        SystemTab { anchors.fill: parent; visible: page === "system" }
 
         // Placeholder tabs
         Item { visible: page === "search"; anchors.fill: parent; Text { anchors.centerIn: parent; text: "Search"; color: Theme.dim; font.pixelSize: 14 } }
-        Item { visible: page === "volume"; anchors.fill: parent; Text { anchors.centerIn: parent; text: "Volume"; color: Theme.dim; font.pixelSize: 14 } }
-        Item { visible: page === "system"; anchors.fill: parent; Text { anchors.centerIn: parent; text: "Activity"; color: Theme.dim; font.pixelSize: 14 } }
         Item { visible: page === "settings"; anchors.fill: parent; Text { anchors.centerIn: parent; text: "Settings"; color: Theme.dim; font.pixelSize: 14 } }
-        Item { visible: page === "lyrics"; anchors.fill: parent; Text { anchors.centerIn: parent; text: "Lyrics"; color: Theme.dim; font.pixelSize: 14 } }
     }
 }
