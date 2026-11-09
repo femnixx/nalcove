@@ -121,7 +121,7 @@ Rectangle {
             model: clipboardModel
             spacing: 6
             delegate: Rectangle {
-                width: parent ? parent.width : 400
+                width: ListView.view.width
                 height: Math.max(72, contentColumn.implicitHeight + 16)
                 color: Theme.cardHi
                 radius: 10
