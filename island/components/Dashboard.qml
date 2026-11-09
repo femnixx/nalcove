@@ -218,24 +218,54 @@ Item {
     // --- UTILITY ROW: Lower icons ---
     Row {
         id: utilityRow
-        x: 20; y: 60
+        x: 20; y: 72
         width: 740
         height: 24
-        spacing: 20
+        spacing: 84
 
-        Icon { name: "calendar"; size: 16; color: "#9a9aa0"; MouseArea { anchors.fill: parent; onClicked: page = "calendar" } }
-        Icon { name: "search"; size: 16; color: "#9a9aa0"; MouseArea { anchors.fill: parent; onClicked: page = "search" } }
-        Icon { name: "volume"; size: 16; color: "#9a9aa0"; MouseArea { anchors.fill: parent; onClicked: page = "volume" } }
-        Icon { name: "bluetooth"; size: 16; color: "#9a9aa0"; MouseArea { anchors.fill: parent; onClicked: page = "bluetooth" } }
-        Icon { name: "activity"; size: 16; color: "#9a9aa0"; MouseArea { anchors.fill: parent; onClicked: page = "system" } }
-        Icon { name: "settings"; size: 16; color: "#9a9aa0"; MouseArea { anchors.fill: parent; onClicked: page = "settings" } }
+        // Align with tab positions (8 tabs, 84px each = 672px, plus 8*8=64 spacing = 736px, roughly 740)
+        // Use same model as tabs for alignment
+        Repeater {
+            model: [
+                ["calendar", "calendar", "Calendar"],
+                ["search", "search", "Search"],
+                ["volume", "volume", "Volume"],
+                ["bluetooth", "bluetooth", "Bluetooth"],
+                ["activity", "activity", "System"],
+                ["settings", "settings", "Settings"]
+            ]
+            delegate: Item {
+                width: 84; height: 24
+                property string pageId: modelData[0]
+                property string iconName: modelData[1]
+                property string label: modelData[2]
+
+                Icon {
+                    name: iconName
+                    size: 16
+                    color: "#9a9aa0"
+                    anchors.centerIn: parent
+                }
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: dashboardRoot.page = pageId
+                }
+            }
+        }
+    }
+
+// Separator line below utility row
+    Rectangle {
+        x: 20; y: 98
+        width: 740; height: 1
+        color: "#2a2a2e"
     }
 
     // --- CONTENT AREA: Tab panels ---
     Item {
-        x: 20; y: 88
+        x: 20; y: 106
         width: 740
-        height: parent.height - 110
+        height: parent.height - 118
 
         HomeTab { anchors.fill: parent; visible: page === "home" }
         
@@ -286,11 +316,11 @@ Item {
                             spacing: (parent.width - (24 + 24 + 40 + 24 + 24)) / 4
 
                             Item { width: 24; height: 24; anchors.verticalCenter: parent.verticalCenter
-                                Icon { name: "media-playlist-shuffle"; size: 20; color: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.shuffle) ? "#3b8bff" : "#ffffff"; anchors.centerIn: parent }
+                                Icon { name: "media-playlist-shuffle"; size: 20; color: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.shuffle) ? "#3b8bff" : "#9a9aa0"; anchors.centerIn: parent }
                                 MouseArea { anchors.fill: parent; onClicked: if (dashboardRoot.activePlayer) dashboardRoot.activePlayer.shuffle = !dashboardRoot.activePlayer.shuffle }
                             }
                             Item { width: 24; height: 24; anchors.verticalCenter: parent.verticalCenter
-                                Icon { name: "media-skip-backward"; size: 24; color: "#ffffff"; anchors.centerIn: parent }
+                                Icon { name: "media-skip-backward"; size: 24; color: "#9a9aa0"; anchors.centerIn: parent }
                                 MouseArea { anchors.fill: parent; onClicked: if (dashboardRoot.activePlayer) dashboardRoot.activePlayer.previous() }
                             }
                             Item { width: 40; height: 40; anchors.verticalCenter: parent.verticalCenter
@@ -298,11 +328,11 @@ Item {
                                 MouseArea { anchors.fill: parent; onClicked: if (dashboardRoot.activePlayer) dashboardRoot.activePlayer.togglePlay() }
                             }
                             Item { width: 24; height: 24; anchors.verticalCenter: parent.verticalCenter
-                                Icon { name: "media-skip-forward"; size: 24; color: "#ffffff"; anchors.centerIn: parent }
+                                Icon { name: "media-skip-forward"; size: 24; color: "#9a9aa0"; anchors.centerIn: parent }
                                 MouseArea { anchors.fill: parent; onClicked: if (dashboardRoot.activePlayer) dashboardRoot.activePlayer.next() }
                             }
                             Item { width: 24; height: 24; anchors.verticalCenter: parent.verticalCenter
-                                Icon { name: "media-playlist-repeat"; size: 20; color: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.loopStatus === 1) ? "#3b8bff" : "#ffffff"; anchors.centerIn: parent }
+                                Icon { name: "media-playlist-repeat"; size: 20; color: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.loopStatus === 1) ? "#3b8bff" : "#9a9aa0"; anchors.centerIn: parent }
                                 MouseArea { anchors.fill: parent; onClicked: if (dashboardRoot.activePlayer) dashboardRoot.activePlayer.loopStatus = (dashboardRoot.activePlayer.loopStatus === 1) ? 0 : 1 }
                             }
                         }

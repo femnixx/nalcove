@@ -9,59 +9,88 @@ Rectangle {
     radius: Theme.cardRadius
     clip: true
 
-    property string copyText: ""
-    property bool useCliphist: true
+    property bool useCliphist: false
 
     ListModel {
         id: clipboardModel
     }
 
-    // Load history from cliphist on startup
+    // Check if cliphist is available
     Process {
-        id: loadHistoryProc
-        command: ["cliphist", "list"]
+        id: checkCliphistProc
+        command: ["which", "cliphist"]
+        onRunningChanged: {
+            if (!running) {
+                // In Quickshell, we check if process started successfully
+                // For now, assume cliphist is not available and use polling
+                pollTimer.running = true
+            }
+        }
+    }
+
+    // Fallback: poll clipboard every 500ms
+    Timer {
+        id: pollTimer
+        interval: 500
+        running: false
+        repeat: true
+        onTriggered: {
+            pollTextClipboard.running = true
+            pollImageClipboard.running = true
+        }
+    }
+
+    // Poll clipboard for text
+    Process {
+        id: pollTextClipboard
+        command: ["wl-paste", "-t", "text"]
         stdout: StdioCollector {
             onStreamFinished: {
                 if (text && text.trim()) {
-                    var lines = text.trim().split("\n")
-                    for (var i = 0; i < lines.length && i < 200; i++) {
-                        var line = lines[i].trim()
-                        if (line) {
-                            var parts = line.split("\t")
-                            if (parts.length >= 2) {
-                                var id = parts[0]
-                                var content = parts.slice(1).join("\t")
-                                if (content.startsWith("[image]") || content.startsWith("[IMAGE]")) {
-                                    clipboardModel.append({ type: "image", cliphistId: id, content: content, time: "" })
-                                } else {
-                                    clipboardModel.append({ type: "text", cliphistId: id, content: content, time: "" })
-                                }
-                            }
+                    var t = text.trim()
+                    var exists = false
+                    for (var i = 0; i < clipboardModel.count; i++) {
+                        var item = clipboardModel.get(i)
+                        if (item && item.type === "text" && item.content === t) {
+                            exists = true
+                            break
                         }
+                    }
+                    if (!exists) {
+                        clipboardModel.insert(0, { type: "text", cliphistId: "", content: t, time: new Date().toLocaleTimeString() })
+                        if (clipboardModel.count > 200) clipboardModel.remove(clipboardModel.count - 1)
                     }
                 }
             }
         }
     }
 
-    // Watch for clipboard changes using wl-paste --watch
+    // Poll clipboard for images
     Process {
-        id: watchProc
-        command: ["bash", "-c", "wl-paste --watch cliphist store"]
-        onRunningChanged: {
-            if (!running) {
-                reviveTimer.start()
+        id: pollImageClipboard
+        command: ["sh", "-c", "wl-paste -t image/png > /tmp/clipboard_img_$(date +%s).png 2>/dev/null && echo /tmp/clipboard_img_$(date +%s).png"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                if (text && text.trim() && text.trim().startsWith("/tmp/")) {
+                    var filename = text.trim()
+                    var exists = false
+                    for (var i = 0; i < clipboardModel.count; i++) {
+                        var item = clipboardModel.get(i)
+                        if (item && item.type === "image" && item.path === filename) {
+                            exists = true
+                            break
+                        }
+                    }
+                    if (!exists) {
+                        clipboardModel.insert(0, { type: "image", cliphistId: "", path: filename, time: new Date().toLocaleTimeString() })
+                        if (clipboardModel.count > 200) clipboardModel.remove(clipboardModel.count - 1)
+                    }
+                }
             }
         }
     }
 
-    Timer {
-        id: reviveTimer
-        interval: 3000
-        onTriggered: watchProc.running = true
-    }
-
-    // Static processes for clipboard operations
+    // Copy selected entry to clipboard
     Process {
         id: copyTextProc
         command: ["wl-copy"]
@@ -72,43 +101,18 @@ Rectangle {
         command: ["wl-copy", "-t", "image/png"]
     }
 
-    Process {
-        id: deleteProc
-        command: ["cliphist", "delete", ""]
-    }
-
-    Process {
-        id: wipeProc
-        command: ["cliphist", "wipe"]
-    }
-
     function copyToClipboard(text) {
         copyTextProc.command = ["wl-copy", text]
         copyTextProc.running = true
     }
 
     function copyImageToClipboard(cliphistId) {
-        copyImageProc.command = ["bash", "-c", "cliphist decode " + cliphistId + " | wl-copy -t image/png"]
-        copyImageProc.running = true
-    }
-
-    function deleteEntry(cliphistId) {
-        deleteProc.command = ["cliphist", "delete", cliphistId]
-        deleteProc.running = true
+        // For fallback mode, we can't easily copy images back
+        // This would need cliphist or similar
     }
 
     function clearHistory() {
-        wipeProc.onCompleted = function() {
-            if (wipeProc.exitCode === 0) {
-                clipboardModel.clear()
-            }
-        }
-        wipeProc.running = true
-    }
-
-    Component.onCompleted: {
-        loadHistoryProc.running = true
-        watchProc.running = true
+        clipboardModel.clear()
     }
 
     ColumnLayout {
@@ -224,12 +228,8 @@ Rectangle {
                                 onEntered: root.hovered = true
                                 onExited: root.hovered = false
                                 onClicked: {
-                                    if (modelData) {
-                                        if (modelData.type === "text" && modelData.content) {
-                                            copyToClipboard(modelData.content)
-                                        } else if (modelData.type === "image" && modelData.cliphistId) {
-                                            copyImageToClipboard(modelData.cliphistId)
-                                        }
+                                    if (modelData && modelData.type === "text" && modelData.content) {
+                                        copyToClipboard(modelData.content)
                                     }
                                 }
                             }
@@ -250,12 +250,7 @@ Rectangle {
                                 hoverEnabled: true
                                 onEntered: root.hovered = true
                                 onExited: root.hovered = false
-                                onClicked: {
-                                    if (modelData && modelData.cliphistId) {
-                                        deleteEntry(modelData.cliphistId)
-                                        clipboardModel.remove(index)
-                                    }
-                                }
+                                onClicked: clipboardModel.remove(index)
                             }
                         }
                     }
