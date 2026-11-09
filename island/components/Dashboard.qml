@@ -182,6 +182,11 @@ Item {
             }
             Rectangle {
                 width: 20; height: 20; color: "transparent"
+                Icon { name: "bluetooth"; size: 16; color: Theme.fg }
+                MouseArea { anchors.fill: parent; onClicked: page = "bluetooth" }
+            }
+            Rectangle {
+                width: 20; height: 20; color: "transparent"
                 Icon { name: "activity"; size: 16; color: Theme.fg }
                 MouseArea { anchors.fill: parent; onClicked: page = "system" }
             }
