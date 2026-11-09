@@ -91,7 +91,8 @@ Rectangle {
             spacing: 12
             Text {
                 text: "Clipboard History"
-                color: Theme.fg
+                color: "#ffffff"
+                opacity: 1.0
                 font.pixelSize: 18
                 font.bold: true
             }
@@ -103,7 +104,8 @@ Rectangle {
                 Text {
                     anchors.centerIn: parent
                     text: "Clear All"
-                    color: Theme.dim
+                    color: "#ffffff"
+                    opacity: 1.0
                     font.pixelSize: 12
                 }
                 MouseArea {
@@ -233,7 +235,8 @@ Rectangle {
             Text {
                 anchors.centerIn: parent
                 text: "Clipboard is empty"
-                color: "#9a9aa0"
+                color: "#ffffff"
+                opacity: 1.0
                 font.pixelSize: 14
             }
         }
