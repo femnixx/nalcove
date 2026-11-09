@@ -308,99 +308,118 @@ Item {
                 spacing: 20
 
                 // ==========================================
-                // LEFT BLOCK: MEDIA COMPONENT WITH VOLUME FIXED
+                // LEFT BLOCK: MEDIA COMPONENT WITH STATIC COORDS
                 // ==========================================
                 Rectangle {
-                    width: 430; height: 240
+                    width: 430
+                    height: 240 // Strict height restriction
                     color: "#16ffffff"
                     border.color: Theme.cardBorder
                     border.width: 1
                     radius: 18
 
-                    Column {
-                        anchors.fill: parent
-                        anchors.margins: 16
+                    // 1. Media Artwork & Track Meta info
+                    Item {
+                        x: 16; y: 16
+                        width: 398; height: 52
+
+                        Rectangle {
+                            id: artBox
+                            width: 52; height: 52; radius: 10; color: "#2c2c2e"; clip: true
+                            Image {
+                                anchors.fill: parent; fillMode: Image.PreserveAspectCrop
+                                source: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.metadata && dashboardRoot.activePlayer.metadata["mpris:artUrl"]) ? String(dashboardRoot.activePlayer.metadata["mpris:artUrl"]) : ""
+                            }
+                            Icon { name: "media-playlist-normal"; size: 24; anchors.centerIn: parent; color: "#ffffff"; visible: parent.children[0].status !== Image.Ready }
+                        }
+
+                        Text {
+                            x: 64; y: 4
+                            text: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.metadata && dashboardRoot.activePlayer.metadata["xesam:title"]) ? String(dashboardRoot.activePlayer.metadata["xesam:title"]) : "Spotify / Browser Idle"
+                            color: "#ffffff"; font.pixelSize: 14; font.bold: true
+                            elide: Text.ElideRight; width: 330
+                        }
+
+                        Text {
+                            x: 64; y: 24
+                            text: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.metadata && dashboardRoot.activePlayer.metadata["xesam:artist"]) ? String(dashboardRoot.activePlayer.metadata["xesam:artist"]) : "Start playing a track..."
+                            color: "#9a9aa0"; font.pixelSize: 11
+                            elide: Text.ElideRight; width: 330
+                        }
+                    }
+
+                    // 2. Timeline Progress Bar
+                    Item {
+                        x: 16; y: 84
+                        width: 398; height: 32
+
+                        Slider {
+                            id: trackProgressSlider
+                            width: parent.width; height: 12
+                            value: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.length > 0) ? (dashboardRoot.activePlayer.position / dashboardRoot.activePlayer.length) : 0
+                            background: Rectangle { height: 4; radius: 2; color: "#22ffffff"; Rectangle { width: trackProgressSlider.visualPosition * parent.width; height: 4; color: "#ffffff"; radius: 2 } }
+                            handle: Rectangle { x: trackProgressSlider.visualPosition * (trackProgressSlider.width - width); y: -4; width: 12; height: 12; radius: 6; color: "#ffffff" }
+                            onValueChanged: {
+                                if (dashboardRoot.activePlayer && dashboardRoot.activePlayer.length > 0) {
+                                    dashboardRoot.activePlayer.position = value * dashboardRoot.activePlayer.length;
+                                }
+                            }
+                        }
+
+                        Text { text: dashboardRoot.activePlayer ? Math.floor(dashboardRoot.activePlayer.position / 60000) + ":" + String(Math.floor((dashboardRoot.activePlayer.position % 60000) / 1000)).padStart(2, '0') : "0:00"; color: "#66ffffff"; font.pixelSize: 10; y: 16 }
+                        Text { text: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.length > 0) ? Math.floor(dashboardRoot.activePlayer.length / 60000) + ":" + String(Math.floor((dashboardRoot.activePlayer.length % 60000) / 1000)).padStart(2, '0') : "-0:00"; color: "#66ffffff"; font.pixelSize: 10; y: 16; anchors.right: parent.right }
+                    }
+
+                    // 3. Spaced Player Control Buttons
+                    Row {
+                        x: 16; y: 132
+                        width: 398; height: 36
+                        spacing: (parent.width - (20 + 20 + 36 + 20 + 20)) / 4
+
+                        Icon { name: "media-playlist-shuffle"; size: 16; color: "#66ffffff"; anchors.verticalCenter: parent.verticalCenter }
+                        Rectangle {
+                            width: 20; height: 20; color: "transparent"; anchors.verticalCenter: parent.verticalCenter
+                            Icon { name: "media-skip-backward"; size: 18; color: "#ffffff"; anchors.centerIn: parent }
+                            MouseArea { anchors.fill: parent; onClicked: if (dashboardRoot.activePlayer) dashboardRoot.activePlayer.previous() }
+                        }
+                        
+                        Rectangle {
+                            width: 36; height: 36; radius: 18; color: "#ffffff"; anchors.verticalCenter: parent.verticalCenter
+                            Icon { name: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.playbackStatus === 1) ? "media-playback-pause" : "media-playback-start"; size: 16; color: "#000000"; anchors.centerIn: parent }
+                            MouseArea { anchors.fill: parent; onClicked: if (dashboardRoot.activePlayer) dashboardRoot.activePlayer.togglePlay() }
+                        }
+                        
+                        Rectangle {
+                            width: 20; height: 20; color: "transparent"; anchors.verticalCenter: parent.verticalCenter
+                            Icon { name: "media-skip-forward"; size: 18; color: "#ffffff"; anchors.centerIn: parent }
+                            MouseArea { anchors.fill: parent; onClicked: if (dashboardRoot.activePlayer) dashboardRoot.activePlayer.next() }
+                        }
+                        
+                        Icon { name: "media-playlist-repeat"; size: 16; color: "#66ffffff"; anchors.verticalCenter: parent.verticalCenter }
+                    }
+
+                    // 4. THE BLUE VOLUME SLIDER ROW (FIXED VERTICAL ANCHOR POSITION)
+                    Row {
+                        x: 16; y: 196
+                        width: 398; height: 20
                         spacing: 12
 
-                        // Track Details
-                        Row {
-                            width: parent.width; height: 52; spacing: 12
-                            Rectangle {
-                                width: 52; height: 52; radius: 10; color: "#2c2c2e"; clip: true
-                                Image {
-                                    anchors.fill: parent; fillMode: Image.PreserveAspectCrop
-                                    source: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.metadata && dashboardRoot.activePlayer.metadata["mpris:artUrl"]) ? String(dashboardRoot.activePlayer.metadata["mpris:artUrl"]) : ""
-                                }
-                                // Transparent fallback system icon overlay if no art exists
-                                Icon { name: "media-playlist-normal"; size: 24; anchors.centerIn: parent; color: "#ffffff"; visible: parent.children[0].status !== Image.Ready }
-                            }
-                            Column {
-                                width: parent.width - 64; anchors.verticalCenter: parent.verticalCenter; spacing: 2
-                                Text { text: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.metadata && dashboardRoot.activePlayer.metadata["xesam:title"]) ? String(dashboardRoot.activePlayer.metadata["xesam:title"]) : "Spotify / Browser Idle"; color: "#ffffff"; font.pixelSize: 14; font.bold: true; elide: Text.ElideRight; width: parent.width }
-                                Text { text: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.metadata && dashboardRoot.activePlayer.metadata["xesam:artist"]) ? String(dashboardRoot.activePlayer.metadata["xesam:artist"]) : "Start playing a track..."; color: "#9a9aa0"; font.pixelSize: 11; elide: Text.ElideRight; width: parent.width }
-                            }
-                        }
+                        Icon { name: "audio-volume-high"; size: 14; color: "#ffffff"; anchors.verticalCenter: parent.verticalCenter }
 
-                        // Timeline
-                        Column {
-                            width: parent.width; spacing: 4
-                            Slider {
-                                id: trackProgressSlider; width: parent.width; height: 12
-                                value: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.length > 0) ? (dashboardRoot.activePlayer.position / dashboardRoot.activePlayer.length) : 0
-                                background: Rectangle { height: 4; radius: 2; color: "#22ffffff"; Rectangle { width: trackProgressSlider.visualPosition * parent.width; height: 4; color: "#ffffff"; radius: 2 } }
-                                handle: Rectangle { x: trackProgressSlider.visualPosition * (trackProgressSlider.width - width); y: -4; width: 12; height: 12; radius: 6; color: "#ffffff" }
-                                onValueChanged: {
-                                    if (dashboardRoot.activePlayer && dashboardRoot.activePlayer.length > 0) {
-                                        dashboardRoot.activePlayer.position = value * dashboardRoot.activePlayer.length;
-                                    }
-                                }
+                        Slider {
+                            id: hardwareVolumeSlider
+                            width: parent.width - 26
+                            value: systemVolumeLevel
+                            anchors.verticalCenter: parent.verticalCenter
+                            
+                            background: Rectangle { 
+                                height: 4; radius: 2; color: "#22ffffff"
+                                Rectangle { width: hardwareVolumeSlider.visualPosition * parent.width; height: 4; color: "#3b8bff"; radius: 2 } 
                             }
-                            Item {
-                                width: parent.width; height: 12
-                                Text { text: dashboardRoot.activePlayer ? Math.floor(dashboardRoot.activePlayer.position / 60000) + ":" + String(Math.floor((dashboardRoot.activePlayer.position % 60000) / 1000)).padStart(2, '0') : "0:00"; color: "#66ffffff"; font.pixelSize: 10 }
-                                Text { text: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.length > 0) ? Math.floor(dashboardRoot.activePlayer.length / 60000) + ":" + String(Math.floor((dashboardRoot.activePlayer.length % 60000) / 1000)).padStart(2, '0') : "-0:00"; color: "#66ffffff"; font.pixelSize: 10; anchors.right: parent.right }
-                            }
-                        }
-
-                        // Controls
-                        Row {
-                            width: parent.width; height: 32
-                            spacing: (parent.width - (20 + 20 + 32 + 20 + 20)) / 4
-
-                            Icon { name: "media-playlist-shuffle"; size: 16; color: "#66ffffff"; anchors.verticalCenter: parent.verticalCenter }
-                            Rectangle {
-                                width: 20; height: 20; color: "transparent"; anchors.verticalCenter: parent.verticalCenter
-                                Icon { name: "media-skip-backward"; size: 18; color: "#ffffff"; anchors.centerIn: parent }
-                                MouseArea { anchors.fill: parent; onClicked: if (dashboardRoot.activePlayer) dashboardRoot.activePlayer.previous() }
-                            }
-                            Rectangle {
-                                width: 32; height: 32; radius: 16; color: "#ffffff"; anchors.verticalCenter: parent.verticalCenter
-                                Icon { name: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.playbackStatus === 1) ? "media-playback-pause" : "media-playback-start"; size: 14; color: "#000000"; anchors.centerIn: parent }
-                                MouseArea { anchors.fill: parent; onClicked: if (dashboardRoot.activePlayer) dashboardRoot.activePlayer.togglePlay() }
-                            }
-                            Rectangle {
-                                width: 20; height: 20; color: "transparent"; anchors.verticalCenter: parent.verticalCenter
-                                Icon { name: "media-skip-forward"; size: 18; color: "#ffffff"; anchors.centerIn: parent }
-                                MouseArea { anchors.fill: parent; onClicked: if (dashboardRoot.activePlayer) dashboardRoot.activePlayer.next() }
-                            }
-                            Icon { name: "media-playlist-repeat"; size: 16; color: "#66ffffff"; anchors.verticalCenter: parent.verticalCenter }
-                        }
-
-                        // THE VOLUME BAR (GUARANTEED VISIBLE)
-                        Row {
-                            width: parent.width; height: 20; spacing: 10
-                            Icon { name: "audio-volume-high"; size: 14; color: "#ffffff"; anchors.verticalCenter: parent.verticalCenter }
-                            Slider {
-                                id: hardwareVolumeSlider; width: parent.width - 24; value: systemVolumeLevel; anchors.verticalCenter: parent.verticalCenter
-                                background: Rectangle { 
-                                    height: 4; radius: 2; color: "#22ffffff"
-                                    Rectangle { width: hardwareVolumeSlider.visualPosition * parent.width; height: 4; color: "#3b8bff"; radius: 2 } 
-                                }
-                                handle: Rectangle { x: hardwareVolumeSlider.visualPosition * (hardwareVolumeSlider.width - width); y: -4; width: 10; height: 10; radius: 5; color: "#ffffff" }
-                                onValueChanged: {
-                                    systemVolumeLevel = value;
-                                    setSystemVolume(value);
-                                }
+                            handle: Rectangle { x: hardwareVolumeSlider.visualPosition * (hardwareVolumeSlider.width - width); y: -4; width: 10; height: 10; radius: 5; color: "#ffffff" }
+                            onValueChanged: {
+                                systemVolumeLevel = value;
+                                setSystemVolume(value);
                             }
                         }
                     }
