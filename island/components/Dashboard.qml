@@ -23,6 +23,30 @@ Item {
     property string liveLyricsText: "Loading..."
     property string lastTrackedTitle: ""
 
+    // System volume real-time reader
+    property real systemVolumeLevel: 0.50
+
+    Process {
+        id: readSystemVolume
+        command: ["wpctl", "get-volume", "@DEFAULT_AUDIO_SINK@"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                var line = text;
+                var parts = line.trim().split(" ");
+                if (parts.length >= 2) {
+                    var val = parseFloat(parts[1]);
+                    if (!isNaN(val)) { systemVolumeLevel = val; }
+                }
+            }
+        }
+    }
+
+    // Poll volume every 2 seconds to capture hardware button changes
+    Timer {
+        interval: 2000; running: true; repeat: true
+        onTriggered: readSystemVolume.running = true
+    }
+
     // Timer to poll UPower values - find any battery device
     Timer {
         interval: 5000
@@ -273,191 +297,179 @@ Item {
 
         HomeTab { anchors.fill: parent; visible: page === "home" }
         
-        // --- SPLIT MEDIA PLAYER (65/35 LAYOUT) ---
+        // --- RESTRUCTURED SPLIT MEDIA PLAYER (60/40 LAYOUT) ---
         Item {
-            anchors.fill: parent
+            x: 0; y: 0
+            width: 740; height: 260
             visible: page === "music"
 
-            Column {
-                anchors.fill: parent
-                anchors.margins: 16
-                spacing: 14
+            Row {
+                width: 740; height: 260
+                spacing: 20
 
-                // --- TRACK DETAILS ROW ---
-                Row {
-                    width: parent.width
-                    spacing: 12
+                // ==========================================
+                // LEFT CONTAINER: MEDIA CONTROL ENGINE (60% Width)
+                // ==========================================
+                Rectangle {
+                    width: 430; height: 250
+                    color: "#16ffffff"
+                    border.color: Theme.cardBorder
+                    border.width: 1
+                    radius: 18
 
-                    Rectangle {
-                        width: 52; height: 52; radius: 10
-                        color: "#2c2c2e"
-                        clip: true
-                        
-                        Image {
-                            anchors.fill: parent
-                            fillMode: Image.PreserveAspectCrop
-                            source: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.metadata && dashboardRoot.activePlayer.metadata["mpris:artUrl"]) ? String(dashboardRoot.activePlayer.metadata["mpris:artUrl"]) : "../icons/music.svg"
+                    Item {
+                        anchors.fill: parent
+                        anchors.margins: 16
+
+                        // 1. Thumbnail Art + Track Meta Info Layout
+                        Row {
+                            id: metaRow
+                            width: parent.width; height: 80; spacing: 14
+
+                            Rectangle {
+                                width: 80; height: 80; radius: 12
+                                color: "#2c2c2e"; clip: true
+                                Image {
+                                    anchors.fill: parent; fillMode: Image.PreserveAspectCrop
+                                    source: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.metadata && dashboardRoot.activePlayer.metadata["mpris:artUrl"]) ? String(dashboardRoot.activePlayer.metadata["mpris:artUrl"]) : "../icons/music.svg"
+                                }
+                            }
+
+                            Column {
+                                width: parent.width - 94
+                                anchors.verticalCenter: parent.verticalCenter
+                                spacing: 4
+
+                                Text {
+                                    text: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.metadata && dashboardRoot.activePlayer.metadata["xesam:title"]) ? String(dashboardRoot.activePlayer.metadata["xesam:title"]) : "Spotify / Browser Idle"
+                                    color: "#ffffff"; font.pixelSize: 15; font.bold: true; elide: Text.ElideRight; width: parent.width
+                                }
+                                Text {
+                                    text: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.metadata && dashboardRoot.activePlayer.metadata["xesam:artist"]) ? String(dashboardRoot.activePlayer.metadata["xesam:artist"]) : "Start playing a track..."
+                                    color: "#9a9aa0"; font.pixelSize: 12; elide: Text.ElideRight; width: parent.width
+                                }
+                            }
                         }
-                    }
 
-                    Column {
-                        width: parent.width - 66
-                        spacing: 2
-                        
-                        Text {
-                            text: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.metadata && dashboardRoot.activePlayer.metadata["xesam:title"]) ? String(dashboardRoot.activePlayer.metadata["xesam:title"]) : "Spotify / Browser Idle"
-                            color: "#ffffff"
-                            font.pixelSize: 13
-                            font.bold: true
-                            elide: Text.ElideRight
-                            width: parent.width
+                        // 2. Centered Progress Timeline
+                        Column {
+                            id: progressStack
+                            width: parent.width; y: 96; spacing: 6
+
+                            Slider {
+                                id: trackProgressSlider
+                                width: parent.width; height: 16
+                                value: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.length > 0) ? (dashboardRoot.activePlayer.position / dashboardRoot.activePlayer.length) : 0
+                                background: Rectangle { 
+                                    height: 4; radius: 2; color: "#22ffffff"
+                                    Rectangle { width: trackProgressSlider.visualPosition * parent.width; height: 4; color: "#ffffff"; radius: 2 } 
+                                }
+                                handle: Rectangle { x: trackProgressSlider.visualPosition * (trackProgressSlider.width - width); y: -4; width: 12; height: 12; radius: 6; color: "#ffffff" }
+                                onValueChanged: {
+                                    if (dashboardRoot.activePlayer && dashboardRoot.activePlayer.length > 0) {
+                                        dashboardRoot.activePlayer.position = value * dashboardRoot.activePlayer.length;
+                                    }
+                                }
+                            }
+
+                            Item {
+                                width: parent.width; height: 16
+                                Text {
+                                    text: dashboardRoot.activePlayer ? Math.floor(dashboardRoot.activePlayer.position / 60000) + ":" + String(Math.floor((dashboardRoot.activePlayer.position % 60000) / 1000)).padStart(2, '0') : "0:00"
+                                    color: "#66ffffff"; font.pixelSize: 11
+                                }
+                                Text {
+                                    text: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.length > 0) ? Math.floor(dashboardRoot.activePlayer.length / 60000) + ":" + String(Math.floor((dashboardRoot.activePlayer.length % 60000) / 1000)).padStart(2, '0') : "-0:00"
+                                    color: "#66ffffff"; font.pixelSize: 11; anchors.right: parent.right
+                                }
+                            }
                         }
-                        Text {
-                            text: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.metadata && dashboardRoot.activePlayer.metadata["xesam:artist"]) ? String(dashboardRoot.activePlayer.metadata["xesam:artist"]) : "Start playing a track..."
-                            color: "#9a9aa0"
-                            font.pixelSize: 11
-                            elide: Text.ElideRight
-                            width: parent.width
+
+                        // 3. Spaced Player Control Toggles Row
+                        Row {
+                            id: controlRow
+                            y: 144; height: 44; width: parent.width
+                            spacing: (parent.width - (24 + 24 + 44 + 24 + 24)) / 4
+
+                            Icon { name: "shuffle"; size: 18; color: "#66ffffff"; anchors.verticalCenter: parent.verticalCenter }
+                            
+                            Rectangle {
+                                width: 24; height: 24; color: "transparent"; anchors.verticalCenter: parent.verticalCenter
+                                Icon { name: "skip-back"; size: 24; color: "#ffffff"; anchors.centerIn: parent }
+                                MouseArea { anchors.fill: parent; onClicked: if (dashboardRoot.activePlayer) dashboardRoot.activePlayer.previous() }
+                            }
+
+                            Rectangle {
+                                width: 44; height: 44; radius: 22; color: "#ffffff"; anchors.verticalCenter: parent.verticalCenter
+                                Icon { 
+                                    name: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.playbackStatus === 1) ? "pause" : "play"
+                                    size: 20 
+                                    color: "#000000"
+                                    anchors.centerIn: parent 
+                                }
+                                MouseArea { anchors.fill: parent; onClicked: if (dashboardRoot.activePlayer) dashboardRoot.activePlayer.togglePlay() }
+                            }
+
+                            Rectangle {
+                                width: 24; height: 24; color: "transparent"; anchors.verticalCenter: parent.verticalCenter
+                                Icon { name: "skip-forward"; size: 24; color: "#ffffff"; anchors.centerIn: parent }
+                                MouseArea { anchors.fill: parent; onClicked: if (dashboardRoot.activePlayer) dashboardRoot.activePlayer.next() }
+                            }
+
+                            Icon { name: "repeat"; size: 18; color: "#66ffffff"; anchors.verticalCenter: parent.verticalCenter }
+                        }
+
+                        // 4. Interactive Live System Volume Bar Slider Row
+                        Row {
+                            width: parent.width; anchors.bottom: parent.bottom; height: 24; spacing: 10
+
+                            Icon { name: "volume"; size: 14; color: "#ffffff"; anchors.verticalCenter: parent.verticalCenter }
+
+                            Slider {
+                                id: hardwareVolumeSlider
+                                width: parent.width - 24
+                                value: systemVolumeLevel
+                                anchors.verticalCenter: parent.verticalCenter
+                                
+                                background: Rectangle { 
+                                    height: 5; radius: 3; color: "#22ffffff"
+                                    Rectangle { width: hardwareVolumeSlider.visualPosition * parent.width; height: 5; color: "#3b8bff"; radius: 3 } 
+                                }
+                                handle: Rectangle { x: hardwareVolumeSlider.visualPosition * (hardwareVolumeSlider.width - width); y: -4; width: 12; height: 12; radius: 6; color: "#ffffff" }
+
+                                onValueChanged: {
+                                    systemVolumeLevel = value;
+                                    setSystemVolume(value);
+                                }
+                            }
                         }
                     }
                 }
 
-                // ============================================================
-                // SPLIT 2-COLUMN LAYOUT: LEFT (65%) PLAYER | RIGHT (35%) LYRICS
-                // ============================================================
-                Row {
-                    width: parent.width
-                    height: 140
-                    spacing: 16
+                // ==========================================
+                // RIGHT CONTAINER: LYRICS DISPLAY VIEWPORT (40% Width)
+                // ==========================================
+                Rectangle {
+                    width: 290; height: 250
+                    color: "#16ffffff"
+                    border.color: Theme.cardBorder
+                    border.width: 1
+                    radius: 18
 
-                    // =========================================================
-                    // LEFT SIDE BLOCK (65% Width): TRACK INFO, PROGRESS, VOLUME
-                    // =========================================================
-                    Column {
-                        width: parent.width * 0.65 - 8
-                        spacing: 12
-
-                        // 1. Duration Line Segment Layout
-                        Item {
-                            width: parent.width
-                            height: 16
-
-                            Text {
-                                id: currentTimerLabel
-                                text: dashboardRoot.activePlayer ? Math.floor(dashboardRoot.activePlayer.position / 60000) + ":" + String(Math.floor((dashboardRoot.activePlayer.position % 60000) / 1000)).padStart(2, '0') : "0:00"
-                                color: "#9a9aa0"
-                                font.pixelSize: 11
-                                anchors.left: parent.left
-                                anchors.verticalCenter: parent.verticalCenter
-                            }
-
-                            Rectangle {
-                                id: progressLineGraphic
-                                width: parent.width - 80
-                                height: 4
-                                radius: 2
-                                color: "#22ffffff"
-                                anchors.left: currentTimerLabel.right
-                                anchors.leftMargin: 8
-                                anchors.verticalCenter: parent.verticalCenter
-
-                                Rectangle {
-                                    width: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.length > 0) ? (dashboardRoot.activePlayer.position / dashboardRoot.activePlayer.length) * parent.width : 0
-                                    height: parent.height
-                                    radius: 2
-                                    color: "#3b8bff"
-                                }
-                            }
-
-                            Text {
-                                text: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.length > 0) ? Math.floor(dashboardRoot.activePlayer.length / 60000) + ":" + String(Math.floor((dashboardRoot.activePlayer.length % 60000) / 1000)).padStart(2, '0') : "3:45"
-                                color: "#9a9aa0"
-                                font.pixelSize: 11
-                                anchors.right: parent.right
-                                anchors.verticalCenter: parent.verticalCenter
-                            }
-
-                            MouseArea {
-                                anchors.fill: progressLineGraphic
-                                hoverEnabled: true
-                                onClicked: (mouse) => { if (dashboardRoot.activePlayer && dashboardRoot.activePlayer.length > 0) dashboardRoot.activePlayer.position = (mouse.x / width) * dashboardRoot.activePlayer.length }
-                                onPositionChanged: (mouse) => { if (pressed && dashboardRoot.activePlayer && dashboardRoot.activePlayer.length > 0) dashboardRoot.activePlayer.position = (mouse.x / width) * dashboardRoot.activePlayer.length }
-                            }
-}
-
-                        // 2. Hardware System Interactive Volume Line Slider
-    Row {
-                            width: parent.width
-                            spacing: 10
-
-                            Icon { name: "volume"; size: 14; color: "#ffffff"; anchors.verticalCenter: parent.verticalCenter }
-
-                            Rectangle {
-                                width: parent.width - 50
-                                height: 4
-                                radius: 2
-                                color: "#22ffffff"
-                                anchors.verticalCenter: parent.verticalCenter
-
-                                Rectangle {
-                                    width: (parent.width - 2) * 0.5
-                                    height: parent.height
-                                    radius: 2
-                                    color: "#3b8bff"
-                                }
-
-                                MouseArea {
-                                    anchors.fill: parent
-                                    hoverEnabled: true
-                                    onClicked: (mouse) => { setSystemVolume(mouse.x / width) }
-                                    onPositionChanged: (mouse) => {
-                                        if (pressed) {
-                                            setSystemVolume(mouse.x / width);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                        // 3. Central System Control Operations
-                        Row {
-                            width: parent.width
-                            spacing: 32
-                            anchors.horizontalCenter: parent.horizontalCenter
-
-                            Icon { name: "skip-back"; size: 20; color: "#ffffff" }
-                            Icon { name: "play"; size: 24; color: "#3b8bff" }
-                            Icon { name: "skip-forward"; size: 20; color: "#ffffff" }
-                        }
-                    }
-
-                    // =========================================================
-                    // RIGHT SIDE BLOCK (35% Width): LIVE SCROLLING LYRICS VIEW
-                    // =========================================================
-                    Rectangle {
-                        width: parent.width * 0.35 - 8
-                        height: parent.height
-                        color: "#11ffffff"
-                        border.color: "#1affffff"
-                        radius: 12
+                    ScrollView {
+                        anchors.fill: parent
+                        anchors.margins: 20
+                        contentWidth: parent.width - 40
                         clip: true
 
-                        Flickable {
-                            anchors.fill: parent
-                            anchors.margins: 10
-                            contentWidth: parent.width - 20
-                            contentHeight: lyricsText.implicitHeight
-                            clip: true
-
-                            Text {
-                                id: lyricsText
-                                width: parent.width - 20
-                                text: dashboardRoot.liveLyricsText
-                                color: "#e4e4e6"
-                                font.pixelSize: 11
-                                wrapMode: Text.WordWrap
-                                lineHeight: 1.3
-                            }
+                        Text {
+                            width: parent.width
+                            text: dashboardRoot.liveLyricsText !== "" ? dashboardRoot.liveLyricsText : "No synced lyrics"
+                            color: "#9a9aa0"
+                            font.pixelSize: 13
+                            horizontalAlignment: Text.AlignHCenter
+                            verticalAlignment: Text.AlignVCenter
+                            wrapMode: Text.Wrap
                         }
                     }
                 }
