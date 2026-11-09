@@ -113,23 +113,33 @@ Rectangle {
                         Item { width: 52 }
                         Repeater {
                             model: modelData.actions || []
-                            delegate: Rectangle {
-                                height: 30; radius: 15
-                                color: root.hovered ? Theme.accent : "transparent"
-                                border.color: Theme.border; border.width: 1
-                                Text {
-                                    anchors.centerIn: parent
-                                    text: modelData.label
-                                    color: root.hovered ? "white" : "#ffffff"
-                                    opacity: 1.0
-                                    font.pixelSize: 12
+                            delegate: Item {
+                                id: actionDelegate
+                                property bool hovered: false
+                                width: Math.max(60, actionText.implicitWidth + 24)
+                                height: 30
+
+                                Rectangle {
+                                    anchors.fill: parent
+                                    radius: 15
+                                    color: actionDelegate.hovered ? Theme.accent : "transparent"
+                                    border.color: Theme.border; border.width: 1
+
+                                    Text {
+                                        id: actionText
+                                        anchors.centerIn: parent
+                                        text: modelData.label
+                                        color: actionDelegate.hovered ? "white" : "#ffffff"
+                                        opacity: 1.0
+                                        font.pixelSize: 12
+                                    }
                                 }
-                                width: Math.max(60, text.implicitWidth + 24)
+
                                 MouseArea {
                                     anchors.fill: parent
                                     hoverEnabled: true
-                                    onEntered: root.hovered = true
-                                    onExited: root.hovered = false
+                                    onEntered: actionDelegate.hovered = true
+                                    onExited: actionDelegate.hovered = false
                                     onClicked: modelData.invoke()
                                 }
                             }
@@ -138,20 +148,22 @@ Rectangle {
                         Item { width: 40 }
                         Rectangle {
                             width: 32; height: 32; radius: 16
-                            color: root.hovered ? "#ff453a20" : "transparent"
+                            color: dismissDelegate.hovered ? "#ff453a20" : "transparent"
                             border.color: Theme.border; border.width: 1
                             Icon {
                                 anchors.centerIn: parent
                                 name: "x"
                                 size: 14
-                                color: root.hovered ? "#ff453a" : "#9a9aa0"
+                                color: dismissDelegate.hovered ? "#ff453a" : "#9a9aa0"
                             }
                             MouseArea {
+                                id: dismissDelegate
                                 anchors.fill: parent
                                 hoverEnabled: true
-                                onEntered: root.hovered = true
-                                onExited: root.hovered = false
-                                onClicked: modelData.close()
+                                property bool hovered: false
+                                onEntered: dismissDelegate.hovered = true
+                                onExited: dismissDelegate.hovered = false
+                                onClicked: modelData.dismiss()
                             }
                         }
                     }

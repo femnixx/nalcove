@@ -21,8 +21,14 @@ Item {
                 Item { width: 22; height: 22; anchors.verticalCenter: parent.verticalCenter
                     Icon { name: "volume"; size: 18; anchors.centerIn: parent; opacity: Services.Audio.sinkMuted ? 0.5 : 1.0 }
                     MouseArea { anchors.fill: parent; onClicked: Services.Audio.toggleSinkMute() } }
-                FlatSlider { width: parent.width - 22 - 34 - 20; anchors.verticalCenter: parent.verticalCenter
-                             value: Services.Audio.sinkVolume; onMoved: Services.Audio.setSinkVolume(value) }
+                FlatSlider { 
+                    width: parent.width - 22 - 34 - 20; anchors.verticalCenter: parent.verticalCenter
+                    value: Services.Audio.sink ? Services.Audio.sinkVolume : 0
+                    enabled: Services.Audio.sink !== null
+                    onMoved: { 
+                        if (Services.Audio.sink) Services.Audio.setSinkVolume(value) 
+                    } 
+                }
                 Text { width: 34; anchors.verticalCenter: parent.verticalCenter
                        text: Math.round(Services.Audio.sinkVolume * 100); color: "#ffffff"; font.pixelSize: 12
                        horizontalAlignment: Text.AlignRight }
@@ -65,8 +71,14 @@ Item {
                 Item { width: 22; height: 22; anchors.verticalCenter: parent.verticalCenter
                     Icon { name: "volume"; size: 18; color: Services.Audio.sourceMuted ? "#ff453a" : "#ffffff"; anchors.centerIn: parent }
                     MouseArea { anchors.fill: parent; onClicked: Services.Audio.toggleSourceMute() } }
-                FlatSlider { width: parent.width - 22 - 34 - 20; anchors.verticalCenter: parent.verticalCenter
-                             value: Services.Audio.sourceVolume; onMoved: Services.Audio.setSourceVolume(value) }
+                FlatSlider { 
+                    width: parent.width - 22 - 34 - 20; anchors.verticalCenter: parent.verticalCenter
+                    value: Services.Audio.source ? Services.Audio.sourceVolume : 0
+                    enabled: Services.Audio.source !== null
+                    onMoved: { 
+                        if (Services.Audio.source) Services.Audio.setSourceVolume(value) 
+                    } 
+                }
                 Text { width: 34; anchors.verticalCenter: parent.verticalCenter
                        text: Math.round(Services.Audio.sourceVolume * 100); color: "#ffffff"; font.pixelSize: 12
                        horizontalAlignment: Text.AlignRight }
