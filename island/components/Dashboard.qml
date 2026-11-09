@@ -289,11 +289,76 @@ Item {
         }
     }
 
+    // --- TOP BAR: Navigation Tabs ---
+    Rectangle {
+        id: tabBar
+        x: 20; y: 12
+        width: 740; height: 44
+        color: "transparent"
+
+        Row {
+            anchors.fill: parent
+            spacing: 8
+
+            Repeater {
+                model: [
+                    ["home", "home", "Home"],
+                    ["music", "music", "Music"],
+                    ["clipboard", "clipboard", "Clipboard"],
+                    ["alerts", "bell", "Alerts"],
+                    ["shelf", "folder", "Shelf"],
+                    ["notes", "notebook", "Notes"],
+                    ["controls", "layers", "Controls"],
+                    ["bluetooth", "bluetooth", "Bluetooth"]
+                ]
+                delegate: Item {
+                    width: 84; height: 44
+                    property string pageId: modelData[0]
+                    property string iconName: modelData[1]
+                    property string label: modelData[2]
+                    property bool isActive: dashboardRoot.page === pageId
+
+                    Rectangle {
+                        anchors.fill: parent
+                        radius: 12
+                        color: isActive ? "#3b8bff" : "transparent"
+                        border.color: isActive ? "#3b8bff" : "transparent"
+                        border.width: isActive ? 1 : 0
+                        Behavior on color { ColorAnimation { duration: 140 } }
+
+                        Column {
+                            anchors.centerIn: parent
+                            spacing: 2
+                            Icon {
+                                name: iconName
+                                size: 20
+                                color: isActive ? "#ffffff" : "#9a9aa0"
+                                Behavior on color { ColorAnimation { duration: 140 } }
+                            }
+                            Text {
+                                text: label
+                                font.pixelSize: 9
+                                font.bold: true
+                                color: isActive ? "#ffffff" : "#9a9aa0"
+                                Behavior on color { ColorAnimation { duration: 140 } }
+                            }
+                        }
+
+                        MouseArea {
+                            anchors.fill: parent
+                            onClicked: dashboardRoot.page = pageId
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     // --- CONTENT AREA: Tab panels ---
     Item {
-        x: 20; y: 124
+        x: 20; y: 70
         width: 740
-        height: parent.height - 144
+        height: parent.height - 90
 
         HomeTab { anchors.fill: parent; visible: page === "home" }
         
