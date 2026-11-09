@@ -2,7 +2,7 @@ import QtQuick
 import Quickshell.Widgets
 import "../services"
 
-// Full music player card
+// Full music player card - redesigned to match reference
 Rectangle {
     id: root
     color: Theme.card
@@ -36,7 +36,7 @@ Rectangle {
         }
     }
 
-    // Album Art with rounded corners and shadow
+    // Album Art on left
     Rectangle {
         x: 24; y: 24
         width: 172; height: 172
@@ -79,121 +79,92 @@ Rectangle {
         }
     }
 
-    // Tab bar for Playing / Lyrics
-    Row {
-        x: 220; y: 28
-        width: root.rightW; height: 32
-        spacing: 0
-
-        Rectangle {
-            width: root.rightW / 2; height: parent.height
-            radius: 6
-            color: root.musicPage === "playing" ? Theme.accent : "transparent"
-            border.color: root.musicPage === "playing" ? "transparent" : Theme.border
-            border.width: 1
-            Text {
-                anchors.centerIn: parent
-                text: "Playing"
-                color: root.musicPage === "playing" ? "white" : Theme.fg
-                font.pixelSize: 12
-                font.bold: true
-            }
-            MouseArea {
-                anchors.fill: parent
-                onClicked: root.musicPage = "playing"
-            }
-        }
-
-        Rectangle {
-            width: root.rightW / 2; height: parent.height
-            radius: 6
-            color: root.musicPage === "lyrics" ? Theme.accent : "transparent"
-            border.color: root.musicPage === "lyrics" ? "transparent" : Theme.border
-            border.width: 1
-            Text {
-                anchors.centerIn: parent
-                text: "Lyrics"
-                color: root.musicPage === "lyrics" ? "white" : Theme.fg
-                font.pixelSize: 12
-                font.bold: true
-            }
-            MouseArea {
-                anchors.fill: parent
-                onClicked: root.musicPage = "lyrics"
-            }
-        }
-    }
-
-    // Track info
+    // ============================================================
+    // RIGHT PANEL - CLEAN VERTICAL STACK LAYOUT (REFERENCE DESIGN)
+    // ============================================================
     Column {
-        x: 220; y: 66
+        x: 220
+        y: 24
         width: root.rightW
-        spacing: 6
-        visible: root.musicPage === "playing"
-
-        Text {
-            width: parent.width
-            text: Media.hasPlayer ? Media.title : "Nothing playing"
-            color: Theme.fg
-            font.pixelSize: 22
-            font.bold: true
-            elide: Text.ElideRight
-        }
-
-        Text {
-            width: parent.width
-            text: Media.artist
-            color: Theme.dim
-            font.pixelSize: 15
-            elide: Text.ElideRight
-        }
-
-        // Album name if available
-        Text {
-            width: parent.width
-            text: Media.album || ""
-            color: Theme.dim
-            font.pixelSize: 12
-            elide: Text.ElideRight
-            visible: Media.hasPlayer && Media.album
-        }
-    }
-
-    // Progress bar with time labels
-    Item {
-        x: 220; y: 112
-        width: root.rightW; height: 28
+        spacing: 16
+        anchors.rightMargin: 24
         visible: Media.hasPlayer && root.musicPage === "playing"
 
+        // --- SECTION 1: TAB TOGGLES (PLAYING VS LYRICS) ---
         Row {
-            anchors.fill: parent
-            spacing: 10
+            width: parent.width
+            height: 32
+            spacing: 8
+
+            Rectangle {
+                width: (parent.width - 8) / 2; height: 32; radius: 8
+                color: root.musicPage === "playing" ? Theme.accent : Theme.cardHi
+                border.color: root.musicPage === "playing" ? "transparent" : Theme.border
+                border.width: 1
+                Text { text: "Playing"; color: root.musicPage === "playing" ? "white" : Theme.fg; font.bold: true; font.pixelSize: 12; anchors.centerIn: parent }
+                MouseArea { anchors.fill: parent; onClicked: root.musicPage = "playing" }
+            }
+
+            Rectangle {
+                width: (parent.width - 8) / 2; height: 32; radius: 8
+                color: root.musicPage === "lyrics" ? Theme.accent : Theme.cardHi
+                border.color: root.musicPage === "lyrics" ? "transparent" : Theme.border
+                border.width: 1
+                Text { text: "Lyrics"; color: root.musicPage === "lyrics" ? "white" : Theme.fg; font.pixelSize: 12; anchors.centerIn: parent }
+                MouseArea { anchors.fill: parent; onClicked: root.musicPage = "lyrics" }
+            }
+        }
+
+        // --- SECTION 2: TRACK METADATA (TITLE AND ARTIST STACK) ---
+        Column {
+            width: parent.width
+            spacing: 4
+
+            Text {
+                text: Media.title
+                color: Theme.fg
+                font.pixelSize: 18
+                font.bold: true
+                elide: Text.ElideRight
+                width: parent.width
+            }
+
+            Text {
+                text: Media.artist
+                color: Theme.dim
+                font.pixelSize: 14
+                elide: Text.ElideRight
+                width: parent.width
+            }
+        }
+
+        // --- SECTION 3: TIMELINE AND SLIDER BAR WRAPPER ---
+        Item {
+            width: parent.width
+            height: 24
 
             Text {
                 text: root.fmt(Media.position)
                 color: Theme.dim
                 font.pixelSize: 11
-                width: 45
+                anchors.left: parent.left
+                anchors.verticalCenter: parent.verticalCenter
             }
 
-            Item {
-                width: parent.width - 90 - 45; height: 4
-                anchors.verticalCenter: parent.verticalCenter
+            // Beautiful custom progress slider line
+            Rectangle {
+                id: progressTrack
+                width: parent.width - 70
+                height: 4
+                radius: 2
+                color: Theme.track
+                anchors.centerIn: parent
+
                 Rectangle {
-                    anchors.fill: parent
+                    width: Media.length > 0 ? parent.width * Math.min(1, (Media.position / 1000000) / Media.length) : 0
+                    height: parent.height
                     radius: 2
-                    color: Theme.track
-                }
-                Rectangle {
-                    y: 0; height: 4; radius: 2
                     color: Theme.accent
-                    width: Media.length > 0 ? (parent.width - 2) * Math.min(1, (Media.position / 1000000) / Media.length) : 0
-                }
-                MouseArea {
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    onClicked: (mouse) => { if (Media.length > 0) Media.seek(mouse.x / width * Media.length) }
-                    onPositionChanged: (mouse) => { if (pressed && Media.length > 0) Media.seek(mouse.x / width * Media.length) }
                 }
             }
 
@@ -201,110 +172,72 @@ Rectangle {
                 text: root.fmt(Media.length)
                 color: Theme.dim
                 font.pixelSize: 11
-                width: 45
-                horizontalAlignment: Text.AlignRight
-            }
-        }
-    }
-
-    // Control buttons centered
-    Row {
-        x: 220 + (root.rightW - width) / 2
-        y: 150
-        spacing: 28
-        visible: Media.hasPlayer && root.musicPage === "playing"
-
-        // Shuffle
-        Item {
-            width: 36; height: 36
-            Glyph { anchors.centerIn: parent; width: 16; height: 16; kind: "shuffle"; color: Theme.dim }
-            MouseArea { anchors.fill: parent; onClicked: Media.shuffle() }
-        }
-
-        // Previous
-        Item {
-            width: 44; height: 44
-            Glyph { anchors.centerIn: parent; width: 20; height: 20; kind: "prev"; color: Theme.fg }
-            MouseArea { anchors.fill: parent; onClicked: Media.previous() }
-        }
-
-        // Play/Pause - prominent button
-        Rectangle {
-            width: 52; height: 52; radius: 26
-            color: Theme.accent
-            border.color: "transparent"
-            border.width: 0
-            Glyph {
-                anchors.centerIn: parent
-                width: 20; height: 20
-                kind: Media.isPlaying ? "pause" : "play"
-                color: "white"
-            }
-            MouseArea {
-                id: playMouseArea
-                anchors.fill: parent
-                onClicked: Media.playPause()
-            }
-            scale: playMouseArea.pressed ? 0.95 : 1
-            Behavior on scale { SpringAnimation { spring: 2; damping: 0.3 } }
-        }
-
-        // Next
-        Item {
-            width: 44; height: 44
-            Glyph { anchors.centerIn: parent; width: 20; height: 20; kind: "next"; color: Theme.fg }
-            MouseArea { anchors.fill: parent; onClicked: Media.next() }
-        }
-
-        // Repeat
-        Item {
-            width: 36; height: 36
-            Glyph { anchors.centerIn: parent; width: 16; height: 16; kind: "repeat"; color: Theme.dim }
-            MouseArea { anchors.fill: parent; onClicked: Media.repeat() }
-        }
-    }
-
-    // Volume slider below controls
-    Item {
-        x: 220; y: 210
-        width: root.rightW; height: 36
-        visible: Media.hasPlayer && root.musicPage === "playing"
-
-        Row {
-            anchors.fill: parent
-            spacing: 10
-            Glyph { anchors.verticalCenter: parent.verticalCenter; width: 16; height: 16; kind: "volume"; color: Theme.dim }
-
-            Item {
-                width: parent.width - 60; height: 4
+                anchors.right: parent.right
                 anchors.verticalCenter: parent.verticalCenter
-                Rectangle {
-                    anchors.fill: parent
-                    radius: 2
-                    color: Theme.track
-                }
-                Rectangle {
-                    y: 0; height: 4; radius: 2
-                    color: Theme.accent
-                    width: (parent.width - 2) * Media.volume
-                }
-                MouseArea {
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    onClicked: (mouse) => { Media.setVolume(mouse.x / width) }
-                    onPositionChanged: (mouse) => { if (pressed) Media.setVolume(mouse.x / width) }
-                }
             }
 
-            Glyph { anchors.verticalCenter: parent.verticalCenter; width: 16; height: 16; kind: "volume"; color: Theme.dim }
+            MouseArea {
+                anchors.fill: progressTrack
+                hoverEnabled: true
+                onClicked: (mouse) => { if (Media.length > 0) Media.seek(mouse.x / width * Media.length) }
+                onPositionChanged: (mouse) => { if (pressed && Media.length > 0) Media.seek(mouse.x / width * Media.length) }
+            }
+        }
+
+        // --- SECTION 4: SPACED MEDIA CONTROLS ROW ---
+        Row {
+            width: parent.width
+            height: 48
+            spacing: (parent.width - (24 + 48 + 24)) / 2
+
+            // Skip Back
+            Item {
+                width: 24; height: 24
+                anchors.verticalCenter: parent.verticalCenter
+                Glyph { anchors.centerIn: parent; width: 24; height: 24; kind: "prev"; color: Theme.fg }
+                MouseArea { anchors.fill: parent; onClicked: Media.previous() }
+            }
+
+            // Play/Pause - Circular dynamic active button
+            Rectangle {
+                width: 48; height: 48; radius: 24
+                color: Theme.accent
+                anchors.verticalCenter: parent.verticalCenter
+
+                Glyph {
+                    anchors.centerIn: parent
+                    width: 22; height: 22
+                    kind: Media.isPlaying ? "pause" : "play"
+                    color: "white"
+                }
+
+                MouseArea {
+                    id: playMouseArea
+                    anchors.fill: parent
+                    onClicked: Media.playPause()
+                }
+                scale: playMouseArea.pressed ? 0.95 : 1
+                Behavior on scale { SpringAnimation { spring: 2; damping: 0.3 } }
+            }
+
+            // Skip Forward
+            Item {
+                width: 24; height: 24
+                anchors.verticalCenter: parent.verticalCenter
+                Glyph { anchors.centerIn: parent; width: 24; height: 24; kind: "next"; color: Theme.fg }
+                MouseArea { anchors.fill: parent; onClicked: Media.next() }
+            }
         }
     }
 
-    // Lyrics page
+    // --- LYRICS PAGE ---
     Item {
-        x: 220; y: 66
-        width: root.rightW; height: parent.height - 90
-        visible: root.musicPage === "lyrics"
+        x: 220
+        y: 24
+        width: root.rightW
+        height: parent.height - 48
+        visible: Media.hasPlayer && root.musicPage === "lyrics"
+        anchors.rightMargin: 24
 
         Column {
             anchors.fill: parent
@@ -343,6 +276,19 @@ Rectangle {
                     }
                 }
             }
+        }
+    }
+
+    // Empty state when no player
+    Item {
+        anchors.fill: parent
+        visible: !Media.hasPlayer
+
+        Text {
+            anchors.centerIn: parent
+            text: "Nothing playing"
+            color: Theme.dim
+            font.pixelSize: 18
         }
     }
 }
