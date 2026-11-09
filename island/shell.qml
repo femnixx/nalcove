@@ -107,8 +107,10 @@ ShellRoot {
                     property real f: islandShape.flare
                     property real r: Math.max(0, islandWindow.currentBottomRadius)
 
-                    strokeWidth: 0
+                    strokeWidth: islandWindow.triggerMode === "hotkey" ? 1 : 0
+                    strokeColor: Theme.border
                     fillColor: islandWindow.triggerMode === "hotkey" ? Theme.islandFill : "#000000"
+                    Behavior on fillColor { ColorAnimation { duration: 200 } }
                     startX: -f
                     startY: 0
 
