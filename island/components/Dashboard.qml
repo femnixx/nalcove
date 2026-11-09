@@ -348,35 +348,35 @@ Item {
                             // Shuffle
                             Item {
                                 width: 24; height: 24; anchors.verticalCenter: parent.verticalCenter
-                                Icon { name: "media-playlist-shuffle"; size: 20; color: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.shuffle) ? "#3b8bff" : "#000000"; anchors.centerIn: parent }
+                                Icon { name: "media-playlist-shuffle"; size: 20; color: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.shuffle) ? "#3b8bff" : "#ffffff"; anchors.centerIn: parent }
                                 MouseArea { anchors.fill: parent; onClicked: if (dashboardRoot.activePlayer) dashboardRoot.activePlayer.shuffle = !dashboardRoot.activePlayer.shuffle }
                             }
 
                             // Skip Backward
                             Item {
                                 width: 24; height: 24; anchors.verticalCenter: parent.verticalCenter
-                                Icon { name: "media-skip-backward"; size: 24; color: "#000000"; anchors.centerIn: parent }
+                                Icon { name: "media-skip-backward"; size: 24; color: "#ffffff"; anchors.centerIn: parent }
                                 MouseArea { anchors.fill: parent; onClicked: if (dashboardRoot.activePlayer) dashboardRoot.activePlayer.previous() }
                             }
 
                             // Play/Pause - large icon, no background
                             Item {
                                 width: 40; height: 40; anchors.verticalCenter: parent.verticalCenter
-                                Icon { name: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.playbackStatus === 1) ? "media-playback-pause" : "media-playback-start"; size: 32; color: "#000000"; anchors.centerIn: parent }
+                                Icon { name: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.playbackStatus === 1) ? "media-playback-pause" : "media-playback-start"; size: 32; color: "#ffffff"; anchors.centerIn: parent }
                                 MouseArea { anchors.fill: parent; onClicked: if (dashboardRoot.activePlayer) dashboardRoot.activePlayer.togglePlay() }
                             }
 
                             // Skip Forward
                             Item {
                                 width: 24; height: 24; anchors.verticalCenter: parent.verticalCenter
-                                Icon { name: "media-skip-forward"; size: 24; color: "#000000"; anchors.centerIn: parent }
+                                Icon { name: "media-skip-forward"; size: 24; color: "#ffffff"; anchors.centerIn: parent }
                                 MouseArea { anchors.fill: parent; onClicked: if (dashboardRoot.activePlayer) dashboardRoot.activePlayer.next() }
                             }
 
                             // Repeat
                             Item {
                                 width: 24; height: 24; anchors.verticalCenter: parent.verticalCenter
-                                Icon { name: "media-playlist-repeat"; size: 20; color: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.loopStatus === 1) ? "#3b8bff" : "#000000"; anchors.centerIn: parent }
+                                Icon { name: "media-playlist-repeat"; size: 20; color: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.loopStatus === 1) ? "#3b8bff" : "#ffffff"; anchors.centerIn: parent }
                                 MouseArea { anchors.fill: parent; onClicked: if (dashboardRoot.activePlayer) dashboardRoot.activePlayer.loopStatus = (dashboardRoot.activePlayer.loopStatus === 1) ? 0 : 1 }
                             }
                         }
@@ -404,7 +404,7 @@ Item {
                         // Section 4: Volume Bar
                         Row {
                             width: parent.width; height: 24; spacing: 12
-                            Icon { name: "audio-volume-high"; size: 16; color: "#000000" }
+                            Icon { name: "audio-volume-high"; size: 16; color: "#ffffff" }
                             Slider {
                                 id: hardwareVolumeSlider; width: parent.width - 24 - 24; value: systemVolumeLevel; anchors.verticalCenter: parent.verticalCenter
                                 background: Rectangle { 
@@ -426,8 +426,9 @@ Item {
                 // ==========================================
                 Rectangle {
                     width: 290
-                    height: parent.height - 16
-                    anchors.verticalCenter: parent.verticalCenter
+                    height: parent.height - 32
+                    anchors.top: parent.top
+                    anchors.topMargin: 16
                     color: "#16ffffff"
                     border.color: Theme.cardBorder
                     border.width: 1
