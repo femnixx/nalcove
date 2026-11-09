@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import Quickshell.Services.UPower
+import Quickshell.Services.Mpris
 
 Item {
     id: dashboardRoot
@@ -8,6 +9,9 @@ Item {
     property bool pinned: false
     property bool active: false
     anchors.fill: parent
+
+    // Active MPRIS player
+    property var activePlayer: Mpris.players.length > 0 ? Mpris.players[0] : null
 
     // Safe battery backing variables
     property string batPercentStr: "78"
@@ -33,9 +37,7 @@ Item {
             for (var i = 0; i < UPower.devices.length; i++) {
                 var dev = UPower.devices[i];
                 if (dev.ready && dev.type !== 0) { // Not line power (0)
-                    // Type 1=UPS, 2=Battery, 3=Monitor, 4=Mouse, 5=Keyboard, etc.
                     if (dev.type === 2 || dev.type === 1 || dev.type === 3) {
-                        // UPower percentage is 0-1, convert to 0-100
                         var pct = Math.round(dev.percentage * 100);
                         dashboardRoot.batPercentStr = pct.toString();
                         dashboardRoot.batPercentNum = pct;
@@ -54,13 +56,17 @@ Item {
             dashboardRoot.isCharging = (UPower.displayDevice.isCharging === true);
             console.log("Using displayDevice: percent=" + pct);
         }
-        // Debug: log all devices on first run
         if (UPower.devices && dashboardRoot.batPercentNum === 78) {
             for (var j = 0; j < UPower.devices.length; j++) {
                 var d = UPower.devices[j];
                 console.log("Device " + j + ": type=" + d.type + " name=" + d.name + " ready=" + d.ready + " percent=" + (d.percentage * 100) + " charging=" + d.isCharging);
             }
         }
+    }
+
+    function fmtTime(us) {
+        const t = Math.max(0, Math.floor(us / 1000000))
+        return Math.floor(t / 60) + ":" + String(t % 60).padStart(2, "0")
     }
 
     Rectangle {
@@ -203,10 +209,174 @@ Item {
         x: 20; y: 124
         width: 740
         height: parent.height - 144
-        // clip: true  // Removed - PanelWindow mask handles clipping
 
         HomeTab { anchors.fill: parent; visible: page === "home" }
-        MusicTab { anchors.fill: parent; visible: page === "music" }
+        
+        // --- SIMPLIFIED MEDIA PLAYER (INLINE) ---
+        Item {
+            anchors.fill: parent
+            visible: page === "music"
+
+            Column {
+                anchors.fill: parent
+                anchors.margins: 18
+                spacing: 14
+
+                // --- SECTION 1: ALBUM ART THUMBNAIL AND TRACK DETAILS ROW ---
+                Row {
+                    width: parent.width
+                    spacing: 14
+
+                    // Fixed Canvas Image Frame for Artwork Thumbnail
+                    Rectangle {
+                        width: 60; height: 60; radius: 10
+                        color: "#161619"
+                        border.color: Theme.cardBorder
+                        border.width: 1
+                        clip: true
+
+                        Image {
+                            anchors.fill: parent
+                            fillMode: Image.PreserveAspectCrop
+                            source: (activePlayer && activePlayer.metadata && activePlayer.metadata["mpris:artUrl"]) ? activePlayer.metadata["mpris:artUrl"] : "../icons/music.svg"
+                        }
+                    }
+
+                    // Vertical Track Context Labels
+                    Column {
+                        width: parent.width - 74
+                        spacing: 3
+                        
+                        Text {
+                            text: (activePlayer && activePlayer.metadata && activePlayer.metadata["xesam:title"]) ? activePlayer.metadata["xesam:title"] : "No Media Playing"
+                            color: "#ffffff"
+                            font.pixelSize: 14
+                            font.bold: true
+                            elide: Text.ElideRight
+                            width: parent.width
+                        }
+                        Text {
+                            text: (activePlayer && activePlayer.metadata && activePlayer.metadata["xesam:artist"]) ? activePlayer.metadata["xesam:artist"].join(", ") : "Unknown Artist"
+                            color: "#9a9aa0"
+                            font.pixelSize: 12
+                            elide: Text.ElideRight
+                            width: parent.width
+                        }
+                    }
+                }
+
+                // --- SECTION 2: METRICS TIMELINE WITH ANCHORED LYRICS INTERACTION BUTTON ---
+                Item {
+                    width: parent.width
+                    height: 24
+
+                    // Active Progress Counter
+                    Text {
+                        id: positionText
+                        text: activePlayer ? fmtTime(activePlayer.position) : "0:00"
+                        color: "#66ffffff"
+                        font.pixelSize: 11
+                        anchors.left: parent.left
+                        anchors.verticalCenter: parent.verticalCenter
+                    }
+
+                    // Responsive Progress Track Line
+                    Rectangle {
+                        id: progressTrack
+                        width: parent.width - 120
+                        height: 4
+                        radius: 2
+                        color: "#22ffffff"
+                        anchors.left: positionText.right
+                        anchors.leftMargin: 10
+                        anchors.verticalCenter: parent.verticalCenter
+
+                        Rectangle {
+                            width: (activePlayer && activePlayer.length > 0) ? (activePlayer.position / activePlayer.length) * parent.width : 0
+                            height: parent.height
+                            radius: 2
+                            color: "#3b8bff"
+                        }
+                    }
+
+                    // Dynamic Spaced Layout: Full Track Duration Display
+                    Text {
+                        id: durationText
+                        text: (activePlayer && activePlayer.length > 0) ? fmtTime(activePlayer.length) : "0:00"
+                        color: "#66ffffff"
+                        font.pixelSize: 11
+                        anchors.left: progressTrack.right
+                        anchors.leftMargin: 10
+                        anchors.verticalCenter: parent.verticalCenter
+                    }
+
+                    // Minimal Interactive Floating Lyrics Shortcut (Safely Anchored on the Far Right)
+                    Rectangle {
+                        anchors.right: parent.right
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: 42; height: 20; radius: 6
+                        color: "#11ffffff"
+                        border.color: "#1affffff"
+
+                        Text { text: "Lyrics"; color: "#9a9aa0"; font.pixelSize: 10; font.bold: true; anchors.centerIn: parent }
+                        MouseArea { 
+                            anchors.fill: parent
+                            onClicked: { page = "lyrics" }
+                        }
+                    }
+
+                    MouseArea {
+                        anchors.fill: progressTrack
+                        hoverEnabled: true
+                        onClicked: (mouse) => { if (activePlayer && activePlayer.length > 0) activePlayer.position = (mouse.x / width) * activePlayer.length }
+                        onPositionChanged: (mouse) => { if (pressed && activePlayer && activePlayer.length > 0) activePlayer.position = (mouse.x / width) * activePlayer.length }
+                    }
+                }
+
+                // --- SECTION 3: SPACED SYSTEM HARDWARE PLAYER MEDIA BACKEND BUTTONS ---
+                Row {
+                    width: parent.width
+                    height: 48
+                    spacing: (parent.width - (24 + 48 + 24)) / 2 
+
+                    // Previous Track
+                    Rectangle {
+                        width: 24; height: 24; color: "transparent"; anchors.verticalCenter: parent.verticalCenter
+                        Icon { name: "skip-back"; size: 24; color: "#ffffff"; anchors.centerIn: parent }
+                        MouseArea { anchors.fill: parent; onClicked: if (activePlayer) activePlayer.previous() }
+                    }
+
+                    // Big Circular Play/Pause Switcher
+                    Rectangle {
+                        width: 48; height: 48; radius: 24
+                        color: "#3b8bff"
+                        anchors.verticalCenter: parent.verticalCenter
+
+                        Icon { 
+                            name: (activePlayer && activePlayer.playbackStatus === Mpris.Playing) ? "pause" : "play"
+                            size: 22 
+                            color: "#ffffff"
+                            anchors.centerIn: parent 
+                        }
+                        MouseArea { 
+                            id: playMouseArea
+                            anchors.fill: parent
+                            onClicked: if (activePlayer) activePlayer.togglePlay()
+                        }
+                        scale: playMouseArea.pressed ? 0.95 : 1
+                        Behavior on scale { SpringAnimation { spring: 2; damping: 0.3 } }
+                    }
+
+                    // Next Track
+                    Rectangle {
+                        width: 24; height: 24; color: "transparent"; anchors.verticalCenter: parent.verticalCenter
+                        Icon { name: "skip-forward"; size: 24; color: "#ffffff"; anchors.centerIn: parent }
+                        MouseArea { anchors.fill: parent; onClicked: if (activePlayer) activePlayer.next() }
+                    }
+                }
+            }
+        }
+
         ClipboardTab { anchors.fill: parent; visible: page === "clipboard" }
         AlertsTab { anchors.fill: parent; visible: page === "alerts" }
         ShelfTab { anchors.fill: parent; visible: page === "shelf" }
@@ -222,5 +392,7 @@ Item {
             Text { anchors.centerIn: parent; text: "Activity"; color: Theme.dim; font.pixelSize: 14 } }
         Item { visible: page === "settings"; anchors.fill: parent
             Text { anchors.centerIn: parent; text: "Settings"; color: Theme.dim; font.pixelSize: 14 } }
+        Item { visible: page === "lyrics"; anchors.fill: parent
+            Text { anchors.centerIn: parent; text: "Lyrics"; color: Theme.dim; font.pixelSize: 14 } }
     }
 }
