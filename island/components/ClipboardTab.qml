@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Layouts
 import Quickshell.Io
 
 Rectangle {
@@ -49,12 +50,13 @@ Rectangle {
         onTriggered: { pasteCmd.running = true }
     }
 
-    Column {
+    ColumnLayout {
         anchors.fill: parent
         anchors.margins: 16
         spacing: 12
 
         Row {
+            Layout.fillWidth: true
             spacing: 12
             Text {
                 text: "Clipboard History"
@@ -81,8 +83,8 @@ Rectangle {
         }
 
         ListView {
-            width: parent.width
-            height: parent.height - 60
+            Layout.fillWidth: true
+            Layout.fillHeight: true
             model: clipboardModel
             spacing: 6
             delegate: Rectangle {
@@ -166,7 +168,8 @@ Rectangle {
 
         Item {
             visible: clipboardModel.count === 0
-            anchors.fill: parent
+            Layout.fillWidth: true
+            Layout.fillHeight: true
             Text {
                 anchors.centerIn: parent
                 text: "Clipboard is empty"
