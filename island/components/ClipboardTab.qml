@@ -15,32 +15,84 @@ Rectangle {
         id: clipboardModel
     }
 
-    // Check if cliphist is available
+    // Check if cliphist is available (primary method like Noctalia)
     Process {
         id: checkCliphistProc
-        command: ["which", "cliphist"]
+        command: ["sh", "-c", "command -v cliphist"]
         onRunningChanged: {
             if (!running) {
-                // In Quickshell, we check if process started successfully
-                // For now, assume cliphist is not available and use polling
-                pollTimer.running = true
+                if (exitCode === 0) {
+                    root.useCliphist = true
+                    loadHistoryProc.running = true
+                    watchProc.running = true
+                } else {
+                    // Fallback: poll clipboard every 800ms
+                    pollTimer.running = true
+                }
             }
         }
     }
 
-    // Fallback: poll clipboard every 500ms
-    Timer {
-        id: pollTimer
-        interval: 500
-        running: false
-        repeat: true
-        onTriggered: {
-            pollTextClipboard.running = true
-            pollImageClipboard.running = true
+    // Load history from cliphist on startup
+    Process {
+        id: loadHistoryProc
+        command: ["cliphist", "list"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                if (text && text.trim()) {
+                    var lines = text.trim().split("\n")
+                    for (var i = 0; i < lines.length && i < 200; i++) {
+                        var line = lines[i].trim()
+                        if (line) {
+                            var parts = line.split("\t")
+                            if (parts.length >= 2) {
+                                var id = parts[0]
+                                var content = parts.slice(1).join("\t")
+                                if (content.startsWith("[image]") || content.startsWith("[IMAGE]")) {
+                                    clipboardModel.append({ type: "image", cliphistId: id, content: content, time: "" })
+                                } else {
+                                    clipboardModel.append({ type: "text", cliphistId: id, content: content, time: "" })
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 
-    // Poll clipboard for text
+    // Watch for clipboard changes using wl-paste --watch (cliphist mode)
+    Process {
+        id: watchProc
+        command: ["bash", "-c", "wl-paste --watch cliphist store"]
+        onRunningChanged: {
+            if (!running && root.useCliphist) {
+                reviveTimer.start()
+            }
+        }
+    }
+
+    Timer {
+        id: reviveTimer
+        interval: 3000
+        onTriggered: if (root.useCliphist) watchProc.running = true
+    }
+
+    // Fallback: poll clipboard every 800ms (doesn't consume clipboard)
+    Timer {
+        id: pollTimer
+        interval: 800
+        running: false
+        repeat: true
+        onTriggered: {
+            if (!root.useCliphist) {
+                pollTextClipboard.running = true
+                pollImageClipboard.running = true
+            }
+        }
+    }
+
+    // Poll clipboard for text (using wl-paste --list-types first to check)
     Process {
         id: pollTextClipboard
         command: ["wl-paste", "-t", "text"]
@@ -63,6 +115,12 @@ Rectangle {
                 }
             }
         }
+    }
+
+    // Wipe process for cliphist
+    Process {
+        id: wipeProc
+        command: ["cliphist", "wipe"]
     }
 
     // Poll clipboard for images
@@ -107,12 +165,21 @@ Rectangle {
     }
 
     function copyImageToClipboard(cliphistId) {
-        // For fallback mode, we can't easily copy images back
-        // This would need cliphist or similar
+        if (root.useCliphist && cliphistId) {
+            copyImageProc.command = ["bash", "-c", "cliphist decode " + cliphistId + " | wl-copy -t image/png"]
+            copyImageProc.running = true
+        }
     }
 
     function clearHistory() {
-        clipboardModel.clear()
+        if (root.useCliphist) {
+            wipeProc.onCompleted = function() {
+                if (exitCode === 0) clipboardModel.clear()
+            }
+            wipeProc.running = true
+        } else {
+            clipboardModel.clear()
+        }
     }
 
     ColumnLayout {
@@ -169,7 +236,6 @@ Rectangle {
                     anchors.margins: 12
                     spacing: 8
 
-                    // Text or Image content
                     Loader {
                         width: parent.width
                         sourceComponent: modelData && modelData.type === "image" ? imageDelegate : textDelegate

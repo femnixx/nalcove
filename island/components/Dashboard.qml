@@ -215,16 +215,14 @@ Item {
         }
     }
 
-    // --- UTILITY ROW: Lower icons ---
+    // --- UTILITY ROW: Lower icons (aligned with tabs) ---
     Row {
         id: utilityRow
         x: 20; y: 72
         width: 740
         height: 24
-        spacing: 84
+        spacing: 8  // Same spacing as tabs
 
-        // Align with tab positions (8 tabs, 84px each = 672px, plus 8*8=64 spacing = 736px, roughly 740)
-        // Use same model as tabs for alignment
         Repeater {
             model: [
                 ["calendar", "calendar", "Calendar"],
@@ -235,7 +233,7 @@ Item {
                 ["settings", "settings", "Settings"]
             ]
             delegate: Item {
-                width: 84; height: 24
+                width: 84; height: 24  // Same width as tabs
                 property string pageId: modelData[0]
                 property string iconName: modelData[1]
                 property string label: modelData[2]
@@ -274,7 +272,7 @@ Item {
             width: 740
             height: 280
             anchors.horizontalCenter: parent.horizontalCenter
-            y: 20
+            y: 8  // Lifted up from 20
             visible: page === "music"
 
             Row {
@@ -289,8 +287,8 @@ Item {
 
                     Column {
                         anchors.fill: parent
-                        anchors.margins: 16
-                        spacing: 12
+                        anchors.margins: 12  // Reduced from 16
+                        spacing: 8  // Reduced from 12
 
                         // Track Details - Thumbnail + Title/Artist
                         Row {
@@ -300,6 +298,8 @@ Item {
                                 Image {
                                     anchors.fill: parent; fillMode: Image.PreserveAspectCrop
                                     source: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.metadata && dashboardRoot.activePlayer.metadata["mpris:artUrl"]) ? String(dashboardRoot.activePlayer.metadata["mpris:artUrl"]) : ""
+                                    asynchronous: true
+                                    cache: true
                                 }
                                 Icon { name: "media-playlist-normal"; size: 32; anchors.centerIn: parent; color: "#ffffff"; visible: parent.children[0].status !== Image.Ready }
                             }
@@ -380,8 +380,8 @@ Item {
                 // RIGHT: Lyrics Card
                 Rectangle {
                     width: 290
-                    height: parent.height - 20
-                    anchors.verticalCenter: parent.verticalCenter
+                    height: parent.height - 16  // Lifted up
+                    y: 0  // Top aligned instead of vertically centered
                     color: "#16ffffff"
                     border.color: Theme.cardBorder
                     border.width: 1
