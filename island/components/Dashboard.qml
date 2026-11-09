@@ -297,9 +297,9 @@ Item {
 
         HomeTab { anchors.fill: parent; visible: page === "home" }
         
-        // --- RESTRUCTURED SPLIT MEDIA PLAYER (60/40 LAYOUT) ---
+        // --- RESTRUCTURED SPLIT MEDIA PLAYER WITH SHELF ---
         Item {
-            x: 0; y: 0
+            x: 20; y: 124
             width: 740; height: 260
             visible: page === "music"
 
@@ -308,10 +308,10 @@ Item {
                 spacing: 20
 
                 // ==========================================
-                // LEFT CONTAINER: MEDIA CONTROL ENGINE (60% Width)
+                // LEFT BLOCK: MEDIA COMPONENT WITH VOLUME FIXED
                 // ==========================================
                 Rectangle {
-                    width: 430; height: 250
+                    width: 430; height: 240
                     color: "#16ffffff"
                     border.color: Theme.cardBorder
                     border.width: 1
@@ -319,35 +319,29 @@ Item {
 
                     Column {
                         anchors.fill: parent
-                        anchors.margins: 14
-                        spacing: 10
+                        anchors.margins: 16
+                        spacing: 12
 
-                        // 1. Media Artwork & Text Information
+                        // Track Details
                         Row {
-                            width: parent.width; height: 64; spacing: 12
+                            width: parent.width; height: 52; spacing: 12
                             Rectangle {
-                                width: 64; height: 64; radius: 10; color: "#2c2c2e"; clip: true
+                                width: 52; height: 52; radius: 10; color: "#2c2c2e"; clip: true
                                 Image {
                                     anchors.fill: parent; fillMode: Image.PreserveAspectCrop
                                     source: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.metadata && dashboardRoot.activePlayer.metadata["mpris:artUrl"]) ? String(dashboardRoot.activePlayer.metadata["mpris:artUrl"]) : ""
                                 }
                                 // Transparent fallback system icon overlay if no art exists
-                                Icon { name: "media-playlist-normal"; size: 28; anchors.centerIn: parent; color: "#ffffff"; visible: parent.children[0].status !== Image.Ready }
+                                Icon { name: "media-playlist-normal"; size: 24; anchors.centerIn: parent; color: "#ffffff"; visible: parent.children[0].status !== Image.Ready }
                             }
                             Column {
-                                width: parent.width - 76; anchors.verticalCenter: parent.verticalCenter; spacing: 2
-                                Text {
-                                    text: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.metadata && dashboardRoot.activePlayer.metadata["xesam:title"]) ? String(dashboardRoot.activePlayer.metadata["xesam:title"]) : "Spotify / Browser Idle"
-                                    color: "#ffffff"; font.pixelSize: 14; font.bold: true; elide: Text.ElideRight; width: parent.width
-                                }
-                                Text {
-                                    text: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.metadata && dashboardRoot.activePlayer.metadata["xesam:artist"]) ? String(dashboardRoot.activePlayer.metadata["xesam:artist"]) : "Start playing a track..."
-                                    color: "#9a9aa0"; font.pixelSize: 11; elide: Text.ElideRight; width: parent.width
-                                }
+                                width: parent.width - 64; anchors.verticalCenter: parent.verticalCenter; spacing: 2
+                                Text { text: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.metadata && dashboardRoot.activePlayer.metadata["xesam:title"]) ? String(dashboardRoot.activePlayer.metadata["xesam:title"]) : "Spotify / Browser Idle"; color: "#ffffff"; font.pixelSize: 14; font.bold: true; elide: Text.ElideRight; width: parent.width }
+                                Text { text: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.metadata && dashboardRoot.activePlayer.metadata["xesam:artist"]) ? String(dashboardRoot.activePlayer.metadata["xesam:artist"]) : "Start playing a track..."; color: "#9a9aa0"; font.pixelSize: 11; elide: Text.ElideRight; width: parent.width }
                             }
                         }
 
-                        // 2. Timeline Progress Section
+                        // Timeline
                         Column {
                             width: parent.width; spacing: 4
                             Slider {
@@ -363,52 +357,46 @@ Item {
                             }
                             Item {
                                 width: parent.width; height: 12
-                                Text {
-                                    text: dashboardRoot.activePlayer ? Math.floor(dashboardRoot.activePlayer.position / 60000) + ":" + String(Math.floor((dashboardRoot.activePlayer.position % 60000) / 1000)).padStart(2, '0') : "0:00"
-                                    color: "#66ffffff"; font.pixelSize: 10
-                                }
-                                Text {
-                                    text: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.length > 0) ? Math.floor(dashboardRoot.activePlayer.length / 60000) + ":" + String(Math.floor((dashboardRoot.activePlayer.length % 60000) / 1000)).padStart(2, '0') : "-0:00"
-                                    color: "#66ffffff"; font.pixelSize: 10; anchors.right: parent.right
-                                }
+                                Text { text: dashboardRoot.activePlayer ? Math.floor(dashboardRoot.activePlayer.position / 60000) + ":" + String(Math.floor((dashboardRoot.activePlayer.position % 60000) / 1000)).padStart(2, '0') : "0:00"; color: "#66ffffff"; font.pixelSize: 10 }
+                                Text { text: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.length > 0) ? Math.floor(dashboardRoot.activePlayer.length / 60000) + ":" + String(Math.floor((dashboardRoot.activePlayer.length % 60000) / 1000)).padStart(2, '0') : "-0:00"; color: "#66ffffff"; font.pixelSize: 10; anchors.right: parent.right }
                             }
                         }
 
-                        // 3. Spaced Player Control Buttons (Using standard theme tokens)
+                        // Controls
                         Row {
-                            width: parent.width; height: 36
-                            spacing: (parent.width - (20 + 20 + 36 + 20 + 20)) / 4
+                            width: parent.width; height: 32
+                            spacing: (parent.width - (20 + 20 + 32 + 20 + 20)) / 4
 
                             Icon { name: "media-playlist-shuffle"; size: 16; color: "#66ffffff"; anchors.verticalCenter: parent.verticalCenter }
                             Rectangle {
                                 width: 20; height: 20; color: "transparent"; anchors.verticalCenter: parent.verticalCenter
-                                Icon { name: "media-skip-backward"; size: 20; color: "#ffffff"; anchors.centerIn: parent }
+                                Icon { name: "media-skip-backward"; size: 18; color: "#ffffff"; anchors.centerIn: parent }
                                 MouseArea { anchors.fill: parent; onClicked: if (dashboardRoot.activePlayer) dashboardRoot.activePlayer.previous() }
                             }
                             Rectangle {
-                                width: 36; height: 36; radius: 18; color: "#ffffff"; anchors.verticalCenter: parent.verticalCenter
-                                Icon { name: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.playbackStatus === 1) ? "media-playback-pause" : "media-playback-start"; size: 16; color: "#000000"; anchors.centerIn: parent }
+                                width: 32; height: 32; radius: 16; color: "#ffffff"; anchors.verticalCenter: parent.verticalCenter
+                                Icon { name: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.playbackStatus === 1) ? "media-playback-pause" : "media-playback-start"; size: 14; color: "#000000"; anchors.centerIn: parent }
                                 MouseArea { anchors.fill: parent; onClicked: if (dashboardRoot.activePlayer) dashboardRoot.activePlayer.togglePlay() }
                             }
                             Rectangle {
                                 width: 20; height: 20; color: "transparent"; anchors.verticalCenter: parent.verticalCenter
-                                Icon { name: "media-skip-forward"; size: 20; color: "#ffffff"; anchors.centerIn: parent }
+                                Icon { name: "media-skip-forward"; size: 18; color: "#ffffff"; anchors.centerIn: parent }
                                 MouseArea { anchors.fill: parent; onClicked: if (dashboardRoot.activePlayer) dashboardRoot.activePlayer.next() }
                             }
                             Icon { name: "media-playlist-repeat"; size: 16; color: "#66ffffff"; anchors.verticalCenter: parent.verticalCenter }
                         }
 
-                        // 4. THE BLUE VOLUME SLIDER ROW (BROUGHT INSIDE VIEW BOUNDS)
+                        // THE VOLUME BAR (GUARANTEED VISIBLE)
                         Row {
                             width: parent.width; height: 20; spacing: 10
                             Icon { name: "audio-volume-high"; size: 14; color: "#ffffff"; anchors.verticalCenter: parent.verticalCenter }
                             Slider {
                                 id: hardwareVolumeSlider; width: parent.width - 24; value: systemVolumeLevel; anchors.verticalCenter: parent.verticalCenter
                                 background: Rectangle { 
-                                    height: 5; radius: 3; color: "#22ffffff"
-                                    Rectangle { width: hardwareVolumeSlider.visualPosition * parent.width; height: 5; color: "#3b8bff"; radius: 3 } 
+                                    height: 4; radius: 2; color: "#22ffffff"
+                                    Rectangle { width: hardwareVolumeSlider.visualPosition * parent.width; height: 4; color: "#3b8bff"; radius: 2 } 
                                 }
-                                handle: Rectangle { x: hardwareVolumeSlider.visualPosition * (hardwareVolumeSlider.width - width); y: -4; width: 12; height: 12; radius: 6; color: "#ffffff" }
+                                handle: Rectangle { x: hardwareVolumeSlider.visualPosition * (hardwareVolumeSlider.width - width); y: -4; width: 10; height: 10; radius: 5; color: "#ffffff" }
                                 onValueChanged: {
                                     systemVolumeLevel = value;
                                     setSystemVolume(value);
@@ -419,29 +407,60 @@ Item {
                 }
 
                 // ==========================================
-                // RIGHT CONTAINER: LYRICS DISPLAY VIEWPORT (40% Width)
+                // RIGHT BLOCK: DYNAMIC PAGE ROUTER (LYRICS VS SHELF)
                 // ==========================================
                 Rectangle {
-                    width: 290; height: 250
+                    width: 290; height: 240
                     color: "#16ffffff"
                     border.color: Theme.cardBorder
                     border.width: 1
                     radius: 18
+                    clip: true
 
-                    ScrollView {
+                    // Dynamic content depending on selected page state
+                    Item {
                         anchors.fill: parent
-                        anchors.margins: 20
-                        contentWidth: parent.width - 40
-                        clip: true
+                        anchors.margins: 16
 
-                        Text {
-                            width: parent.width
-                            text: dashboardRoot.liveLyricsText !== "" ? dashboardRoot.liveLyricsText : "No synced lyrics"
-                            color: "#9a9aa0"
-                            font.pixelSize: 13
-                            horizontalAlignment: Text.AlignHCenter
-                            verticalAlignment: Text.AlignVCenter
-                            wrapMode: Text.Wrap
+                        // View 1: Show Lyrics if page isn't "shelf"
+                        ScrollView {
+                            anchors.fill: parent
+                            visible: page !== "shelf"
+                            Text {
+                                width: parent.width
+                                text: dashboardRoot.liveLyricsText !== "" ? dashboardRoot.liveLyricsText : "No synced lyrics available"
+                                color: "#9a9aa0"; font.pixelSize: 13; horizontalAlignment: Text.AlignHCenter
+                                wrapMode: Text.Wrap
+                            }
+                        }
+
+                        // View 2: Mac-style File Shelf Staging Area
+                        Column {
+                            anchors.fill: parent
+                            visible: page === "shelf"
+                            spacing: 12
+
+                            Text {
+                                text: "Notch File Shelf"
+                                color: "#ffffff"; font.bold: true; font.pixelSize: 13
+                            }
+
+                            // Dropzone box representation
+                            Rectangle {
+                                width: parent.width; height: 120; radius: 10
+                                color: "#11ffffff"; border.color: "#33ffffff"; border.width: 1
+                                
+                                Column {
+                                    anchors.centerIn: parent; spacing: 6
+                                    Icon { name: "folder-download"; size: 24; color: "#66ffffff" }
+                                    Text { text: "Drag files here to stage"; color: "#66ffffff"; font.pixelSize: 11 }
+                                }
+                            }
+
+                            Text {
+                                text: "Staged files copy into ~/Downloads/NotchShelf/ automatically."
+                                color: "#44ffffff"; font.pixelSize: 10; wrapMode: Text.Wrap; width: parent.width
+                            }
                         }
                     }
                 }
