@@ -366,28 +366,61 @@ Item {
                             }
                         }
 
-                        // Section 3: Central Player Controls
+                        // Section 3: Central Player Controls - All icons contained in fixed-size items
                         Row {
                             width: parent.width; height: 44
-                            spacing: (parent.width - (24 + 24 + 40 + 24 + 24)) / 4
-
-                            Icon { name: "media-playlist-shuffle"; size: 18; color: "#66ffffff"; anchors.verticalCenter: parent.verticalCenter }
-                            Icon { name: "media-skip-backward"; size: 22; color: "#ffffff"; anchors.verticalCenter: parent.verticalCenter }
-                            Rectangle {
-                                width: 40; height: 40; radius: 20; color: "#ffffff"; anchors.verticalCenter: parent.verticalCenter
-                                Icon { name: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.playbackStatus === 1) ? "media-playback-pause" : "media-playback-start"; size: 18; color: "#000000"; anchors.centerIn: parent }
-                                MouseArea { anchors.fill: parent; onClicked: if (dashboardRoot.activePlayer) dashboardRoot.activePlayer.togglePlay() }
+                            spacing: 0
+                            // 5 equal segments for: shuffle | skip-back | play/pause | skip-forward | repeat
+                            Repeater {
+                                model: 5
+                                Rectangle {
+                                    width: parent.width / 5; height: parent.height
+                                    // Shuffle
+                                    Item {
+                                        anchors.fill: parent
+                                        visible: index === 0
+                                        Icon { name: "media-playlist-shuffle"; size: 18; color: "#66ffffff"; anchors.centerIn: parent }
+                                    }
+                                    // Skip Backward
+                                    Rectangle {
+                                        width: 24; height: 24; color: "transparent"; anchors.centerIn: parent
+                                        visible: index === 1
+                                        Icon { name: "media-skip-backward"; size: 22; color: "#ffffff"; anchors.centerIn: parent }
+                                        MouseArea { anchors.fill: parent; onClicked: if (dashboardRoot.activePlayer) dashboardRoot.activePlayer.previous() }
+                                    }
+                                    // Play/Pause - centered circle
+                                    Rectangle {
+                                        width: 40; height: 40; radius: 20; color: "#ffffff"; anchors.centerIn: parent
+                                        visible: index === 2
+                                        Icon { name: (dashboardRoot.activePlayer && dashboardRoot.activePlayer.playbackStatus === 1) ? "media-playback-pause" : "media-playback-start"; size: 18; color: "#000000"; anchors.centerIn: parent }
+                                        MouseArea { anchors.fill: parent; onClicked: if (dashboardRoot.activePlayer) dashboardRoot.activePlayer.togglePlay() }
+                                    }
+                                    // Skip Forward
+                                    Rectangle {
+                                        width: 24; height: 24; color: "transparent"; anchors.centerIn: parent
+                                        visible: index === 3
+                                        Icon { name: "media-skip-forward"; size: 22; color: "#ffffff"; anchors.centerIn: parent }
+                                        MouseArea { anchors.fill: parent; onClicked: if (dashboardRoot.activePlayer) dashboardRoot.activePlayer.next() }
+                                    }
+                                    // Repeat
+                                    Item {
+                                        anchors.fill: parent
+                                        visible: index === 4
+                                        Icon { name: "media-playlist-repeat"; size: 18; color: "#66ffffff"; anchors.centerIn: parent }
+                                    }
+                                }
                             }
-                            Icon { name: "media-skip-forward"; size: 22; color: "#ffffff"; anchors.verticalCenter: parent.verticalCenter }
-                            Icon { name: "media-playlist-repeat"; size: 18; color: "#66ffffff"; anchors.verticalCenter: parent.verticalCenter }
                         }
 
                         // Section 4: Pure System Blue Volume Bar (Bypasses hardcoded clip zones)
                         Row {
                             width: parent.width; height: 24; spacing: 12
-                            Icon { name: "audio-volume-high"; size: 16; color: "#ffffff"; anchors.verticalCenter: parent.verticalCenter }
+                            Rectangle {
+                                width: 24; height: parent.height
+                                Icon { name: "audio-volume-high"; size: 16; color: "#ffffff"; anchors.centerIn: parent }
+                            }
                             Slider {
-                                id: hardwareVolumeSlider; width: parent.width - 28; value: systemVolumeLevel; anchors.verticalCenter: parent.verticalCenter
+                                id: hardwareVolumeSlider; width: parent.width - 28 - 24; value: systemVolumeLevel; anchors.verticalCenter: parent.verticalCenter
                                 background: Rectangle { 
                                     height: 5; radius: 3; color: "#22ffffff"
                                     Rectangle { width: hardwareVolumeSlider.visualPosition * parent.width; height: 5; color: "#3b8bff"; radius: 3 } 
