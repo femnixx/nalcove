@@ -1,4 +1,5 @@
 module qs.components
+singleton Theme 1.0 Theme.qml
 AlertsTab 1.0 AlertsTab.qml
 AppMixer 1.0 AppMixer.qml
 BatteryCard 1.0 BatteryCard.qml
