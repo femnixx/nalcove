@@ -5,7 +5,6 @@ import "../components"
 // Alcove-style Home: music | week + weather | clock | AppMixer | volume + brightness | battery
 Item {
     id: root
-    clip: true
     signal navigate(string page)
 
     readonly property real gap: 12
@@ -145,13 +144,13 @@ Item {
             VolumeCard {
                 id: volumeCard
                 width: parent.width
-                // Size to content; battery card positioned below via Column spacing
+                height: parent.height * 0.35
             }
 
             BatteryCard {
                 id: batteryCard
                 width: parent.width
-                height: parent.height * 0.65
+                height: parent.height * 0.60
                 anchors.bottom: parent.bottom
             }
         }
