@@ -85,11 +85,10 @@ Item {
         }
     }
 
-    // --- SECOND ROW: Smaller icons centered on left side on top of divider ---
+    // --- SECOND ROW: Smaller icons centered + battery on right ---
     Row {
         id: utilityRow
-        anchors.left: parent.left
-        anchors.leftMargin: 20
+        anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: tabBar.bottom
         anchors.topMargin: 12
         height: 20
