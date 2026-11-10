@@ -11,6 +11,7 @@ Rectangle {
 
     readonly property real spacing: 10
     readonly property real margins: 24
+    readonly property real sectionSpacing: 18
 
     // Card height: volume slider + brightness slider only.
     // Device selector dropdown floats as overlay on top and does not affect card height.
@@ -22,7 +23,7 @@ Rectangle {
         id: content
         anchors.fill: parent
         anchors.margins: root.margins
-        spacing: root.spacing
+        spacing: root.sectionSpacing
 
         // ---- Volume row ----
         Column {
