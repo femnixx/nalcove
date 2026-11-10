@@ -1,5 +1,7 @@
 import QtQuick
+import QtQuick.Shapes
 import "../services" as Services
+import qs.components 1.0
 
 Item {
     id: dashboardRoot
@@ -20,11 +22,12 @@ Item {
         width: 740; height: 44
         color: "transparent"
 
-        // Tabs centered in available space (balanced left/right margins)
+        // Tabs grouped on the left
         Row {
             id: tabsRow
+            anchors.left: parent.left
+            anchors.leftMargin: 20
             anchors.verticalCenter: parent.verticalCenter
-            anchors.horizontalCenter: parent.horizontalCenter
             spacing: 8
 
             Repeater {
@@ -39,7 +42,7 @@ Item {
                     ["bluetooth", "bluetooth", "Bluetooth"]
                 ]
                 delegate: Item {
-                    width: 84; height: 44
+                    width: 72; height: 44
                     property string pageId: modelData[0]
                     property string iconName: modelData[1]
                     property string label: modelData[2]
@@ -149,9 +152,12 @@ Item {
 
     // --- CONTENT AREA: Tab panels ---
     Item {
-        x: 20; y: utilityRow.y + utilityRow.height + 20
+        x: 20
         width: 740
-        height: parent.height - (utilityRow.y + utilityRow.height + 20)
+        anchors.top: utilityRow.bottom
+        anchors.topMargin: 20
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: Style.s4
 
         // Lazy-loaded tabs using Loader
         Loader { anchors.fill: parent; active: page === "home";      source: "HomeTab.qml" }

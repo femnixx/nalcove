@@ -38,7 +38,7 @@ Rectangle {
         anchors.centerIn: parent
     }
 
-    // Percentage text
+    // Percentage text (or "AC" when no battery)
     Text {
         id: pctText
         text: Services.Battery.ready ? Math.round(Services.Battery.pct * 100) + "%" : "AC"
@@ -56,7 +56,7 @@ Rectangle {
         width: 10; height: 10
         Text {
             anchors.fill: parent
-            text: "\u26A1"   // zap symbol
+            text: "\u26A1"
             font.pixelSize: 10
             color: "#ffffff"
             horizontalAlignment: Text.AlignHCenter
