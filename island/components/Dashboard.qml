@@ -85,11 +85,29 @@ Item {
             }
         }
 
-        // Battery circle indicator on the right
-        BatteryCircle {
+        // Battery indicator on the right - battery icon + percentage
+        Row {
             anchors.right: parent.right
             anchors.rightMargin: 20
             anchors.verticalCenter: parent.verticalCenter
+            spacing: 6
+
+            Icon {
+                name: Services.Battery.charging ? "battery-charging" : (Services.Battery.low ? "battery-low" : "battery")
+                size: 14
+                color: Services.Battery.accent
+                anchors.verticalCenter: parent.verticalCenter
+            }
+
+            Text {
+                text: Math.round(Services.Battery.pct * 100) + "%"
+                color: Services.Battery.accent
+                font.pixelSize: 12
+                font.bold: true
+                anchors.verticalCenter: parent.verticalCenter
+            }
+
+            Item { width: 6 }
         }
     }
 

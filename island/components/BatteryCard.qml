@@ -3,8 +3,9 @@ import "../services" as Services
 import Quickshell.Services.UPower
 
 Rectangle {
-    implicitWidth: 150; implicitHeight: 110
-    radius: 18; color: "#16ffffff"; border.color: "#22ffffff"; border.width: 1
+    id: root
+    implicitWidth: 100; implicitHeight: 120
+    color: "transparent"
 
     readonly property var dev: UPower.displayDevice
     readonly property real pct: dev && dev.ready ? dev.percentage : 0     // 0..1
@@ -28,33 +29,52 @@ Rectangle {
     }
 
     Column {
-        anchors.centerIn: parent; spacing: 8
+        anchors.centerIn: parent
+        spacing: 6
 
-        Row {
-            anchors.horizontalCenter: parent.horizontalCenter; spacing: 2
-            Rectangle {
-                width: 56; height: 26; radius: 7
-                color: "transparent"; border.color: "#aaffffff"; border.width: 2
-                Rectangle {
-                    x: 3; y: 3; height: parent.height - 6; radius: 4
-                    width: Math.max(4, (parent.width - 6) * pct)
-                    color: accent
-                    Behavior on width { NumberAnimation { duration: 300 } }
-                }
-                Text { visible: charging; anchors.centerIn: parent; text: "⚡"; font.pixelSize: 14; color: "#000000" }
+        // Circular battery indicator
+        Rectangle {
+            width: 72; height: 72
+            radius: 36
+            color: "#1a1a1a"
+            border.color: "#2a2a2e"
+            border.width: 1
+
+            // Percentage text in center
+            Text {
+                anchors.centerIn: parent
+                text: Math.round(pct * 100) + "%"
+                color: accent
+                font.pixelSize: 20
+                font.bold: true
             }
-            Rectangle { width: 3; height: 10; radius: 1; color: "#aaffffff"; anchors.verticalCenter: parent.verticalCenter }
+
+            // Ring around circle representing percentage
+            // Draw as a rotated rectangle arc approximation using multiple segments
+            // For simplicity, draw a partial circle border
+            Item {
+                anchors.fill: parent
+                anchors.margins: 8
+                // Ring segments drawn via rotated rectangles
+                Repeater {
+                    model: 100
+                    delegate: Rectangle {
+                        width: 2; height: parent.height * 0.9
+                        color: index < Math.round(pct * 100) ? accent : "#2a2a2e"
+                        radius: 1
+                        rotation: index * 3.6
+                        transformOrigin: Item.Center
+                        anchors.centerIn: parent
+                    }
+                }
+            }
         }
 
-        Text {
-            anchors.horizontalCenter: parent.horizontalCenter
-            text: Math.round(pct * 100) + "%"
-            color: accent; font.pixelSize: 22; font.bold: true
-        }
+        // Duration below
         Text {
             anchors.horizontalCenter: parent.horizontalCenter
             text: status
-            color: "#9a9aa0"; font.pixelSize: 11
+            color: "#9a9aa0"; font.pixelSize: 10
         }
     }
 }

@@ -136,6 +136,7 @@ Item {
 
             BatteryCard {
                 width: parent.width
+                height: (parent.height - root.gap) / 2
             }
         }
 
@@ -149,7 +150,6 @@ Item {
         VolumeCard {
             id: volumeCard
             width: root.avail * 0.235
-            height: parent.height
             onOutputClicked: root.navigate("volume")
         }
     }
