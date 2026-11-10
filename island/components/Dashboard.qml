@@ -15,14 +15,13 @@ Item {
         return Math.floor(t / 60) + ":" + String(t % 60).padStart(2, "0")
     }
 
-    // --- TOP BAR: Main tabs centered + Battery circle on right ---
+    // --- TOP BAR: Main tabs on left ---
     Rectangle {
         id: tabBar
         x: 20; y: 12
         width: 740; height: 44
         color: "transparent"
 
-        // Tabs grouped on the left
         Row {
             id: tabsRow
             anchors.left: parent.left
@@ -84,31 +83,6 @@ Item {
                 }
             }
         }
-
-        // Battery indicator on the right - battery icon + percentage
-        Row {
-            anchors.right: parent.right
-            anchors.rightMargin: 20
-            anchors.verticalCenter: parent.verticalCenter
-            spacing: 6
-
-            Icon {
-                name: Services.Battery.charging ? "battery-charging" : (Services.Battery.low ? "battery-low" : "battery")
-                size: 14
-                color: Services.Battery.accent
-                anchors.verticalCenter: parent.verticalCenter
-            }
-
-            Text {
-                text: Math.round(Services.Battery.pct * 100) + "%"
-                color: Services.Battery.accent
-                font.pixelSize: 12
-                font.bold: true
-                anchors.verticalCenter: parent.verticalCenter
-            }
-
-            Item { width: 6 }
-        }
     }
 
     // --- SECOND ROW: Smaller icons centered on left side on top of divider ---
@@ -159,6 +133,31 @@ Item {
                 }
             }
         }
+
+        // Battery indicator on the right - percentage first, then icon
+        Row {
+            anchors.right: parent.right
+            anchors.rightMargin: 20
+            anchors.verticalCenter: parent.verticalCenter
+            spacing: 6
+
+            Text {
+                text: Math.round(Services.Battery.pct * 100) + "%"
+                color: Services.Battery.accent
+                font.pixelSize: 10
+                font.bold: true
+                anchors.verticalCenter: parent.verticalCenter
+            }
+
+            Icon {
+                name: Services.Battery.charging ? "battery-charging" : (Services.Battery.low ? "battery-low" : "battery")
+                size: 14
+                color: "#9a9aa0"
+                anchors.verticalCenter: parent.verticalCenter
+            }
+
+            Item { width: 6 }
+        }
     }
 
     // Divider line below second row
@@ -177,7 +176,6 @@ Item {
         anchors.bottom: parent.bottom
         anchors.bottomMargin: Style.s4
 
-        // Lazy-loaded tabs using Loader
         Loader { anchors.fill: parent; active: page === "home";      source: "HomeTab.qml" }
         Loader { anchors.fill: parent; active: page === "music";     source: "MusicTab.qml" }
         Loader { anchors.fill: parent; active: page === "clipboard"; source: "ClipboardTab.qml" }

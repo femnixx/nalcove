@@ -5,7 +5,10 @@ import Quickshell.Services.UPower
 Rectangle {
     id: root
     implicitWidth: 100; implicitHeight: 120
-    color: "transparent"
+    color: "#1a1a1a"
+    border.color: "#2a2a2e"
+    border.width: 1
+    radius: 18
 
     readonly property var dev: UPower.displayDevice
     readonly property real pct: dev && dev.ready ? dev.percentage : 0     // 0..1
