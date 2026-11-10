@@ -55,8 +55,6 @@ Singleton {
                 .filter(d => {
                     // Skip sinks/sources with no usable name
                     if (!d.name || d.name.trim() === "") return false
-                    // Skip SUSPENDED (ghost/phantom) outputs — only show active ones
-                    if (d.state === "SUSPENDED") return false
                     // Skip monitor/virtual devices
                     if (d.name.endsWith(".monitor")) return false
                     if (d.properties && d.properties["device.class"] === "monitor") return false
