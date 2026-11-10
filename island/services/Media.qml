@@ -9,14 +9,23 @@ Singleton {
     property bool tracking: false
 
     readonly property var players: Mpris.players.values
-    readonly property var active: players.find(p => p.isPlaying) ?? players[0] ?? null
+    readonly property var active: {
+        const list = root.players
+        if (!list || list.length === 0)
+            return null
+        for (let i = 0; i < list.length; i++) {
+            if (list[i].isPlaying)
+                return list[i]
+        }
+        return list[0]
+    }
 
     readonly property bool hasPlayer: active !== null
     readonly property bool isPlaying: active ? active.isPlaying : false
     readonly property string title: active ? (active.trackTitle || "") : ""
     readonly property string artist: active ? (active.trackArtist || "") : ""
-    property real position: active ? active.position : 0   // seconds
-    property real length: active ? active.length : 0       // seconds
+    readonly property real position: active ? active.position : 0   // seconds
+    readonly property real length: active ? active.length : 0       // seconds
     readonly property bool shuffleOn: active ? active.shuffle : false
     readonly property bool repeatOn: active ? active.loopState !== MprisLoopState.None : false
 
@@ -39,8 +48,6 @@ Singleton {
         onTriggered: {
             if (root.active) {
                 root.active.positionChanged()
-                root.position = root.active.position
-                root.length = root.active.length
             }
         }
     }
