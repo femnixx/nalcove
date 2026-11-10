@@ -10,12 +10,12 @@ Rectangle {
 
     // Compute battery color based on charge level
     readonly property color batteryColor: {
-        if (!Battery.ready) return "#30d158"          // AC power - green
-        if (Battery.full) return "#3b8bff"             # Fully charged - blue
-        var pct = Battery.pct * 100
-        if (pct <= 15) return "#ff453a"                # Low - red
-        if (pct <= 60) return "#ffd60a"                # Mid - yellow
-        return "#30d158"                               # Good - green
+        if (!Services.Battery.ready) return "#30d158"          // AC power - green
+        if (Services.Battery.full) return "#3b8bff"            // Fully charged - blue
+        var pct = Services.Battery.pct * 100
+        if (pct <= 15) return "#ff453a"                        // Low - red
+        if (pct <= 60) return "#ffd60a"                        // Mid - yellow
+        return "#30d158"                                       // Good - green
     }
 
     // Outer ring
@@ -41,7 +41,7 @@ Rectangle {
     // Percentage text
     Text {
         id: pctText
-        text: Battery.ready ? Math.round(Battery.pct * 100) + "%" : "AC"
+        text: Services.Battery.ready ? Math.round(Services.Battery.pct * 100) + "%" : "AC"
         color: root.batteryColor
         font.pixelSize: 11
         font.bold: true
@@ -52,7 +52,7 @@ Rectangle {
     Item {
         id: chargingBolt
         anchors.centerIn: parent
-        visible: Battery.ready && Battery.charging
+        visible: Services.Battery.ready && Services.Battery.charging
         width: 10; height: 10
         Text {
             anchors.fill: parent
