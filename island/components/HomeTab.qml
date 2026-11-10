@@ -138,6 +138,7 @@ Item {
         VolumeCard {
             id: volumeCard
             width: root.avail * 0.235
+            anchors.left: parent.left
             anchors.top: parent.top
             anchors.bottom: parent.verticalCenter
             anchors.bottomMargin: root.gap / 2
