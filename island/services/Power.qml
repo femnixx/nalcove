@@ -1,4 +1,5 @@
-pragma Singleton
+// island/services/Power.qml - Stub: UPower power service wrapper
+
 import QtQuick 2.15
 import Quickshell.Services.UPower
 

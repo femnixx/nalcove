@@ -1,203 +1,88 @@
 import QtQuick
-import QtQuick.Layouts
-import "../services"
-import "../components"
-
+import "../services" as Services
 
 Item {
-    id: root
-
+    // Main content area - Flickable for scrolling
     Flickable {
         anchors.fill: parent
-        contentWidth: parent.width
+        contentWidth: 360
         contentHeight: contentColumn.implicitHeight
         clip: true
 
-        ScrollIndicator { flickable: parent }
-
         Column {
             id: contentColumn
-            width: parent.width
-            spacing: Theme.s3
+            width: 360
+            spacing: 10
 
             // Output section
-            Text {
-                text: "Output"
-                color: Theme.dim
-                font.pixelSize: Theme.tSmall
-                font.bold: true
-                font.family: Theme.fontFamily
-                Layout.fillWidth: true
-                leftPadding: Theme.s4
-            }
-
-            Card {
-                Layout.fillWidth: true
-                hoverEnabled: false
-
-                ColumnLayout {
-                    anchors.fill: parent
-                    anchors.margins: Theme.s4
-                    spacing: Theme.s3
-
-                    RowLayout {
-                        Layout.fillWidth: true
-                        Layout.minimumHeight: Theme.controlH
-                        Layout.preferredHeight: Theme.controlH
-                        spacing: Theme.s2
-
-                        Item {
-                            width: Theme.iconMd + Theme.s2; height: Theme.controlH
-                            Icon { name: "volume"; size: Theme.iconMd; anchors.centerIn: parent; opacity: Services.Audio.sinkMuted ? 0.5 : 1.0 }
-                            MouseArea { anchors.fill: parent; onClicked: Services.Audio.toggleSinkMute() }
-                        }
-
-                        FlatSlider {
-                            Layout.fillWidth: true
-                            value: Services.Audio.sinkVolume
-                            enabled: Services.Audio.sinkReady
-                            onMoved: if (Services.Audio.sinkReady) Services.Audio.setSinkVolume(value)
-                        }
-
-                        Text {
-                            width: 34
-                            Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
-                            text: Math.round(Services.Audio.sinkVolume * 100)
-                            color: Theme.fg
-                            font.pixelSize: Theme.tBody
-                            font.family: Theme.fontFamily
-                        }
-                    }
-
-                    DeviceSelector {
-                        id: outputSelector
-                        Layout.fillWidth: true
-                        accordionGroup: true
-                        model: Services.Audio.sinks
-                        currentNode: Services.Audio.sink
-                        onPicked: n => Services.Audio.setDefaultSink(n)
-                    }
+            Text { text: "Output"; color: "#9a9aa0"; font.pixelSize: 11; font.bold: true }
+            Row {
+                width: parent.width; spacing: 10
+                Item { width: 22; height: 22; anchors.verticalCenter: parent.verticalCenter
+                    Icon { name: "volume"; size: 18; anchors.centerIn: parent; opacity: Services.Audio.sinkMuted ? 0.5 : 1.0 }
+                    MouseArea { anchors.fill: parent; onClicked: Services.Audio.toggleSinkMute() } }
+                FlatSlider { 
+                    width: parent.width - 22 - 34 - 20; anchors.verticalCenter: parent.verticalCenter
+                    value: Services.Audio.sinkVolume
+                    enabled: Services.Audio.sinkReady
+                    onMoved: if (Services.Audio.sinkReady) Services.Audio.setSinkVolume(value)
                 }
+                Text { width: 34; anchors.verticalCenter: parent.verticalCenter
+                       text: Math.round(Services.Audio.sinkVolume * 100); color: "#ffffff"; font.pixelSize: 12
+                       horizontalAlignment: Text.AlignRight }
             }
 
-            Divider {}
+            DeviceSelector {
+                id: outputSelector
+                model: Services.Audio.sinks
+                currentNode: Services.Audio.sink
+                onPicked: n => Services.Audio.setDefaultSink(n)
+            }
+
+            Item { width: 1; height: 6 }
 
             // Input section
-            Text {
-                text: "Input"
-                color: Theme.dim
-                font.pixelSize: Theme.tSmall
-                font.bold: true
-                font.family: Theme.fontFamily
-                Layout.fillWidth: true
-                leftPadding: Theme.s4
-            }
-
-            Card {
-                Layout.fillWidth: true
-                hoverEnabled: false
-
-                ColumnLayout {
-                    anchors.fill: parent
-                    anchors.margins: Theme.s4
-                    spacing: Theme.s3
-
-                    RowLayout {
-                        Layout.fillWidth: true
-                        Layout.minimumHeight: Theme.controlH
-                        Layout.preferredHeight: Theme.controlH
-                        spacing: Theme.s2
-
-                        Item {
-                            width: Theme.iconMd + Theme.s2; height: Theme.controlH
-                            Icon { name: "volume"; size: Theme.iconMd; anchors.centerIn: parent; color: Services.Audio.sourceMuted ? Theme.danger : Theme.fg }
-                            MouseArea { anchors.fill: parent; onClicked: Services.Audio.toggleSourceMute() }
-                        }
-
-                        FlatSlider {
-                            Layout.fillWidth: true
-                            value: Services.Audio.sourceVolume
-                            enabled: Services.Audio.sourceReady
-                            onMoved: if (Services.Audio.sourceReady) Services.Audio.setSourceVolume(value)
-                        }
-
-                        Text {
-                            width: 34
-                            Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
-                            text: Math.round(Services.Audio.sourceVolume * 100)
-                            color: Theme.fg
-                            font.pixelSize: Theme.tBody
-                            font.family: Theme.fontFamily
-                        }
-                    }
-
-                    DeviceSelector {
-                        id: inputSelector
-                        Layout.fillWidth: true
-                        accordionGroup: true
-                        model: Services.Audio.sources
-                        currentNode: Services.Audio.source
-                        onPicked: n => Services.Audio.setDefaultSource(n)
-                    }
+            Text { text: "Input"; color: "#9a9aa0"; font.pixelSize: 11; font.bold: true }
+            Row {
+                width: parent.width; spacing: 10
+                Item { width: 22; height: 22; anchors.verticalCenter: parent.verticalCenter
+                    Icon { name: "volume"; size: 18; color: Services.Audio.sourceMuted ? "#ff453a" : "#ffffff"; anchors.centerIn: parent }
+                    MouseArea { anchors.fill: parent; onClicked: Services.Audio.toggleSourceMute() } }
+                FlatSlider { 
+                    width: parent.width - 22 - 34 - 20; anchors.verticalCenter: parent.verticalCenter
+                    value: Services.Audio.sourceVolume
+                    enabled: Services.Audio.sourceReady
+                    onMoved: if (Services.Audio.sourceReady) Services.Audio.setSourceVolume(value)
                 }
+                Text { width: 34; anchors.verticalCenter: parent.verticalCenter
+                       text: Math.round(Services.Audio.sourceVolume * 100); color: "#ffffff"; font.pixelSize: 12
+                       horizontalAlignment: Text.AlignRight }
             }
 
-            Divider { visible: Services.Brightness.available }
+            DeviceSelector {
+                id: inputSelector
+                model: Services.Audio.sources
+                currentNode: Services.Audio.source
+                onPicked: n => Services.Audio.setDefaultSource(n)
+            }
+
+            Item { width: 1; height: 6; visible: Services.Brightness.available }
 
             // Per-app volume mixer
-            AppMixer { Layout.fillWidth: true }
+            AppMixer { width: parent.width }
 
-            Divider { visible: Services.Brightness.available }
+            Item { width: 1; height: 6; visible: Services.Brightness.available }
 
-            // Brightness section
-            Text {
+            Text { visible: Services.Brightness.available; text: "Brightness"; color: "#9a9aa0"; font.pixelSize: 11; font.bold: true }
+            Row {
                 visible: Services.Brightness.available
-                text: "Brightness"
-                color: Theme.dim
-                font.pixelSize: Theme.tSmall
-                font.bold: true
-                font.family: Theme.fontFamily
-                Layout.fillWidth: true
-                leftPadding: Theme.s4
-            }
-
-            Card {
-                visible: Services.Brightness.available
-                Layout.fillWidth: true
-                hoverEnabled: false
-
-                ColumnLayout {
-                    anchors.fill: parent
-                    anchors.margins: Theme.s4
-                    spacing: Theme.s3
-
-                    RowLayout {
-                        Layout.fillWidth: true
-                        Layout.minimumHeight: Theme.controlH
-                        Layout.preferredHeight: Theme.controlH
-                        spacing: Theme.s2
-
-                        Item {
-                            width: Theme.iconMd + Theme.s2; height: Theme.controlH
-                            Icon { name: "sun"; size: Theme.iconMd; anchors.centerIn: parent; color: Theme.fg }
-                        }
-
-                        FlatSlider {
-                            Layout.fillWidth: true
-                            value: Services.Brightness.level
-                            onMoved: Services.Brightness.set(value)
-                        }
-
-                        Text {
-                            width: 34
-                            Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
-                            text: Math.round(Services.Brightness.level * 100)
-                            color: Theme.fg
-                            font.pixelSize: Theme.tBody
-                            font.family: Theme.fontFamily
-                        }
-                    }
-                }
+                width: parent.width; spacing: 10
+                Icon { name: "sun"; size: 18; anchors.verticalCenter: parent.verticalCenter }
+                FlatSlider { width: parent.width - 18 - 34 - 20; anchors.verticalCenter: parent.verticalCenter
+                             value: Services.Brightness.level; onMoved: Services.Brightness.set(value) }
+                Text { width: 34; anchors.verticalCenter: parent.verticalCenter
+                       text: Math.round(Services.Brightness.level * 100); color: "#ffffff"; font.pixelSize: 12
+                       horizontalAlignment: Text.AlignRight }
             }
         }
     }

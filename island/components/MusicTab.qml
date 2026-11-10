@@ -1,8 +1,6 @@
 import QtQuick
 import QtQuick.Controls
-import QtQuick.Layouts
 import "../services" as Services
-
 
 Item {
     id: tab
@@ -15,202 +13,118 @@ Item {
     Component.onCompleted: Services.Lyrics.users = Services.Lyrics.users + 1
     Component.onDestruction: Services.Lyrics.users = Services.Lyrics.users - 1
 
-    RowLayout {
+    Row {
         anchors.fill: parent
-        anchors.margins: Theme.s4
-        spacing: Theme.s4
+        anchors.margins: 8
+        spacing: 20
 
-        // ---------- LEFT: player ----------
         Item {
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            Layout.minimumWidth: 300
+            width: parent.width - 290 - parent.spacing
+            height: parent.height
 
             Column {
                 anchors.fill: parent
-                spacing: Theme.s3
+                anchors.margins: 12
+                spacing: 8
 
-                // Artwork + title/artist
                 Row {
-                    Layout.fillWidth: true
-                    height: 110
-                    spacing: Theme.s3
-
+                    width: parent.width; height: 110; spacing: 16
                     Rectangle {
-                        width: 110; height: 110
-                        radius: Theme.rMd
-                        color: Theme.cardHi
-                        clip: true
-
+                        width: 110; height: 110; radius: 14; color: "#2c2c2e"; clip: true
                         Image {
                             id: art
-                            anchors.fill: parent
-                            fillMode: Image.PreserveAspectCrop
+                            anchors.fill: parent; fillMode: Image.PreserveAspectCrop
                             source: Services.Media.artUrl
-                            asynchronous: true
-                            cache: true
+                            asynchronous: true; cache: true
                             sourceSize: Qt.size(220, 220)
                         }
-                        Icon { name: "media-playlist-normal"; size: Theme.iconLg; anchors.centerIn: parent; color: Theme.fg
+                        Icon { name: "media-playlist-normal"; size: 32; anchors.centerIn: parent; color: "#ffffff"
                                visible: art.status !== Image.Ready }
                     }
-
                     Column {
-                        Layout.fillWidth: true
-                        anchors.verticalCenter: parent.verticalCenter
-                        spacing: Theme.s1
-
-                        Text {
-                            width: parent.width
-                            elide: Text.ElideRight
-                            color: Theme.fg
-                            font.pixelSize: Theme.tTitle
-                            font.bold: true
-                            font.family: Theme.fontFamily
-                            text: Services.Media.hasPlayer ? Services.Media.title : "Nothing playing"
-                        }
-                        Text {
-                            width: parent.width
-                            elide: Text.ElideRight
-                            color: Theme.dim
-                            font.pixelSize: Theme.tBody
-                            font.family: Theme.fontFamily
-                            text: Services.Media.artist !== "" ? Services.Media.artist : "Start playing a track\u2026"
-                        }
+                        width: parent.width - 126; anchors.verticalCenter: parent.verticalCenter; spacing: 4
+                        Text { width: parent.width; elide: Text.ElideRight; color: "#ffffff"; font.pixelSize: 16; font.bold: true
+                               text: Services.Media.hasPlayer ? Services.Media.title : "Nothing playing" }
+                        Text { width: parent.width; elide: Text.ElideRight; color: "#9a9aa0"; font.pixelSize: 13
+                               text: Services.Media.artist !== "" ? Services.Media.artist : "Start playing a track\u2026" }
                     }
                 }
 
-                // Transport controls
                 Row {
-                    Layout.fillWidth: true
-                    height: Theme.controlH + 8
-                    spacing: 0
+                    width: parent.width; height: 44
+                    spacing: (parent.width - (24 + 24 + 40 + 24 + 24)) / 4
 
-                    Item { Layout.fillWidth: true }
-
-                    Item {
-                        width: 24; height: 24
-                        anchors.verticalCenter: parent.verticalCenter
-                        Icon { name: "shuffle"; size: Theme.iconMd; anchors.centerIn: parent
-                               color: Services.Media.shuffleOn ? Theme.accent : Theme.dim }
-                        MouseArea { anchors.fill: parent; onClicked: Services.Media.toggleShuffle() }
-                    }
-
-                    Item {
-                        width: 24; height: 24
-                        anchors.verticalCenter: parent.verticalCenter
-                        Icon { name: "media-skip-backward"; size: Theme.iconLg; color: Theme.dim; anchors.centerIn: parent }
-                        MouseArea { anchors.fill: parent; onClicked: Services.Media.previous() }
-                    }
-
-                    Item {
-                        width: Theme.controlH + 8; height: Theme.controlH + 8
-                        anchors.verticalCenter: parent.verticalCenter
-                        Rectangle {
-                            anchors.centerIn: parent
-                            width: Theme.controlH; height: Theme.controlH
-                            radius: Theme.controlH / 2
-                            color: Theme.accent
-                            Icon {
-                                anchors.centerIn: parent
-                                name: Services.Media.isPlaying ? "pause" : "play"
-                                size: Theme.iconLg
-                                color: "#ffffff"
-                            }
-                            MouseArea { anchors.fill: parent; onClicked: Services.Media.togglePlay() }
-                        }
-                    }
-
-                    Item {
-                        width: 24; height: 24
-                        anchors.verticalCenter: parent.verticalCenter
-                        Icon { name: "media-skip-forward"; size: Theme.iconLg; color: Theme.dim; anchors.centerIn: parent }
-                        MouseArea { anchors.fill: parent; onClicked: Services.Media.next() }
-                    }
-
-                    Item {
-                        width: 24; height: 24
-                        anchors.verticalCenter: parent.verticalCenter
-                        Icon { name: "repeat"; size: Theme.iconMd; anchors.centerIn: parent
-                               color: Services.Media.repeatOn ? Theme.accent : Theme.dim }
-                        MouseArea { anchors.fill: parent; onClicked: Services.Media.toggleRepeat() }
-                    }
-
-                    Item { Layout.fillWidth: true }
+                    Item { width: 24; height: 24; anchors.verticalCenter: parent.verticalCenter
+                        Icon { name: "shuffle"; size: 20; anchors.centerIn: parent
+                               color: Services.Media.shuffleOn ? "#3b8bff" : "#9a9aa0" }
+                        MouseArea { anchors.fill: parent; onClicked: Services.Media.toggleShuffle() } }
+                    Item { width: 24; height: 24; anchors.verticalCenter: parent.verticalCenter
+                        Icon { name: "media-skip-backward"; size: 24; color: "#9a9aa0"; anchors.centerIn: parent }
+                        MouseArea { anchors.fill: parent; onClicked: Services.Media.previous() } }
+                    Item { width: 40; height: 40; anchors.verticalCenter: parent.verticalCenter
+                        Icon { name: Services.Media.isPlaying ? "pause" : "play"; size: 32; color: "#ffffff"; anchors.centerIn: parent }
+                        MouseArea { anchors.fill: parent; onClicked: Services.Media.togglePlay() } }
+                    Item { width: 24; height: 24; anchors.verticalCenter: parent.verticalCenter
+                        Icon { name: "media-skip-forward"; size: 24; color: "#9a9aa0"; anchors.centerIn: parent }
+                        MouseArea { anchors.fill: parent; onClicked: Services.Media.next() } }
+                    Item { width: 24; height: 24; anchors.verticalCenter: parent.verticalCenter
+                        Icon { name: "repeat"; size: 20; anchors.centerIn: parent
+                               color: Services.Media.repeatOn ? "#3b8bff" : "#9a9aa0" }
+                        MouseArea { anchors.fill: parent; onClicked: Services.Media.toggleRepeat() } }
                 }
 
-                // Progress
                 Column {
-                    Layout.fillWidth: true
-                    height: 40
-                    spacing: Theme.s1
-
+                    width: parent.width; height: 40; spacing: 6
                     Slider {
                         id: progress
-                        width: parent.width
-                        height: 14
+                        width: parent.width; height: 14
                         value: Services.Media.length > 0 ? Services.Media.position / Services.Media.length : 0
                         background: Rectangle {
-                            height: 5; radius: 3; color: Theme.track
-                            Rectangle { width: progress.visualPosition * parent.width; height: 5; color: Theme.fg; radius: 3 }
+                            height: 5; radius: 3; color: "#22ffffff"
+                            Rectangle { width: progress.visualPosition * parent.width; height: 5; color: "#ffffff"; radius: 3 }
                         }
                         handle: Rectangle {
                             x: progress.visualPosition * (progress.width - width); y: -5
-                            width: 14; height: 14; radius: 7; color: Theme.fg
+                            width: 14; height: 14; radius: 7; color: "#ffffff"
                         }
                         onMoved: if (Services.Media.length > 0) Services.Media.seek(value * Services.Media.length)
                     }
-                    Row {
+                    Item {
                         width: parent.width; height: 14
-                        Text { text: tab.fmtTime(Services.Media.position); color: Theme.faint; font.pixelSize: Theme.tCaption; font.family: Theme.fontFamily }
-                        Text { anchors.right: parent.right; color: Theme.faint; font.pixelSize: Theme.tCaption; font.family: Theme.fontFamily
+                        Text { text: tab.fmtTime(Services.Media.position); color: "#66ffffff"; font.pixelSize: 11 }
+                        Text { anchors.right: parent.right; color: "#66ffffff"; font.pixelSize: 11
                                text: Services.Media.length > 0 ? tab.fmtTime(Services.Media.length) : "0:00" }
                     }
                 }
 
-                // Volume
                 Row {
-                    Layout.fillWidth: true
-                    height: Theme.controlH
-                    spacing: Theme.s2
-
-                    Icon { name: "volume"; size: Theme.iconMd; color: Theme.fg; anchors.verticalCenter: parent.verticalCenter
+                    width: parent.width; height: 24; spacing: 12
+                    Icon { name: "volume"; size: 16; color: "#ffffff"; anchors.verticalCenter: parent.verticalCenter
                            opacity: Services.Audio.sinkMuted ? 0.5 : 1.0 }
-
                     FlatSlider {
-                        Layout.fillWidth: true
+                        width: parent.width - 16 - 34 - 24
                         anchors.verticalCenter: parent.verticalCenter
                         value: Services.Audio.sinkVolume
                         enabled: Services.Audio.sinkReady
                         onMoved: if (Services.Audio.sinkReady) Services.Audio.setSinkVolume(value)
                     }
-
-                    Text {
-                        width: 34
-                        anchors.verticalCenter: parent.verticalCenter
-                        horizontalAlignment: Text.AlignRight
-                        color: Theme.fg
-                        font.pixelSize: Theme.tBody
-                        font.family: Theme.fontFamily
-                        text: Math.round(Services.Audio.sinkVolume * 100)
-                    }
+                    Text { width: 34; anchors.verticalCenter: parent.verticalCenter
+                           horizontalAlignment: Text.AlignRight; color: "#ffffff"; font.pixelSize: 12
+                           text: Math.round(Services.Audio.sinkVolume * 100) }
                 }
             }
         }
 
-        // ---------- RIGHT: lyrics card ----------
         Rectangle {
             width: 290
-            Layout.fillHeight: true
-            Layout.minimumWidth: 290
-            Layout.maximumWidth: 290
-            radius: Theme.rLg
-            color: Theme.card
+            height: parent.height
+            radius: 18
+            color: "#16ffffff"
             border.color: Theme.cardBorder
             border.width: 1
             clip: true
 
-            LyricsPanel { anchors.fill: parent; anchors.margins: Theme.s3 }
+            LyricsPanel { anchors.fill: parent; anchors.margins: 14 }
         }
     }
 }

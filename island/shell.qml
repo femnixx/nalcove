@@ -18,7 +18,7 @@ ShellRoot {
         id: islandWindow
 
         anchors { top: true; left: true; right: true }
-        implicitHeight: Theme.windowHeight
+        implicitHeight: 470
         color: "transparent"
         exclusionMode: ExclusionMode.Ignore
         WlrLayershell.layer: WlrLayer.Overlay
@@ -39,29 +39,22 @@ ShellRoot {
             }
         }
 
-        // State machine: "closed" | "hover" | "notify" | "hotkey"
+        // State machine: "closed" | "hover" | "hotkey"
         property string triggerMode: "closed"
 
-        // Notification peek state
-        property var peekNotification: null
-        property bool peekHovered: false
-
-        property real currentWidth: triggerMode === "hotkey" ? Theme.expandedWidth
-            : (triggerMode === "notify" ? Theme.notifyWidth
-            : (triggerMode === "hover" ? Theme.hoverWidth : (Media.isPlaying ? 270 : Theme.idleWidth)))
-        property real currentHeight: triggerMode === "hotkey" ? Theme.expandedHeight
-            : (triggerMode === "notify" ? Theme.notifyHeight
-            : (triggerMode === "hover" ? Theme.hoverHeight : Theme.idleHeight))
-        property real currentBottomRadius: triggerMode === "closed" ? Theme.rSm : Theme.expandedBottomRadius
+        property real currentWidth: triggerMode === "hotkey" ? 780
+            : (triggerMode === "hover" ? 360 : (Media.isPlaying ? 270 : 200))
+        property real currentHeight: triggerMode === "hotkey" ? 400 : (triggerMode === "hover" ? 80 : 34)
+        property real currentBottomRadius: triggerMode === "closed" ? 14 : 32
 
         Behavior on currentWidth {
-            SpringAnimation { spring: Theme.springWidth; damping: Theme.dampingWidth; epsilon: Theme.epsilonWidth }
+            SpringAnimation { spring: 3.5; damping: 0.35; epsilon: 0.25 }
         }
         Behavior on currentHeight {
-            SpringAnimation { spring: Theme.springHeight; damping: Theme.dampingHeight; epsilon: Theme.epsilonHeight }
+            SpringAnimation { spring: 3.5; damping: 0.35; epsilon: 0.25 }
         }
         Behavior on currentBottomRadius {
-            SpringAnimation { spring: Theme.springRadius; damping: Theme.dampingRadius; epsilon: Theme.epsilonRadius }
+            SpringAnimation { spring: 3.0; damping: 0.4; epsilon: 0.1 }
         }
 
         // Only poll playback position while the island is open
@@ -106,11 +99,11 @@ ShellRoot {
 
         Item {
             id: islandShape
-            property real flare: Theme.flareRadius
+            property real flare: 12
             width: islandWindow.currentWidth
             height: islandWindow.currentHeight
             x: (parent.width - width) / 2
-            y: Theme.overshootMargin
+            y: 0
 
             Shape {
                 anchors.fill: parent
@@ -125,7 +118,7 @@ ShellRoot {
 
                     strokeWidth: islandWindow.triggerMode === "hotkey" ? 1 : 0
                     strokeColor: Theme.border
-                    fillColor: islandWindow.triggerMode === "hotkey" ? Theme.bg : "#000000"
+                    fillColor: islandWindow.triggerMode === "hotkey" ? Theme.islandFill : "#000000"
                     Behavior on fillColor { ColorAnimation { duration: 200 } }
                     startX: -f
                     startY: 0
@@ -298,128 +291,6 @@ ShellRoot {
                     }
                 }
 
-                // ===== Notification peek =====
-                Item {
-                    id: notifyView
-                    anchors.fill: parent
-                    opacity: islandWindow.triggerMode === "notify" ? 1 : 0
-                    visible: opacity > 0.01 && islandWindow.peekNotification !== null
-                    Behavior on opacity {
-                        SequentialAnimation {
-                            PauseAnimation { duration: 0 }
-                            NumberAnimation { duration: 150 }
-                        }
-                    }
-
-                    property var n: islandWindow.peekNotification
-
-                    MouseArea {
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        onEntered: islandWindow.peekHovered = true
-                        onExited: islandWindow.peekHovered = false
-                        onClicked: islandWindow.triggerMode = "hotkey"
-                    }
-
-                    Row {
-                        anchors.fill: parent
-                        anchors.margins: Theme.s4
-                        spacing: Theme.s3
-
-                        // App icon or image
-                        Rectangle {
-                            width: 64; height: 64
-                            radius: Theme.rMd
-                            color: Theme.card
-                            border.color: Theme.cardBorder
-                            border.width: 1
-
-                            Image {
-                                anchors.fill: parent
-                                anchors.margins: 4
-                                source: n.image || n.appIcon || ""
-                                fillMode: Image.PreserveAspectFit
-                                visible: !!(n.image || n.appIcon)
-                            }
-                            Icon {
-                                anchors.centerIn: parent
-                                name: "bell"
-                                size: Theme.iconLg
-                                color: Theme.accent
-                                visible: !(n.image || n.appIcon)
-                            }
-                        }
-
-                        // Text content
-                        Column {
-                            width: parent.width - 64 - Theme.s3 - 48
-                            spacing: 2
-                            anchors.verticalCenter: parent.verticalCenter
-
-                            Row {
-                                spacing: Theme.s2
-                                Text {
-                                    text: n.appName || "Unknown"
-                                    color: Theme.dim
-                                    font.pixelSize: Theme.tSmall
-                                    font.bold: true
-                                    font.family: Theme.fontFamily
-                                }
-                                Text {
-                                    text: "·"
-                                    color: Theme.faint
-                                    font.pixelSize: Theme.tSmall
-                                    font.family: Theme.fontFamily
-                                }
-                                Text {
-                                    text: n.urgency === 2 ? "Critical" : "Notification"
-                                    color: n.urgency === 2 ? Theme.danger : Theme.dim
-                                    font.pixelSize: Theme.tSmall
-                                    font.family: Theme.fontFamily
-                                }
-                            }
-
-                            Text {
-                                text: n.summary || ""
-                                color: Theme.fg
-                                font.pixelSize: Theme.tBody
-                                font.bold: true
-                                font.family: Theme.fontFamily
-                                elide: Text.ElideRight
-                            }
-
-                            Text {
-                                text: n.body || ""
-                                color: Theme.dim
-                                font.pixelSize: Theme.tSmall
-                                font.family: Theme.fontFamily
-                                wrapMode: Text.WordWrap
-                                maximumLineCount: 2
-                                elide: Text.ElideRight
-                            }
-
-                            // Action buttons
-                            Row {
-                                spacing: Theme.s2
-                                visible: n.actions && n.actions.length > 0
-                                Repeater {
-                                    model: n.actions
-                                    delegate: Pill {
-                                        text: modelData.label
-                                        accent: true
-                                        height: Theme.controlH
-                                        onClicked: {
-                                            modelData.invoke()
-                                            islandWindow.peekNotification.dismiss()
-                                            islandWindow.triggerMode = "closed"
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-
                 // ===== Expanded (hotkey): tabbed dashboard =====
                 Dashboard {
                     id: fullView
@@ -430,60 +301,33 @@ ShellRoot {
                     Behavior on opacity {
                         SequentialAnimation {
                             PauseAnimation { duration: fullView.active ? 100 : 0 }
-                            NumberAnimation { duration: Theme.dBase }
+                            NumberAnimation { duration: 180 }
                         }
                     }
                 }
             }
-        }
 
-        // Hover peek (disabled while locked open or in notify mode)
-        HoverHandler {
-            enabled: islandWindow.triggerMode === "closed" || islandWindow.triggerMode === "hover"
-            onHoveredChanged: {
-                if (hovered) {
-                    hoverDebounce.stop()
-                    if (islandWindow.triggerMode === "closed")
-                        islandWindow.triggerMode = "hover"
-                } else if (islandWindow.triggerMode === "hover") {
-                    hoverDebounce.restart()
+            // Hover peek (disabled while locked open)
+            HoverHandler {
+                enabled: islandWindow.triggerMode !== "hotkey"
+                onHoveredChanged: {
+                    if (hovered) {
+                        hoverDebounce.stop()
+                        if (islandWindow.triggerMode === "closed")
+                            islandWindow.triggerMode = "hover"
+                    } else if (islandWindow.triggerMode === "hover") {
+                        hoverDebounce.restart()
+                    }
                 }
             }
         }
 
         Timer {
             id: hoverDebounce
-            interval: Theme.hoverDebounceMs
+            interval: 150
             onTriggered: {
                 if (islandWindow.triggerMode === "hover")
                     islandWindow.triggerMode = "closed"
-            }
-        }
-
-        // Notification peek timeout timer
-        Timer {
-            id: notifyTimeout
-            interval: 5000
-            repeat: false
-            onTriggered: {
-                if (islandWindow.triggerMode === "notify" && !islandWindow.peekHovered) {
-                    islandWindow.triggerMode = "closed"
-                    islandWindow.peekNotification = null
-                }
-            }
-        }
-
-        // Listen for notifications
-        Connections {
-            target: Notifications
-            function onReceived(n) {
-                if (islandWindow.triggerMode === "hotkey") return
-                if (Notifications.dnd) return
-
-                islandWindow.peekNotification = n
-                islandWindow.triggerMode = "notify"
-                notifyTimeout.interval = n.expireTimeout > 0 ? n.expireTimeout : 5000
-                notifyTimeout.restart()
             }
         }
 
@@ -493,6 +337,7 @@ ShellRoot {
         }
 
         // Global keybind: Ctrl+Alt+Space toggles the island open/closed.
+        // If already expanded (hotkey or hover), it instantly shrinks back to closed.
         Shortcut {
             sequence: "Ctrl+Alt+Space"
             onActivated: {

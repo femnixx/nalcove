@@ -1,5 +1,5 @@
 import QtQuick
-
+import QtQuick.Controls
 
 Rectangle {
     id: root
@@ -19,14 +19,14 @@ Rectangle {
 
     implicitWidth: content.implicitWidth + (root.iconOnly ? 0 : Theme.s4 * 2)
 
-    color: root.enabled
+    property color bgColor: root.enabled
         ? (root.accent ? Theme.accent : (root.danger ? Theme.danger : Theme.cardHi))
         : Theme.track
 
+    color: bgColor
+
     border.color: root.accent || root.danger ? "transparent" : Theme.cardBorder
     border.width: root.accent || root.danger ? 0 : 1
-
-    Behavior on color: ColorAnimation { duration: Theme.dFast; easing.type: Theme.easingOutCubic }
 
     property real _opacity: root.enabled ? 1.0 : 0.5
 

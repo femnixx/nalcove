@@ -1,7 +1,5 @@
 import QtQuick
-import QtQuick.Controls
 import "../services" as Services
-
 
 Item {
     id: dashboardRoot
@@ -10,38 +8,23 @@ Item {
     property bool active: false
     anchors.fill: parent
 
-    // Active tab indicator animation
-    property real indicatorX: 0
-    property real indicatorWidth: 84
+    function fmtTime(s) {
+        const t = Math.max(0, Math.floor(s))
+        return Math.floor(t / 60) + ":" + String(t % 60).padStart(2, "0")
+    }
 
     // --- TOP BAR: Navigation Tabs ---
     Rectangle {
         id: tabBar
-        x: Theme.s4
-        y: Theme.s3
-        width: parent.width - Theme.s4 * 2
-        height: Theme.rowH
+        x: 20; y: 12
+        width: 740; height: 44
         color: "transparent"
-
-        // Sliding indicator
-        Rectangle {
-            id: tabIndicator
-            y: 0
-            height: parent.height
-            radius: Theme.pillRadius
-            color: Theme.accent
-            x: dashboardRoot.indicatorX
-            width: dashboardRoot.indicatorWidth
-            Behavior on x { SpringAnimation { spring: 3; damping: 0.4 } }
-            Behavior on width { SpringAnimation { spring: 3; damping: 0.4 } }
-        }
 
         Row {
             anchors.fill: parent
-            spacing: Theme.s2
+            spacing: 8
 
             Repeater {
-                id: tabRepeater
                 model: [
                     ["home", "home", "Home"],
                     ["music", "music", "Music"],
@@ -53,9 +36,7 @@ Item {
                     ["bluetooth", "bluetooth", "Bluetooth"]
                 ]
                 delegate: Item {
-                    id: tabItem
-                    width: 84
-                    height: Theme.rowH
+                    width: 84; height: 44
                     property string pageId: modelData[0]
                     property string iconName: modelData[1]
                     property string label: modelData[2]
@@ -63,52 +44,33 @@ Item {
 
                     Rectangle {
                         anchors.fill: parent
-                        radius: Theme.pillRadius
-                        color: "transparent"
-                        z: -1
+                        radius: 12
+                        color: isActive ? "#3b8bff" : "transparent"
+                        border.color: isActive ? "#3b8bff" : "transparent"
+                        border.width: isActive ? 1 : 0
+                        Behavior on color { ColorAnimation { duration: 140 } }
 
                         Column {
                             anchors.centerIn: parent
                             spacing: 2
                             Icon {
                                 name: iconName
-                                size: Theme.iconMd
-                                color: isActive ? "#ffffff" : Theme.dim
-                                Behavior on color { ColorAnimation { duration: Theme.dFast } }
+                                size: 20
+                                color: isActive ? "#ffffff" : "#9a9aa0"
+                                Behavior on color { ColorAnimation { duration: 140 } }
                             }
                             Text {
                                 text: label
-                                font.pixelSize: Theme.tCaption
+                                font.pixelSize: 9
                                 font.bold: true
-                                font.family: Theme.fontFamily
-                                color: isActive ? "#ffffff" : Theme.dim
-                                Behavior on color { ColorAnimation { duration: Theme.dFast } }
+                                color: isActive ? "#ffffff" : "#9a9aa0"
+                                Behavior on color { ColorAnimation { duration: 140 } }
                             }
                         }
-                    }
 
-                    MouseArea {
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        onEntered: {
-                            if (!isActive) {
-                                dashboardRoot.indicatorX = tabItem.x
-                                dashboardRoot.indicatorWidth = tabItem.width
-                            }
-                        }
-                        onExited: {
-                            if (!isActive) {
-                                var activeItem = tabRepeater.itemAt(tabRepeater.model.indexOf(dashboardRoot.page))
-                                if (activeItem) {
-                                    dashboardRoot.indicatorX = activeItem.x
-                                    dashboardRoot.indicatorWidth = activeItem.width
-                                }
-                            }
-                        }
-                        onClicked: {
-                            dashboardRoot.page = pageId
-                            dashboardRoot.indicatorX = tabItem.x
-                            dashboardRoot.indicatorWidth = tabItem.width
+                        MouseArea {
+                            anchors.fill: parent
+                            onClicked: dashboardRoot.page = pageId
                         }
                     }
                 }
@@ -119,11 +81,10 @@ Item {
     // --- UTILITY ROW: Lower icons (aligned with tabs) ---
     Row {
         id: utilityRow
-        x: Theme.s4
-        y: tabBar.y + tabBar.height + Theme.s2
-        width: parent.width - Theme.s4 * 2
+        x: 20; y: 72
+        width: 740
         height: 24
-        spacing: Theme.s2
+        spacing: 8
 
         Repeater {
             model: [
@@ -139,24 +100,14 @@ Item {
                 property string iconName: modelData[1]
                 property string label: modelData[2]
 
-                ToolTip {
-                    text: label
-                    delay: 500
-                    visible: parent.hovered
-                }
-
                 Icon {
                     name: iconName
-                    size: Theme.iconMd
-                    color: Theme.dim
+                    size: 16
+                    color: "#9a9aa0"
                     anchors.centerIn: parent
-                    Behavior on color { ColorAnimation { duration: Theme.dFast } }
                 }
                 MouseArea {
                     anchors.fill: parent
-                    hoverEnabled: true
-                    onEntered: parent.Icon.color = Theme.fg
-                    onExited: parent.Icon.color = Theme.dim
                     onClicked: dashboardRoot.page = pageId
                 }
             }
@@ -164,42 +115,31 @@ Item {
     }
 
     // Separator line below utility row
-    Divider {
-        x: Theme.s4
-        y: utilityRow.y + utilityRow.height + Theme.s2
-        width: parent.width - Theme.s4 * 2
+    Rectangle {
+        x: 20; y: 98
+        width: 740; height: 1
+        color: "#2a2a2e"
     }
 
     // --- CONTENT AREA: Tab panels ---
     Item {
-        id: contentArea
-        x: Theme.s4
-        y: utilityRow.y + utilityRow.height + Theme.s2 + 2
-        width: parent.width - Theme.s4 * 2
-        height: parent.height - y
+        x: 20; y: 106
+        width: 740
+        height: parent.height - 118
 
-        // Lazy-loaded tabs using Loader with cross-fade
-        Loader { id: homeLoader;      anchors.fill: parent; active: page === "home";      source: "HomeTab.qml" }
-        Loader { id: musicLoader;     anchors.fill: parent; active: page === "music";     source: "MusicTab.qml" }
-        Loader { id: clipboardLoader; anchors.fill: parent; active: page === "clipboard"; source: "ClipboardTab.qml" }
-        Loader { id: alertsLoader;    anchors.fill: parent; active: page === "alerts";    source: "AlertsTab.qml" }
-        Loader { id: shelfLoader;     anchors.fill: parent; active: page === "shelf";     source: "ShelfTab.qml" }
-        Loader { id: notesLoader;     anchors.fill: parent; active: page === "notes";     source: "NotesTab.qml" }
-        Loader { id: calendarLoader;  anchors.fill: parent; active: page === "calendar";  source: "CalendarTab.qml" }
-        Loader { id: controlsLoader;  anchors.fill: parent; active: page === "controls";  source: "ControlsTab.qml" }
-        Loader { id: bluetoothLoader; anchors.fill: parent; active: page === "bluetooth"; source: "BluetoothTab.qml" }
-        Loader { id: systemLoader;    anchors.fill: parent; active: page === "system";    source: "SystemTab.qml" }
-        Loader { id: wifiLoader;      anchors.fill: parent; active: page === "wifi";      source: "WifiTab.qml" }
-        Loader { id: searchLoader;    anchors.fill: parent; active: page === "search";    source: "SearchTab.qml" }
-        Loader { id: settingsLoader;  anchors.fill: parent; active: page === "settings";  source: "SettingsTab.qml" }
-    }
-
-    // Initialize indicator position
-    Component.onCompleted: {
-        var activeItem = tabRepeater.itemAt(tabRepeater.model.indexOf(page))
-        if (activeItem) {
-            indicatorX = activeItem.x
-            indicatorWidth = activeItem.width
-        }
+        // Lazy-loaded tabs using Loader
+        Loader { anchors.fill: parent; active: page === "home";      source: "HomeTab.qml" }
+        Loader { anchors.fill: parent; active: page === "music";     source: "MusicTab.qml" }
+        Loader { anchors.fill: parent; active: page === "clipboard"; source: "ClipboardTab.qml" }
+        Loader { anchors.fill: parent; active: page === "alerts";    source: "AlertsTab.qml" }
+        Loader { anchors.fill: parent; active: page === "shelf";     source: "ShelfTab.qml" }
+        Loader { anchors.fill: parent; active: page === "notes";     source: "NotesTab.qml" }
+        Loader { anchors.fill: parent; active: page === "calendar";  source: "CalendarTab.qml" }
+        Loader { anchors.fill: parent; active: page === "controls";  source: "ControlsTab.qml" }
+        Loader { anchors.fill: parent; active: page === "bluetooth"; source: "BluetoothTab.qml" }
+        Loader { anchors.fill: parent; active: page === "system";    source: "SystemTab.qml" }
+        Loader { anchors.fill: parent; active: page === "wifi";      source: "WifiTab.qml" }
+        Loader { anchors.fill: parent; active: page === "search";    source: "SearchTab.qml" }
+        Loader { anchors.fill: parent; active: page === "settings";  source: "SettingsTab.qml" }
     }
 }

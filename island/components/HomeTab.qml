@@ -1,15 +1,14 @@
 import QtQuick
-import QtQuick.Layouts
 import "../services"
 import "../components"
 
-
+// Alcove-style Home: music | week + weather | clock | AppMixer | volume + brightness
 Item {
     id: root
     clip: true
     signal navigate(string page)
 
-    readonly property real gap: Theme.s3
+    readonly property real gap: 12
     readonly property real avail: width - 3 * gap
 
     // Rebuild the week only when the DAY changes, not on every clock tick.
@@ -17,7 +16,7 @@ Item {
     readonly property var week: { today; return buildWeek() }
 
     function buildWeek() {
-        const n = new Date()
+        const n = new Date()                       // not Clock.now, so no per-tick dependency
         const monday = new Date(n.getFullYear(), n.getMonth(), n.getDate() - ((n.getDay() + 6) % 7))
         const out = []
         for (let i = 0; i < 7; i++) {
@@ -44,34 +43,34 @@ Item {
             height: parent.height
             spacing: root.gap
 
-            Card {
+            Rectangle {
                 id: weekCard
                 width: parent.width
                 height: (parent.height - root.gap) / 2
-                hoverEnabled: false
+                color: Theme.card
+                radius: Theme.cardRadius
+                clip: true
 
                 Text {
-                    x: Theme.s4; y: Theme.s3
+                    x: 14; y: 12
                     text: Qt.formatDate(Clock.now, "MMMM")
                     color: Theme.fg
                     font.pixelSize: 17
                     font.bold: true
-                    font.family: Theme.fontFamily
                 }
                 Row {
-                    x: Theme.s4
-                    y: parent.height - height - Theme.s3
+                    x: 14
+                    y: parent.height - height - 12
                     Repeater {
                         model: root.week
                         delegate: Item {
-                            width: (weekCard.width - Theme.s4 * 2) / 7
+                            width: (weekCard.width - 28) / 7
                             height: 44
                             Text {
                                 anchors.horizontalCenter: parent.horizontalCenter
                                 text: modelData.letter
                                 color: Theme.dim
                                 font.pixelSize: 10
-                                font.family: Theme.fontFamily
                             }
                             Rectangle {
                                 anchors.horizontalCenter: parent.horizontalCenter
@@ -83,7 +82,6 @@ Item {
                                     text: modelData.num
                                     color: Theme.fg
                                     font.pixelSize: 11
-                                    font.family: Theme.fontFamily
                                     font.bold: modelData.today
                                 }
                             }
@@ -99,10 +97,12 @@ Item {
         }
 
         // ---- clock ----
-        Card {
+        Rectangle {
             width: root.avail * 0.17
             height: parent.height
-            hoverEnabled: false
+            color: Theme.card
+            radius: Theme.cardRadius
+            clip: true
 
             Column {
                 anchors.centerIn: parent
@@ -113,50 +113,42 @@ Item {
                     color: Theme.fg
                     font.pixelSize: 28
                     font.bold: true
-                    font.family: Theme.fontFamily
                 }
                 Text {
                     anchors.horizontalCenter: parent.horizontalCenter
                     text: Qt.formatDate(Clock.now, "dddd")
                     color: Theme.fg
                     font.pixelSize: 12
-                    font.family: Theme.fontFamily
                 }
                 Text {
                     anchors.horizontalCenter: parent.horizontalCenter
                     text: Qt.formatDate(Clock.now, "d MMMM")
                     color: Theme.dim
                     font.pixelSize: 11
-                    font.family: Theme.fontFamily
                 }
             }
         }
 
-        // ---- per-app volume mixer + volume + brightness ----
+        // ---- per-app volume mixer ----
+        AppMixer {
+            width: root.avail * 0.235
+            height: parent.height * 0.45
+        }
+
+        // ---- volume + brightness ----
         Column {
             width: root.avail * 0.235
-            height: parent.height
+            height: parent.height * 0.55
             spacing: root.gap
 
-            AppMixer {
+            VolumeCard {
                 width: parent.width
-                height: parent.height * 0.45
+                height: (parent.height - root.gap) * 0.6
+                onOutputClicked: root.navigate("volume")
             }
-
-            // Volume + Brightness in a ColumnLayout so dropdown pushes brightness down
-            ColumnLayout {
+            BrightnessCard {
                 width: parent.width
-                height: parent.height * 0.55
-                spacing: Theme.s3
-
-                VolumeCard {
-                    Layout.fillWidth: true
-                    onOutputClicked: root.navigate("volume")
-                }
-
-                BrightnessCard {
-                    Layout.fillWidth: true
-                }
+                height: (parent.height - root.gap) * 0.4
             }
         }
     }

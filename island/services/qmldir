@@ -8,7 +8,4 @@ singleton Network Network.qml
 singleton Apps Apps.qml
 singleton Shelf Shelf.qml
 singleton Lyrics Lyrics.qml
-singleton Power Power.qml
-singleton Screenshot Screenshot.qml
-singleton Stats Stats.qml
 Cmd Cmd.qml
