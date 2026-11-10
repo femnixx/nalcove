@@ -151,7 +151,6 @@ Item {
                 id: batteryCard
                 width: parent.width
                 height: parent.height * 0.60
-                anchors.bottom: parent.bottom
             }
         }
     }
