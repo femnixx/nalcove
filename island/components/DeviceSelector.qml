@@ -5,7 +5,7 @@ Item {
     property var model: []
     property var currentNode: null
     property bool opened: false
-    property real maxDropdownHeight: root.itemHeight * 7 + root.listSpacing * 6 + root.listPadding
+    property real maxDropdownHeight: root.itemHeight * 4 + root.listSpacing * 3 + root.listPadding
     property bool overlayMode: false
     signal picked(var node)
 
@@ -53,7 +53,7 @@ Item {
         radius: 10; color: "#1a1a1a"; border.color: "#2a2a2a"; border.width: 1
         clip: true
         visible: root.opened
-        z: overlayMode ? 10 : 0
+        z: overlayMode ? 100 : 0
         layer.enabled: overlayMode
 
         Flickable {
