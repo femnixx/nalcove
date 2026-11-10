@@ -11,19 +11,18 @@ Rectangle {
 
     readonly property real spacing: 10
     readonly property real margins: 24
-    readonly property real bottomReserve: 12
+    readonly property real bottomReserve: 6
 
     readonly property real brightnessHeight: Services.Brightness.available ? brightnessRow.implicitHeight : 0
 
     // Closed: volume + brightness only. Open: card extends downward to fit the
-    // dropdown (capped at maxHeight) so brightness stays visible at the bottom.
-    // Dropdown is scrollable when there are more outputs than fit in the space.
+    // dropdown (scrollable when there are more outputs than fit) so brightness
+    // stays visible at the bottom, capped so the card never touches the container edge.
     height: Math.min(margins * 2
         + sliderRow.height + spacing
         + outputSelector.height
         + brightnessHeight,
-        maxHeight,
-        parent.height > 0 ? parent.height - bottomReserve : maxHeight)
+        root.parent.height > 0 ? root.parent.height - bottomReserve : maxHeight)
 
     Column {
         id: content
@@ -57,7 +56,8 @@ Rectangle {
             id: outputSelector
             width: content.width
             maxDropdownHeight: Math.max(40,
-                root.maxHeight - margins * 2 - sliderRow.height - brightnessHeight - root.spacing * 3 - 12)
+                (root.parent.height > 0 ? root.parent.height - bottomReserve : maxHeight)
+                - margins * 2 - sliderRow.height - brightnessHeight - root.spacing * 3 - 12)
             model: Services.Audio.sinks
             currentNode: Services.Audio.sink
             onPicked: n => Services.Audio.setDefaultSink(n)
