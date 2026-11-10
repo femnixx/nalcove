@@ -53,6 +53,10 @@ Item {
         "cloud-snow": "\uF0598",
         "cloud-lightning": "\uEF2C",
         "cloud-fog": "\uF0591",
+        // Battery indicators
+        "battery": "\uF242",
+        "battery-charging": "\uF0084",
+        "battery-low": "\uF12A1",
         // State indicators
         "hovered": "\u25CF",
         "pressed": "\uF110",
