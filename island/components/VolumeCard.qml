@@ -11,6 +11,7 @@ Rectangle {
 
     readonly property real spacing: 10
     readonly property real margins: 24
+    readonly property real bottomReserve: 12
 
     readonly property real brightnessHeight: Services.Brightness.available ? brightnessRow.implicitHeight : 0
 
@@ -21,7 +22,8 @@ Rectangle {
         + sliderRow.height + spacing
         + outputSelector.height
         + brightnessHeight,
-        maxHeight)
+        maxHeight,
+        parent.height > 0 ? parent.height - bottomReserve : maxHeight)
 
     Column {
         id: content
