@@ -1,5 +1,4 @@
 import QtQuick
-import qs.components 1.0
 import QtQuick.Controls
 import QtQuick.Layouts
 
@@ -11,8 +10,8 @@ Item {
 
     Column {
         anchors.fill: parent
-        anchors.margins: Theme.s4
-        spacing: Theme.s3
+        anchors.margins: Style.s4
+        spacing: Style.s3
 
         // DND toggle
         Card {
@@ -21,22 +20,22 @@ Item {
 
             RowLayout {
                 anchors.fill: parent
-                anchors.margins: Theme.s4
-                spacing: Theme.s3
+                anchors.margins: Style.s4
+                spacing: Style.s3
 
                 Column {
                     Layout.fillWidth: true
                     Text {
                         text: "Do Not Disturb"
-                        color: Theme.fg
-                        font.pixelSize: Theme.tBody
-                        font.family: Theme.fontFamily
+                        color: Style.fg
+                        font.pixelSize: Style.tBody
+                        font.family: Style.fontFamily
                     }
                     Text {
                         text: "Suppress notification peeks"
-                        color: Theme.dim
-                        font.pixelSize: Theme.tSmall
-                        font.family: Theme.fontFamily
+                        color: Style.dim
+                        font.pixelSize: Style.tSmall
+                        font.family: Style.fontFamily
                     }
                 }
 
@@ -57,35 +56,35 @@ Item {
 
             RowLayout {
                 anchors.fill: parent
-                anchors.margins: Theme.s4
-                spacing: Theme.s3
+                anchors.margins: Style.s4
+                spacing: Style.s3
 
                 Column {
                     Layout.fillWidth: true
                     Text {
                         text: "Notification History"
-                        color: Theme.fg
-                        font.pixelSize: Theme.tBody
-                        font.family: Theme.fontFamily
+                        color: Style.fg
+                        font.pixelSize: Style.tBody
+                        font.family: Style.fontFamily
                     }
                     Text {
                         text: "Max items: " + Services.Notifications.maxItems
-                        color: Theme.dim
-                        font.pixelSize: Theme.tSmall
-                        font.family: Theme.fontFamily
+                        color: Style.dim
+                        font.pixelSize: Style.tSmall
+                        font.family: Style.fontFamily
                     }
                 }
 
                 Row {
-                    spacing: Theme.s2
+                    spacing: Style.s2
                     Pill {
                         text: "−"
-                        height: Theme.controlH
+                        height: Style.controlH
                         onClicked: Services.Notifications.maxItems = Math.max(10, Services.Notifications.maxItems - 10)
                     }
                     Pill {
                         text: "+"
-                        height: Theme.controlH
+                        height: Style.controlH
                         onClicked: Services.Notifications.maxItems = Math.min(200, Services.Notifications.maxItems + 10)
                     }
                 }
@@ -101,19 +100,19 @@ Item {
 
             Column {
                 anchors.fill: parent
-                anchors.margins: Theme.s4
-                spacing: Theme.s2
+                anchors.margins: Style.s4
+                spacing: Style.s2
 
                 Text {
                     text: "Appearance"
-                    color: Theme.dim
-                    font.pixelSize: Theme.tSmall
+                    color: Style.dim
+                    font.pixelSize: Style.tSmall
                     font.bold: true
-                    font.family: Theme.fontFamily
+                    font.family: Style.fontFamily
                 }
 
                 Row {
-                    spacing: Theme.s2
+                    spacing: Style.s2
                     Pill { text: "Light"; onClicked: console.log("Light theme not implemented") }
                     Pill { text: "Dark"; onClicked: console.log("Dark theme not implemented") }
                     Pill { text: "System"; onClicked: console.log("System theme not implemented") }
@@ -130,29 +129,29 @@ Item {
 
             Column {
                 anchors.fill: parent
-                anchors.margins: Theme.s4
-                spacing: Theme.s2
+                anchors.margins: Style.s4
+                spacing: Style.s2
 
                 Text {
                     text: "About"
-                    color: Theme.dim
-                    font.pixelSize: Theme.tSmall
+                    color: Style.dim
+                    font.pixelSize: Style.tSmall
                     font.bold: true
-                    font.family: Theme.fontFamily
+                    font.family: Style.fontFamily
                 }
 
                 Text {
                     text: "Dynamic Notch for Niri"
-                    color: Theme.fg
-                    font.pixelSize: Theme.tBody
-                    font.family: Theme.fontFamily
+                    color: Style.fg
+                    font.pixelSize: Style.tBody
+                    font.family: Style.fontFamily
                 }
 
                 Text {
                     text: "Built with Quickshell & Qt Quick"
-                    color: Theme.dim
-                    font.pixelSize: Theme.tSmall
-                    font.family: Theme.fontFamily
+                    color: Style.dim
+                    font.pixelSize: Style.tSmall
+                    font.family: Style.fontFamily
                 }
             }
         }

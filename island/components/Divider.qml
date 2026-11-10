@@ -1,12 +1,11 @@
 import QtQuick
-import qs.components 1.0
 
 
 Rectangle {
     id: root
     Layout.fillWidth: true
     height: 1
-    color: Theme.cardBorder
+    color: Style.cardBorder
     visible: root.show
 
     property bool show: true

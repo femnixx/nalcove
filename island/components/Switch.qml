@@ -1,5 +1,4 @@
 import QtQuick
-import qs.components 1.0
 
 
 Rectangle {
@@ -12,11 +11,11 @@ Rectangle {
     property bool enabled: true
     property var onToggled: null
 
-    color: root.enabled ? (root.checked ? Theme.accent : Theme.track) : Theme.track
+    color: root.enabled ? (root.checked ? Style.accent : Style.track) : Style.track
     border.color: "transparent"
     border.width: 0
 
-    Behavior on color { ColorAnimation { duration: Theme.dFast; easing.type: Theme.easingOutCubic } }
+    Behavior on color { ColorAnimation { duration: Style.dFast; easing.type: Style.easingOutCubic } }
 
     Rectangle {
         x: root.checked ? root.width - height : 0

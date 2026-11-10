@@ -1,8 +1,5 @@
 import QtQuick
-import qs.components 1.0
-import QtQuick.Controls
 import Quickshell.Io
-
 
 Item {
     id: root
@@ -38,84 +35,45 @@ Item {
     Component.onCompleted: listProc.running = true
     onVisibleChanged: if (visible) listProc.running = true
 
-    Column {
-        anchors.fill: parent
-        anchors.margins: Theme.s4
-        spacing: Theme.s3
+    Row {
+        id: header
+        spacing: 12
+        Text { text: "Clipboard History"; color: "#ffffff"; font.pixelSize: 15; font.bold: true
+               anchors.verticalCenter: parent.verticalCenter }
+        Rectangle {
+            width: 80; height: 26; radius: 13; color: "#22ffffff"
+            Text { anchors.centerIn: parent; text: "Clear All"; color: "#ffffff"; font.pixelSize: 11 }
+            MouseArea { anchors.fill: parent; onClicked: wipeProc.running = true }
+        }
+    }
 
-        RowLayout {
-            Layout.fillWidth: true
-            spacing: Theme.s2
-
+    ListView {
+        anchors { top: header.bottom; topMargin: 10; left: parent.left; right: parent.right; bottom: parent.bottom }
+        model: root.entries
+        spacing: 6
+        clip: true
+        delegate: Rectangle {
+            width: ListView.view.width; height: 34; radius: 10
+            color: ma.containsMouse ? "#22ffffff" : "#16ffffff"
             Text {
-                text: "Clipboard History"
-                color: Theme.fg
-                font.pixelSize: Theme.tTitle
-                font.bold: true
-                font.family: Theme.fontFamily
-                Layout.alignment: Qt.AlignVCenter
+                anchors.fill: parent; anchors.leftMargin: 12; anchors.rightMargin: 12
+                text: modelData.replace(/^\d+\t/, "")
+                color: "#ffffff"; font.pixelSize: 12
+                elide: Text.ElideRight; verticalAlignment: Text.AlignVCenter
             }
-
-            Item { Layout.fillWidth: true }
-
-            Pill {
-                text: "Clear All"
-                danger: true
-                height: Theme.controlH
-                enabled: root.entries.length > 0
-                Layout.alignment: Qt.AlignVCenter
-                onClicked: wipeProc.running = true
-            }
-        }
-
-        Divider {}
-
-        ListView {
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            model: root.entries
-            spacing: Theme.s2
-            clip: true
-
-            delegate: Card {
-                width: ListView.view.width
-                hoverEnabled: true
-                implicitHeight: Theme.controlH
-
-                Row {
-                    anchors.fill: parent
-                    anchors.margins: Theme.s3
-                    spacing: Theme.s3
-
-                    Text {
-                        width: parent.width
-                        text: modelData.replace(/^\d+\t/, "")
-                        color: Theme.fg
-                        font.pixelSize: Theme.tBody
-                        font.family: Theme.fontFamily
-                        elide: Text.ElideRight
-                        verticalAlignment: Text.AlignVCenter
-                    }
-                }
-
-                MouseArea {
-                    id: ma
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    onClicked: {
-                        copyProc.command = ["sh", "-c", "printf '%s' \"$1\" | cliphist decode | wl-copy", "sh", modelData]
-                        copyProc.running = true
-                    }
+            MouseArea {
+                id: ma; anchors.fill: parent; hoverEnabled: true
+                onClicked: {
+                    copyProc.command = ["sh", "-c", "printf '%s' \"$1\" | cliphist decode | wl-copy", "sh", modelData]
+                    copyProc.running = true
                 }
             }
         }
+    }
 
-        EmptyState {
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            visible: root.entries.length === 0
-            icon: "clipboard"
-            text: "Clipboard is empty"
-        }
+    Text {
+        anchors.centerIn: parent
+        visible: root.entries.length === 0
+        text: "Clipboard is empty"; color: "#66ffffff"
     }
 }

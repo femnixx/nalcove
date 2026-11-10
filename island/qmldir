@@ -1,1 +1,2 @@
+module Island
 singleton Media 1.0 Media.qml

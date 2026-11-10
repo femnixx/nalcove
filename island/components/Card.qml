@@ -4,9 +4,9 @@ import QtQuick.Controls
 Rectangle {
     id: root
     Layout.fillWidth: true
-    radius: Theme.rLg
-    color: Theme.card
-    border.color: Theme.cardBorder
+    radius: Style.rLg
+    color: Style.card
+    border.color: Style.cardBorder
     border.width: 1
 
     property alias content: contentItem.children
@@ -23,12 +23,12 @@ Rectangle {
         State {
             name: "hovered"
             when: root.hoverEnabled && root.hovered && !root.pressed
-            PropertyChanges { target: root; color: Theme.cardHi }
+            PropertyChanges { target: root; color: Style.cardHi }
         },
         State {
             name: "pressed"
             when: root.pressed
-            PropertyChanges { target: root; color: Theme.cardHi; opacity: 0.9 }
+            PropertyChanges { target: root; color: Style.cardHi; opacity: 0.9 }
         }
     ]
 

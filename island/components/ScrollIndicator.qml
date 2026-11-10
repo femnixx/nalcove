@@ -1,5 +1,4 @@
 import QtQuick
-import qs.components 1.0
 
 
 Item {
@@ -17,7 +16,7 @@ Item {
         id: handle
         width: parent.width
         radius: 2
-        color: Theme.dim
+        color: Style.dim
         opacity: root._visible ? 0.6 : 0
         y: root._visible ? (root.flickable.contentY / root.flickable.contentHeight) * (root.height - height) : 0
         height: Math.max(30, (root.flickable.height / root.flickable.contentHeight) * root.height)

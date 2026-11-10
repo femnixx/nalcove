@@ -1,12 +1,11 @@
 import QtQuick
-import qs.components 1.0
 import QtQuick.Layouts
 
 
 Item {
     id: root
     Layout.fillWidth: true
-    implicitHeight: Theme.rowH
+    implicitHeight: Style.rowH
 
     property string title: ""
     property bool showTrailing: false
@@ -14,14 +13,14 @@ Item {
 
     RowLayout {
         anchors.fill: parent
-        spacing: Theme.s2
+        spacing: Style.s2
 
         Text {
             text: root.title
-            font.pixelSize: Theme.tTitle
+            font.pixelSize: Style.tTitle
             font.bold: true
-            color: Theme.fg
-            font.family: Theme.fontFamily
+            color: Style.fg
+            font.family: Style.fontFamily
             Layout.alignment: Qt.AlignVCenter
         }
 

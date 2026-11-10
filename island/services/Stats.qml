@@ -1,4 +1,5 @@
-pragma Singleton
+// island/services/Stats.qml - Stub: system stats service
+
 import QtQuick 2.15
 
 Item {

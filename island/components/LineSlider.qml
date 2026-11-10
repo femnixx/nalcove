@@ -1,5 +1,4 @@
 import QtQuick
-import qs.components 1.0
 
 Item {
     id: root
@@ -13,7 +12,7 @@ Item {
         width: parent.width
         height: 6
         radius: 3
-        color: Theme.track
+        color: Style.track
         Rectangle {
             width: parent.width * Math.max(0, Math.min(1, root.value))
             height: parent.height

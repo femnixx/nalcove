@@ -7,10 +7,10 @@ import QtQuick.Shapes 2.15
 Item {
     id: islandShapeRoot
 
-    property int width: Theme.idleWidth   // 200 idle
-    property int height: Theme.idleHeight // 34 idle
-    property int bottomRadius: Theme.idleBottomRadius  // 14 idle
-    property int flare: Theme.flareRadius // 12
+    property int width: Style.idleWidth   // 200 idle
+    property int height: Style.idleHeight // 34 idle
+    property int bottomRadius: Style.idleBottomRadius  // 14 idle
+    property int flare: Style.flareRadius // 12
 
     Shape {
         id: shape
@@ -24,7 +24,7 @@ Item {
         ShapePath {
             id: shapePath
             strokeWidth: 0
-            fillColor: Theme.islandFill
+            fillColor: Style.islandFill
 
             // Start at top-left: begin at the leftmost point of the top edge
             // For a centered 200-wide shape, the shape starts at x=0 (left edge)

@@ -1,7 +1,5 @@
 import QtQuick
-import qs.components 1.0
 import Quickshell.Io
-
 
 Item {
     id: root
@@ -47,20 +45,22 @@ Item {
         return "cloud"
     }
 
-    Card {
+    Rectangle {
         anchors.fill: parent
-        hoverEnabled: false
+        color: Style.card
+        radius: Style.cardRadius
+        clip: true
 
         Column {
             anchors.fill: parent
-            anchors.margins: Theme.s3
-            spacing: Theme.s1
+            anchors.margins: 12
+            spacing: 4
 
             Text {
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: root.loading ? "Loading..." : root.city
-                color: Theme.dim
-                font.pixelSize: Theme.tCaption
+                color: Style.dim
+                font.pixelSize: 11
                 elide: Text.ElideRight
             }
 
@@ -68,13 +68,13 @@ Item {
                 anchors.horizontalCenter: parent.horizontalCenter
                 name: root.iconName
                 size: 36
-                color: Theme.fg
+                color: Style.fg
             }
 
             Text {
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: root.temp
-                color: Theme.fg
+                color: Style.fg
                 font.pixelSize: 24
                 font.bold: true
             }
@@ -82,8 +82,8 @@ Item {
             Text {
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: root.weatherDesc
-                color: Theme.dim
-                font.pixelSize: Theme.tCaption
+                color: Style.dim
+                font.pixelSize: 11
                 elide: Text.ElideRight
             }
         }

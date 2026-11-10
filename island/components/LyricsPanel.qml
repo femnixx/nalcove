@@ -1,19 +1,16 @@
 import QtQuick
-import qs.components 1.0
 import "../services" as Services
-
 
 Item {
     id: panel
 
-    // status messages
     Text {
         anchors.centerIn: parent
         width: parent.width - 20
         visible: Services.Lyrics.status !== "synced" && Services.Lyrics.status !== "plain"
         horizontalAlignment: Text.AlignHCenter
         wrapMode: Text.Wrap
-        color: Theme.dim; font.pixelSize: Theme.tBody
+        color: "#9a9aa0"; font.pixelSize: 13
         text: ({
             idle: "Nothing playing",
             loading: "Searching lyrics\u2026",
@@ -27,7 +24,6 @@ Item {
         }
     }
 
-    // synced lyrics: the active line stays centred
     ListView {
         id: lv
         anchors.fill: parent
@@ -50,7 +46,7 @@ Item {
             horizontalAlignment: Text.AlignHCenter
             wrapMode: Text.Wrap
             text: modelData.text !== "" ? modelData.text : "\u266a"
-            color: cur ? Theme.fg : Theme.faint
+            color: cur ? "#ffffff" : "#66ffffff"
             font.pixelSize: cur ? 16 : 13
             font.bold: cur
             Behavior on color { ColorAnimation { duration: 200 } }
@@ -58,7 +54,6 @@ Item {
         }
     }
 
-    // plain lyrics
     Flickable {
         anchors.fill: parent
         visible: Services.Lyrics.status === "plain"
@@ -70,7 +65,7 @@ Item {
             id: plainText
             width: panel.width
             text: Services.Lyrics.plain
-            color: Theme.dim; font.pixelSize: Theme.tBody
+            color: "#cfcfd4"; font.pixelSize: 13
             horizontalAlignment: Text.AlignHCenter
             wrapMode: Text.Wrap
         }

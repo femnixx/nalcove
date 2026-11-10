@@ -1,8 +1,7 @@
 // island/components/PillBattery.qml - Stub for battery pill (transient live activity)
-import qs.components 1.0
 
 import QtQuick 2.15
-
+import qs.components 1.0 as Style
 
 Item {
     id: pillBatteryRoot
@@ -11,8 +10,8 @@ Item {
     property bool charging: false
     property bool active: false
 
-    width: Theme.idleWidth
-    height: Theme.idleHeight
+    width: Style.idleWidth
+    height: Style.idleHeight
     opacity: active ? 1 : 0
     enabled: active
 }

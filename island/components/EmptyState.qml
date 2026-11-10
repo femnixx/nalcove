@@ -1,5 +1,4 @@
 import QtQuick
-import qs.components 1.0
 
 
 Item {
@@ -14,19 +13,19 @@ Item {
 
     Column {
         anchors.centerIn: parent
-        spacing: Theme.s3
+        spacing: Style.s3
 
         Icon {
             name: root.icon
             size: 48
-            color: Theme.dim
+            color: Style.dim
         }
 
         Text {
             text: root.text
-            color: Theme.dim
-            font.pixelSize: Theme.tBody
-            font.family: Theme.fontFamily
+            color: Style.dim
+            font.pixelSize: Style.tBody
+            font.family: Style.fontFamily
             horizontalAlignment: Text.AlignHCenter
         }
 

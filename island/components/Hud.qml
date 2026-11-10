@@ -1,8 +1,7 @@
 // island/components/Hud.qml - Stub for HUD replacements (volume, brightness)
-import qs.components 1.0
 
 import QtQuick 2.15
-
+import qs.components 1.0 as Style
 
 Item {
     id: hudRoot
@@ -12,8 +11,8 @@ Item {
     property bool muted: false
     property bool active: false
 
-    width: Theme.idleWidth
-    height: Theme.idleHeight
+    width: Style.idleWidth
+    height: Style.idleHeight
     opacity: active ? 1 : 0
     enabled: active
 }

@@ -1,15 +1,11 @@
 import QtQuick
-import qs.components 1.0
 import QtQuick.Controls
-import QtQuick.Layouts
-
+import "../services"
 
 // Month grid + today card
 Item {
     id: root
     clip: true
-    Layout.fillWidth: true
-    Layout.fillHeight: true
 
     // Rebuild only when the day changes
     readonly property int today: Clock.now.getDate()
@@ -26,122 +22,88 @@ Item {
         return out
     }
 
-    RowLayout {
-        anchors.fill: parent
-        spacing: Theme.s3
+    readonly property real gap: 12
+    readonly property real leftW: (width - gap) * 0.53
 
-        // Month calendar
-        Card {
-            id: monthCard
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            Layout.minimumWidth: 300
-            hoverEnabled: false
+    Rectangle {
+        id: monthCard
+        x: 0; y: 0
+        width: root.leftW; height: root.height
+        color: Style.card
+        radius: Style.cardRadius
 
-            Column {
-                anchors.fill: parent
-                anchors.margins: Theme.s4
-                spacing: Theme.s3
+        readonly property real cell: (width - 40) / 7
 
-                Text {
-                    text: Qt.formatDate(Clock.now, "MMMM yyyy")
-                    color: Theme.fg
-                    font.pixelSize: Theme.tTitle
-                    font.bold: true
-                    font.family: Theme.fontFamily
+        Text {
+            x: 20; y: 12
+            text: Qt.formatDate(Clock.now, "MMMM yyyy")
+            color: Style.fg
+            font.pixelSize: 16
+            font.bold: true
+        }
+        Row {
+            x: 20; y: 44
+            Repeater {
+                model: ["M", "T", "W", "T", "F", "S", "S"]
+                delegate: Item {
+                    width: monthCard.cell; height: 16
+                    Text { anchors.centerIn: parent; text: modelData; color: Style.dim; font.pixelSize: 11 }
                 }
-
-                readonly property real cell: (parent.width - Theme.s4 * 2) / 7
-
-                Row {
-                    Layout.fillWidth: true
-                    spacing: 0
-
-                    Repeater {
-                        model: ["M", "T", "W", "T", "F", "S", "S"]
-                        delegate: Item {
-                            Layout.fillWidth: true
-                            height: 16
-                            Text {
-                                anchors.centerIn: parent
-                                text: modelData
-                                color: Theme.dim
-                                font.pixelSize: Theme.tCaption
-                                font.family: Theme.fontFamily
-                            }
-                        }
+            }
+        }
+        Grid {
+            x: 20; y: 64
+            columns: 7
+            Repeater {
+                model: root.cellList
+                delegate: Item {
+                    width: monthCard.cell
+                    height: Math.min(26, (monthCard.height - 72) / 6)
+                    Rectangle {
+                        anchors.centerIn: parent
+                        width: 22; height: 22; radius: 11
+                        visible: modelData === root.today
+                        color: Style.accent
                     }
-                }
-
-                Grid {
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
-                    columns: 7
-                    spacing: 0
-
-                    Repeater {
-                        model: root.cellList
-                        delegate: Item {
-                            width: monthCard.cell
-                            height: Math.min(Theme.controlH, (parent.height - 20) / 6)
-
-                            Rectangle {
-                                anchors.centerIn: parent
-                                width: 28; height: 28; radius: 14
-                                visible: modelData === root.today
-                                color: Theme.accent
-                            }
-
-                            Text {
-                                anchors.centerIn: parent
-                                visible: modelData > 0
-                                text: modelData
-                                color: modelData === root.today ? "#ffffff" : Theme.fg
-                                font.pixelSize: Theme.tSmall
-                                font.family: Theme.fontFamily
-                                font.bold: modelData === root.today
-                            }
-                        }
+                    Text {
+                        anchors.centerIn: parent
+                        visible: modelData > 0
+                        text: modelData
+                        color: Style.fg
+                        font.pixelSize: 12
                     }
                 }
             }
         }
+    }
 
-        // Today detail
-        Card {
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            Layout.minimumWidth: 200
-            hoverEnabled: false
+    Rectangle {
+        x: root.leftW + root.gap; y: 0
+        width: root.width - x; height: root.height
+        color: Style.card
+        radius: Style.cardRadius
 
-            Column {
-                anchors.centerIn: parent
-                spacing: Theme.s2
-
-                Text {
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    text: Qt.formatDate(Clock.now, "d")
-                    color: Theme.fg
-                    font.pixelSize: 56
-                    font.bold: true
-                    font.family: Theme.fontFamily
-                }
-
-                Text {
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    text: Qt.formatDate(Clock.now, "dddd")
-                    color: Theme.fg
-                    font.pixelSize: Theme.tBody
-                    font.family: Theme.fontFamily
-                }
-
-                Text {
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    text: "Nothing scheduled"
-                    color: Theme.dim
-                    font.pixelSize: Theme.tSmall
-                    font.family: Theme.fontFamily
-                }
+        Column {
+            anchors.centerIn: parent
+            spacing: 6
+            Text {
+                anchors.horizontalCenter: parent.horizontalCenter
+                text: Qt.formatDate(Clock.now, "d")
+                color: Style.fg
+                font.pixelSize: 56
+                font.bold: true
+            }
+            Text {
+                anchors.horizontalCenter: parent.horizontalCenter
+                text: Qt.formatDate(Clock.now, "dddd")
+                color: Style.fg
+                font.pixelSize: 15
+            }
+            Text {
+                anchors.horizontalCenter: parent.horizontalCenter
+                text: "Nothing scheduled"
+                color: Style.dim
+                font.pixelSize: 12
             }
         }
     }
