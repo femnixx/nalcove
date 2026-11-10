@@ -1,4 +1,5 @@
 import QtQuick
+import qs.components as Theme
 import Quickshell.Widgets
 import "../services"
 import "../components"

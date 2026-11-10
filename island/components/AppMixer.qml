@@ -1,4 +1,5 @@
 import QtQuick
+import qs.components as Theme
 import Quickshell
 import "../services" as Services
 

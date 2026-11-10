@@ -1,4 +1,5 @@
 import QtQuick
+import qs.components as Theme
 import QtQuick.Controls
 import Quickshell.Io
 
@@ -67,11 +68,7 @@ Item {
             }
         }
 
-        Rectangle {
-            Layout.fillWidth: true
-            height: 1
-            color: Theme.cardBorder
-        }
+        Divider {}
 
         ListView {
             Layout.fillWidth: true

@@ -1,4 +1,5 @@
 import QtQuick
+import qs.components as Theme
 import QtQuick.Controls
 import Quickshell
 import Quickshell.Io

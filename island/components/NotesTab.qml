@@ -1,4 +1,5 @@
 import QtQuick
+import qs.components as Theme
 import QtQuick.Controls
 
 
@@ -30,7 +31,7 @@ Card {
             Item { Layout.fillWidth: true }
         }
 
-        Rectangle { Layout.fillWidth: true; height: 1; color: Theme.cardBorder }
+        Divider {}
 
         Rectangle {
             Layout.fillWidth: true

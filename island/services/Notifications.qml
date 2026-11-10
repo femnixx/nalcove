@@ -20,6 +20,7 @@ Singleton {
         onNotification: n => {
             n.tracked = true
             root._updateList()
+            root.received(n)
         }
     }
 

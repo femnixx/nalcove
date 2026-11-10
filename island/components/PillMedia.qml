@@ -1,4 +1,5 @@
 // island/components/PillMedia.qml - Stub for media pill (compact live activity)
+import qs.components as Theme
 
 import QtQuick 2.15
 

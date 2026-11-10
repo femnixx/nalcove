@@ -1,4 +1,5 @@
 import QtQuick
+import qs.components as Theme
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Bluetooth

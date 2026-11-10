@@ -1,4 +1,5 @@
 // island/components/PillBattery.qml - Stub for battery pill (transient live activity)
+import qs.components as Theme
 
 import QtQuick 2.15
 

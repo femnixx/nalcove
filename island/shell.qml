@@ -12,6 +12,7 @@ import QtQuick.Shapes
 import QtQuick.Controls
 import "services"
 import "components"
+import qs.components as Theme
 
 ShellRoot {
     PanelWindow {
@@ -311,8 +312,6 @@ ShellRoot {
                         }
                     }
 
-                    property var n: islandWindow.peekNotification
-
                     MouseArea {
                         anchors.fill: parent
                         hoverEnabled: true
@@ -321,97 +320,106 @@ ShellRoot {
                         onClicked: islandWindow.triggerMode = "hotkey"
                     }
 
-                    Row {
+                    Loader {
                         anchors.fill: parent
-                        anchors.margins: Theme.s4
-                        spacing: Theme.s3
+                        active: islandWindow.peekNotification !== null
+                        sourceComponent: notificationContent
+                    }
 
-                        // App icon or image
-                        Rectangle {
-                            width: 64; height: 64
-                            radius: Theme.rMd
-                            color: Theme.card
-                            border.color: Theme.cardBorder
-                            border.width: 1
+                    Component {
+                        id: notificationContent
+                        Row {
+                            anchors.fill: parent
+                            anchors.margins: Theme.s4
+                            spacing: Theme.s3
 
-                            Image {
-                                anchors.fill: parent
-                                anchors.margins: 4
-                                source: n.image || n.appIcon || ""
-                                fillMode: Image.PreserveAspectFit
-                                visible: !!(n.image || n.appIcon)
+                            // App icon or image
+                            Rectangle {
+                                width: 64; height: 64
+                                radius: Theme.rMd
+                                color: Theme.card
+                                border.color: Theme.cardBorder
+                                border.width: 1
+
+                                Image {
+                                    anchors.fill: parent
+                                    anchors.margins: 4
+                                    source: islandWindow.peekNotification.image || islandWindow.peekNotification.appIcon || ""
+                                    fillMode: Image.PreserveAspectFit
+                                    visible: !!(islandWindow.peekNotification.image || islandWindow.peekNotification.appIcon)
+                                }
+                                Icon {
+                                    anchors.centerIn: parent
+                                    name: "bell"
+                                    size: Theme.iconLg
+                                    color: Theme.accent
+                                    visible: !(islandWindow.peekNotification.image || islandWindow.peekNotification.appIcon)
+                                }
                             }
-                            Icon {
-                                anchors.centerIn: parent
-                                name: "bell"
-                                size: Theme.iconLg
-                                color: Theme.accent
-                                visible: !(n.image || n.appIcon)
-                            }
-                        }
 
-                        // Text content
-                        Column {
-                            width: parent.width - 64 - Theme.s3 - 48
-                            spacing: 2
-                            anchors.verticalCenter: parent.verticalCenter
+                            // Text content
+                            Column {
+                                width: parent.width - 64 - Theme.s3 - 48
+                                spacing: 2
+                                anchors.verticalCenter: parent.verticalCenter
 
-                            Row {
-                                spacing: Theme.s2
+                                Row {
+                                    spacing: Theme.s2
+                                    Text {
+                                        text: islandWindow.peekNotification.appName || "Unknown"
+                                        color: Theme.dim
+                                        font.pixelSize: Theme.tSmall
+                                        font.bold: true
+                                        font.family: Theme.fontFamily
+                                    }
+                                    Text {
+                                        text: "·"
+                                        color: Theme.faint
+                                        font.pixelSize: Theme.tSmall
+                                        font.family: Theme.fontFamily
+                                    }
+                                    Text {
+                                        text: islandWindow.peekNotification.urgency === 2 ? "Critical" : "Notification"
+                                        color: islandWindow.peekNotification.urgency === 2 ? Theme.danger : Theme.dim
+                                        font.pixelSize: Theme.tSmall
+                                        font.family: Theme.fontFamily
+                                    }
+                                }
+
                                 Text {
-                                    text: n.appName || "Unknown"
-                                    color: Theme.dim
-                                    font.pixelSize: Theme.tSmall
+                                    text: islandWindow.peekNotification.summary || ""
+                                    color: Theme.fg
+                                    font.pixelSize: Theme.tBody
                                     font.bold: true
                                     font.family: Theme.fontFamily
+                                    elide: Text.ElideRight
                                 }
+
                                 Text {
-                                    text: "·"
-                                    color: Theme.faint
+                                    text: islandWindow.peekNotification.body || ""
+                                    color: Theme.dim
                                     font.pixelSize: Theme.tSmall
                                     font.family: Theme.fontFamily
+                                    wrapMode: Text.WordWrap
+                                    maximumLineCount: 2
+                                    elide: Text.ElideRight
                                 }
-                                Text {
-                                    text: n.urgency === 2 ? "Critical" : "Notification"
-                                    color: n.urgency === 2 ? Theme.danger : Theme.dim
-                                    font.pixelSize: Theme.tSmall
-                                    font.family: Theme.fontFamily
-                                }
-                            }
 
-                            Text {
-                                text: n.summary || ""
-                                color: Theme.fg
-                                font.pixelSize: Theme.tBody
-                                font.bold: true
-                                font.family: Theme.fontFamily
-                                elide: Text.ElideRight
-                            }
-
-                            Text {
-                                text: n.body || ""
-                                color: Theme.dim
-                                font.pixelSize: Theme.tSmall
-                                font.family: Theme.fontFamily
-                                wrapMode: Text.WordWrap
-                                maximumLineCount: 2
-                                elide: Text.ElideRight
-                            }
-
-                            // Action buttons
-                            Row {
-                                spacing: Theme.s2
-                                visible: n.actions && n.actions.length > 0
-                                Repeater {
-                                    model: n.actions
-                                    delegate: Pill {
-                                        text: modelData.label
-                                        accent: true
-                                        height: Theme.controlH
-                                        onClicked: {
-                                            modelData.invoke()
-                                            islandWindow.peekNotification.dismiss()
-                                            islandWindow.triggerMode = "closed"
+                                // Action buttons
+                                Row {
+                                    spacing: Theme.s2
+                                    visible: islandWindow.peekNotification.actions && islandWindow.peekNotification.actions.length > 0
+                                    Repeater {
+                                        model: islandWindow.peekNotification.actions
+                                        delegate: Pill {
+                                            text: modelData.label
+                                            accent: true
+                                            height: Theme.controlH
+                                            onClicked: {
+                                                modelData.invoke()
+                                                islandWindow.peekNotification.dismiss()
+                                                islandWindow.triggerMode = "closed"
+                                            }
                                         }
                                     }
                                 }

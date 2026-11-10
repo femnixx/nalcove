@@ -1,0 +1,42 @@
+module qs.components
+AlertsTab 1.0 AlertsTab.qml
+AppMixer 1.0 AppMixer.qml
+BatteryCard 1.0 BatteryCard.qml
+BatteryPill 1.0 BatteryPill.qml
+BluetoothTab 1.0 BluetoothTab.qml
+BrightnessCard 1.0 BrightnessCard.qml
+CalendarTab 1.0 CalendarTab.qml
+Card 1.0 Card.qml
+ClipboardTab 1.0 ClipboardTab.qml
+singleton Clock 1.0 Clock.qml
+ControlsTab 1.0 ControlsTab.qml
+Dashboard 1.0 Dashboard.qml
+DeviceSelector 1.0 DeviceSelector.qml
+Divider 1.0 Divider.qml
+EmptyState 1.0 EmptyState.qml
+ExpandedContent 1.0 ExpandedContent.qml
+FlatSlider 1.0 FlatSlider.qml
+Glyph 1.0 Glyph.qml
+HomeTab 1.0 HomeTab.qml
+Hud 1.0 Hud.qml
+Icon 1.0 Icon.qml
+LineSlider 1.0 LineSlider.qml
+LyricsPanel 1.0 LyricsPanel.qml
+MusicCard 1.0 MusicCard.qml
+MusicTab 1.0 MusicTab.qml
+NotesTab 1.0 NotesTab.qml
+singleton Notifications 1.0 Notifications.qml
+PasswordField 1.0 PasswordField.qml
+PillBattery 1.0 PillBattery.qml
+PillMedia 1.0 PillMedia.qml
+Pill 1.0 Pill.qml
+ScrollIndicator 1.0 ScrollIndicator.qml
+SearchTab 1.0 SearchTab.qml
+SettingsTab 1.0 SettingsTab.qml
+ShelfTab 1.0 ShelfTab.qml
+Switch 1.0 Switch.qml
+SystemTab 1.0 SystemTab.qml
+TabHeader 1.0 TabHeader.qml
+VolumeCard 1.0 VolumeCard.qml
+WeatherCard 1.0 WeatherCard.qml
+WifiTab 1.0 WifiTab.qml

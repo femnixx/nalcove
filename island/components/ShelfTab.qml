@@ -1,4 +1,5 @@
 import QtQuick
+import qs.components as Theme
 import QtQuick.Layouts
 import QtQuick.Controls
 import "../services" as Services
@@ -94,7 +95,7 @@ Item {
             }
         }
 
-        Rectangle { Layout.fillWidth: true; height: 1; color: Theme.cardBorder }
+        Divider {}
 
         // ---- Content area ----
         Item {
