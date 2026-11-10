@@ -13,7 +13,7 @@ Item {
         return Math.floor(t / 60) + ":" + String(t % 60).padStart(2, "0")
     }
 
-    // --- TOP BAR: All icons grouped on left + Battery on right ---
+    // --- TOP BAR: Main tabs on left + Battery on right ---
     Rectangle {
         id: tabBar
         x: 20; y: 12
@@ -120,22 +120,15 @@ Item {
         }
     }
 
-    // Separator line below top bar
-    Rectangle {
-        x: 20; y: 62
-        width: 740; height: 1
-        color: "#2a2a2e"
-    }
-
-    // --- UTILITY ROW: Lower icons (left) + Battery on right ---
+    // --- SECOND ROW: Smaller icons on left + Battery on right, sitting on top of divider ---
     Row {
         id: utilityRow
         anchors.left: parent.left
         anchors.leftMargin: 20
         anchors.top: tabBar.bottom
-        anchors.topMargin: 18
-        height: 24
-        spacing: 8
+        anchors.topMargin: 12
+        height: 20
+        spacing: 6
 
         Repeater {
             model: [
@@ -146,17 +139,29 @@ Item {
                 ["settings", "settings", "Settings"]
             ]
             delegate: Item {
-                width: 84; height: 24
+                width: 60; height: 20
                 property string pageId: modelData[0]
                 property string iconName: modelData[1]
                 property string label: modelData[2]
 
-                Icon {
-                    name: iconName
-                    size: 16
-                    color: "#9a9aa0"
+                Column {
                     anchors.centerIn: parent
+                    spacing: 1
+                    Icon {
+                        name: iconName
+                        size: 14
+                        color: "#9a9aa0"
+                        anchors.horizontalCenter: parent.horizontalCenter
+                    }
+                    Text {
+                        text: label
+                        font.pixelSize: 7
+                        font.bold: true
+                        color: "#9a9aa0"
+                        anchors.horizontalCenter: parent.horizontalCenter
+                    }
                 }
+
                 MouseArea {
                     anchors.fill: parent
                     onClicked: dashboardRoot.page = pageId
@@ -169,18 +174,18 @@ Item {
             anchors.right: parent.right
             anchors.rightMargin: 20
             anchors.verticalCenter: parent.verticalCenter
-            radius: 12
+            radius: 10
             color: "#1a1a1a"
             border.color: "#2a2a2e"
             border.width: 1
 
             Row {
                 anchors.centerIn: parent
-                spacing: 6
+                spacing: 4
 
                 Icon {
                     name: Battery.charging ? "battery-charging" : (Battery.low ? "battery-low" : "battery")
-                    size: 16
+                    size: 12
                     color: Battery.accent
                     visible: Battery.ready
                     anchors.verticalCenter: parent.verticalCenter
@@ -189,22 +194,29 @@ Item {
                 Text {
                     text: Battery.ready ? Math.round(Battery.pct * 100) + "%" : "—"
                     color: Battery.accent
-                    font.pixelSize: 12
+                    font.pixelSize: 10
                     font.bold: true
                     visible: Battery.ready
                     anchors.verticalCenter: parent.verticalCenter
                 }
 
-                Item { width: 8 }
+                Item { width: 6 }
             }
         }
     }
 
+    // Divider line below second row
+    Rectangle {
+        x: 20; y: utilityRow.y + utilityRow.height + 12
+        width: 740; height: 1
+        color: "#2a2a2e"
+    }
+
     // --- CONTENT AREA: Tab panels ---
     Item {
-        x: 20; y: 110
+        x: 20; y: utilityRow.y + utilityRow.height + 20
         width: 740
-        height: parent.height - 120
+        height: parent.height - (utilityRow.y + utilityRow.height + 20)
 
         // Lazy-loaded tabs using Loader
         Loader { anchors.fill: parent; active: page === "home";      source: "HomeTab.qml" }
