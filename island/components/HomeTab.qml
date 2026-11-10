@@ -29,8 +29,9 @@ Item {
         return out
     }
 
-    Item {
+    Row {
         anchors.fill: parent
+        spacing: root.gap
 
         // ---- music ----
         MusicCard { width: root.avail * 0.31; height: parent.height }
@@ -133,13 +134,24 @@ Item {
             height: parent.height * 0.45
         }
 
-        // ---- volume + brightness ----
-        VolumeCard {
-            id: volumeCard
+        // ---- volume + brightness + battery stacked at bottom right ----
+        Column {
             width: root.avail * 0.235
-            anchors.right: parent.right
             anchors.top: parent.top
             anchors.bottom: parent.bottom
+            spacing: root.gap
+
+            VolumeCard {
+                id: volumeCard
+                width: parent.width
+                height: parent.height * 0.35
+            }
+
+            BatteryCard {
+                id: batteryCard
+                width: parent.width
+                height: parent.height * 0.60
+            }
         }
     }
 }
