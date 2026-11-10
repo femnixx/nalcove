@@ -52,7 +52,7 @@ Singleton {
         }
     }
 
-    function togglePlay() { if (active && active.canTogglePlaying) active.togglePlaying() }
+    function togglePlay() { if (active) active.togglePlaying() }
     function next()       { if (active && active.canGoNext) active.next() }
     function previous()   { if (active && active.canGoPrevious) active.previous() }
     function toggleShuffle() { if (active && active.shuffleSupported) active.shuffle = !active.shuffle }
