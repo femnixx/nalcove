@@ -5,9 +5,10 @@ Rectangle {
     id: root
     radius: 18; color: "#1a1a1a"; border.color: "#2a2a2a"; border.width: 1
 clip: true
-height: Math.min(content.implicitHeight + 24, parent.height * 0.65)
+    height: Math.min(content.implicitHeight + 24, maxCardHeight)
 
     property real maxDropdownHeight: 200
+    property real maxCardHeight: 200
     property bool dropdownOpen: outputSelector.opened
 
     signal outputClicked()

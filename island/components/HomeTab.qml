@@ -150,6 +150,7 @@ Item {
                 VolumeCard {
                     id: volumeCard
                     width: parent.width
+                    maxCardHeight: volBrightArea.height * 0.6
                     maxDropdownHeight: volBrightArea.height - brightnessCard.implicitHeight - root.gap - 40
                     onOutputClicked: root.navigate("volume")
                 }
