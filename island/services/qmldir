@@ -7,4 +7,5 @@ singleton Battery Battery.qml
 singleton Network Network.qml
 singleton Apps Apps.qml
 singleton Shelf Shelf.qml
+singleton Lyrics Lyrics.qml
 Cmd Cmd.qml

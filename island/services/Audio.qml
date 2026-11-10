@@ -1,84 +1,28 @@
 pragma Singleton
 import QtQuick
 import Quickshell
+import Quickshell.Io
 import Quickshell.Services.Pipewire
 
 Singleton {
     id: root
 
-    // Track the default sink and source so their audio properties are available
-    PwObjectTracker {
-        objects: [Pipewire.defaultAudioSink, Pipewire.defaultAudioSource]
-    }
-
-    // Also track all nodes for the device dropdowns and per-app streams
+    // ---------- PipeWire: volume, mute, defaults (needs bound nodes) ----------
+    PwObjectTracker { objects: [Pipewire.defaultAudioSink, Pipewire.defaultAudioSource] }
     PwObjectTracker { objects: Pipewire.nodes.values }
-
-    // Filter function for sinks and sources
-    function filterNodes(nodes, isSink) {
-        var result = []
-        for (var i = 0; i < nodes.count; i++) {
-            var node = nodes.get(i)
-            if (node && !node.isStream && node.isSink === isSink && node.audio) {
-                result.push(node)
-            }
-        }
-        return result
-    }
-
-    // Use ListModel for sinks and sources so PwObjectTracker can track them
-    ListModel { id: sinksModel }
-    ListModel { id: sourcesModel }
-
-    // Update models when Pipewire.nodes changes
-    Connections {
-        target: Pipewire.nodes
-        function onRowsInserted() { updateModels() }
-        function onRowsRemoved() { updateModels() }
-    }
-
-    function updateModels() {
-        sinksModel.clear()
-        sourcesModel.clear()
-        for (var i = 0; i < Pipewire.nodes.count; i++) {
-            var node = Pipewire.nodes.get(i)
-            if (node && !node.isStream && node.audio) {
-                if (node.isSink) sinksModel.append(node)
-                else sourcesModel.append(node)
-            }
-        }
-    }
-
-    // Initialize
-    Component.onCompleted: updateModels()
 
     readonly property var sink: Pipewire.defaultAudioSink
     readonly property var source: Pipewire.defaultAudioSource
 
-    // Readiness checks - only true when node is bound and has audio interface
     readonly property bool sinkReady: sink !== null && sink.ready && sink.audio !== null
     readonly property bool sourceReady: source !== null && source.ready && source.audio !== null
 
-    // Volume/muted properties - only return values when ready
     readonly property real sinkVolume: sinkReady ? sink.audio.volume : 0
     readonly property bool sinkMuted: sinkReady ? sink.audio.muted : false
     readonly property real sourceVolume: sourceReady ? source.audio.volume : 0
     readonly property bool sourceMuted: sourceReady ? source.audio.muted : false
 
-    // Per-app streams (playback)
-    readonly property var appStreams: Pipewire.nodes.values.filter(n => n.isStream && !n.isSink && n.audio)
-
-    // Per-app capture streams (microphone)
-    readonly property var captureStreams: Pipewire.nodes.values.filter(n => n.isStream && n.isSink && n.audio)
-
     function label(n) { return n ? (n.description || n.nickname || n.name) : "No device" }
-
-    function appName(n) {
-        var p = n.properties
-        return p["application.name"] || p["node.description"] || n.description || n.name || "Unknown"
-    }
-    function appDetail(n) { return n.properties["media.name"] || "" }
-    function appIconName(n) { return n.properties["application.icon-name"] || "" }
 
     function setSinkVolume(v) {
         if (!sinkReady) return
@@ -96,6 +40,66 @@ Singleton {
         if (!sourceReady) return
         source.audio.muted = !source.audio.muted
     }
-    function setDefaultSink(n)   { if (n) Pipewire.preferredDefaultAudioSink = n }
-    function setDefaultSource(n) { if (n) Pipewire.preferredDefaultAudioSource = n }
+
+    // Default device: use pactl (same names the lists below contain)
+    function setDefaultSink(n)   { if (n && n.name) Quickshell.execDetached(["pactl", "set-default-sink", n.name]) }
+    function setDefaultSource(n) { if (n && n.name) Quickshell.execDetached(["pactl", "set-default-source", n.name]) }
+
+    // ---------- Device lists via pactl (independent of node binding) ----------
+    property var sinks: []
+    property var sources: []
+
+    function _parse(text, isSource) {
+        try {
+            return JSON.parse(text)
+                .filter(d => !(isSource && (d.name.endsWith(".monitor")
+                               || (d.properties && d.properties["device.class"] === "monitor"))))
+                .map(d => ({ name: d.name, description: d.description || d.name, index: d.index }))
+        } catch (e) {
+            return []
+        }
+    }
+
+    Process {
+        id: sinkList
+        command: ["pactl", "--format=json", "list", "sinks"]
+        stdout: StdioCollector { onStreamFinished: root.sinks = root._parse(text, false) }
+    }
+    Process {
+        id: sourceList
+        command: ["pactl", "--format=json", "list", "sources"]
+        stdout: StdioCollector { onStreamFinished: root.sources = root._parse(text, true) }
+    }
+
+    function refreshDevices() {
+        if (!sinkList.running) sinkList.running = true
+        if (!sourceList.running) sourceList.running = true
+    }
+
+    // Event-driven refresh: pactl subscribe prints a line per change.
+    Process {
+        id: subscribe
+        running: true
+        command: ["pactl", "subscribe"]
+        stdout: SplitParser {
+            onRead: line => { if (/'(new|remove)' on (sink|source) /.test(line)) debounce.restart() }
+        }
+    }
+    Timer { id: debounce; interval: 300; onTriggered: root.refreshDevices() }
+
+    Component.onCompleted: refreshDevices()
+
+    // ---------- Per-application streams (optional; used by AppMixer.qml) ----------
+    readonly property var appStreams: Pipewire.nodes.values
+        .filter(n => n.isStream && !n.isSink && n.audio)
+        .sort((a, b) => a.id - b.id)
+
+    function appName(n) {
+        var p = n.properties
+        return p["application.name"] || p["node.description"] || n.description || n.name || "Unknown"
+    }
+    function appDetail(n) { return n.properties["media.name"] || "" }
+    function appIconName(n) { return n.properties["application.icon-name"] || "" }
+    function setNodeVolume(n, v) { if (n && n.audio) n.audio.volume = Math.max(0, Math.min(1, v)) }
+    function toggleNodeMute(n) { if (n && n.audio) n.audio.muted = !n.audio.muted }
 }

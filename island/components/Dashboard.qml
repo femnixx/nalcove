@@ -1,6 +1,4 @@
 import QtQuick
-import QtQuick.Controls
-import Quickshell.Io
 import "../services" as Services
 
 Item {
@@ -10,56 +8,9 @@ Item {
     property bool active: false
     anchors.fill: parent
 
-    // Lyrics fetcher state
-    property string liveLyricsText: "Loading..."
-    property string lastTrackedTitle: ""
-
     function fmtTime(s) {
         const t = Math.max(0, Math.floor(s))
         return Math.floor(t / 60) + ":" + String(t % 60).padStart(2, "0")
-    }
-
-    // Lyrics fetcher process
-    Process {
-        id: fetchLyricsProcess
-        stdout: StdioCollector {
-            onStreamFinished: {
-                try {
-                    var data = JSON.parse(text);
-                    if (data && data.lyrics) {
-                        dashboardRoot.liveLyricsText = data.lyrics;
-                    } else {
-                        dashboardRoot.liveLyricsText = "No lyrics found for this track.";
-                    }
-                } catch(e) {
-                    dashboardRoot.liveLyricsText = "No lyrics available.";
-                }
-            }
-        }
-    }
-
-    function fetchLyrics(currentArtist, currentTitle) {
-        fetchLyricsProcess.command = ["curl", "-s", "https://api.lyrics.ovh/v1/" + encodeURIComponent(currentArtist) + "/" + encodeURIComponent(currentTitle)];
-        fetchLyricsProcess.running = true;
-    }
-
-    // Auto-fetch hook tracking titles - uses Services.Media
-    Timer {
-        interval: 2000
-        running: dashboardRoot.active && page === "music"
-        repeat: true
-        onTriggered: {
-            if (Services.Media.hasPlayer && Services.Media.title !== "") {
-                if (Services.Media.title !== lastTrackedTitle) {
-                    lastTrackedTitle = Services.Media.title;
-                    dashboardRoot.liveLyricsText = "Searching backend...";
-                    fetchLyrics(Services.Media.artist, Services.Media.title);
-                }
-            } else {
-                dashboardRoot.liveLyricsText = "None (No active media playing).";
-                lastTrackedTitle = "";
-            }
-        }
     }
 
     // --- TOP BAR: Navigation Tabs ---
@@ -133,7 +84,7 @@ Item {
         x: 20; y: 72
         width: 740
         height: 24
-        spacing: 8  // Same spacing as tabs
+        spacing: 8
 
         Repeater {
             model: [
@@ -144,7 +95,7 @@ Item {
                 ["settings", "settings", "Settings"]
             ]
             delegate: Item {
-                width: 84; height: 24  // Same width as tabs
+                width: 84; height: 24
                 property string pageId: modelData[0]
                 property string iconName: modelData[1]
                 property string label: modelData[2]

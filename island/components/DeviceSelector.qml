@@ -61,7 +61,7 @@ Item {
                 model: root.model
                 delegate: Rectangle {
                     width: list.width; height: 30; radius: 8
-                    property bool isCur: root.currentNode !== null && modelData.id === root.currentNode.id
+                    property bool isCur: !!root.currentNode && modelData.name === root.currentNode.name
                     color: ma.containsMouse ? "#2a2a2a" : "transparent"
                     Text {
                         anchors.fill: parent; anchors.leftMargin: 10; anchors.rightMargin: 10
