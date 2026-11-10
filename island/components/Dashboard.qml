@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Layouts
 import QtQuick.Shapes
 import "../services" as Services
 import qs.components 1.0
@@ -86,7 +87,7 @@ Item {
     }
 
     // --- SECOND ROW: Smaller icons spread across + battery on right ---
-    Row {
+    RowLayout {
         id: utilityRow
         anchors.left: parent.left
         anchors.leftMargin: 20
@@ -95,7 +96,7 @@ Item {
         anchors.top: tabBar.bottom
         anchors.topMargin: 12
         height: 20
-        spacing: 20
+        spacing: 10
 
         Repeater {
             model: [
@@ -106,7 +107,8 @@ Item {
                 ["settings", "settings", "Settings"]
             ]
             delegate: Item {
-                width: 60; height: 20
+                Layout.preferredWidth: 60
+                Layout.alignment: Qt.AlignHCenter
                 property string pageId: modelData[0]
                 property string iconName: modelData[1]
                 property string label: modelData[2]
@@ -136,11 +138,11 @@ Item {
             }
         }
 
+        // Spacer pushes battery to the right
+        Item { Layout.fillWidth: true }
+
         // Battery indicator on the right - percentage first, then icon
         Row {
-            anchors.right: parent.right
-            anchors.rightMargin: 20
-            anchors.verticalCenter: parent.verticalCenter
             spacing: 6
 
             Text {

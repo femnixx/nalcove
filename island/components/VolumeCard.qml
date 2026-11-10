@@ -13,10 +13,9 @@ Rectangle {
     readonly property real margins: 24
 
     // Card height: volume slider + brightness only. Dropdown floats as overlay on top.
-    height: Math.min(margins * 2
+    height: margins * 2
         + sliderRow.height + spacing
-        + brightnessRow.implicitHeight,
-        maxHeight)
+        + brightnessRow.height
 
     Column {
         id: content
@@ -52,7 +51,7 @@ Rectangle {
             width: content.width
             maxDropdownHeight: Math.max(40,
                 (parent.height > 0 ? parent.height : maxHeight)
-                - margins * 2 - sliderRow.height - brightnessRow.implicitHeight - root.spacing * 3 - 12)
+                - margins * 2 - sliderRow.height - brightnessRow.height - root.spacing * 3 - 12)
             model: Services.Audio.sinks
             currentNode: Services.Audio.sink
             onPicked: n => Services.Audio.setDefaultSink(n)
@@ -62,6 +61,7 @@ Rectangle {
         Row {
             id: brightnessRow
             width: parent.width; spacing: 10
+            height: 22
             Icon { name: "sun"; size: 18; anchors.verticalCenter: parent.verticalCenter }
             FlatSlider {
                 width: parent.width - 18 - 34 - 20
