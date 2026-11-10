@@ -8,6 +8,7 @@ Rectangle {
     height: content.implicitHeight + 24
 
     property real maxDropdownHeight: 200
+    property bool dropdownOpen: outputSelector.opened
 
     signal outputClicked()
 

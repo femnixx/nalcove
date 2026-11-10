@@ -18,7 +18,7 @@ Item {
     function close() { opened = false }
 
     width: parent ? parent.width : 200
-    height: header.height + (opened ? listColumn.implicitHeight : 0)
+    height: header.height + (opened ? dropdownBg.height : 0)
     clip: true
 
     // Header
@@ -53,9 +53,12 @@ Item {
         Rectangle {
             id: dropdownBg
             width: parent.width
-            height: flickable.visible ? flickable.height : staticList.implicitHeight + 8
+            height: Math.min(contentHeight, root.maxDropdownHeight)
             radius: 10; color: "#1a1a1a"; border.color: "#2a2a2a"; border.width: 1
             clip: true
+
+            // Calculate content height based on items
+            property real contentHeight: flickable.visible ? (list.height + 8) : (staticList.implicitHeight + 8)
 
             // Scrollable list for many items (>3)
             Flickable {

@@ -140,22 +140,41 @@ Item {
             id: volBrightArea
             width: root.avail * 0.235
             height: parent.height * 0.55
+            clip: true
 
             Column {
                 id: volBrightColumn
-                anchors.fill: parent
+                anchors { left: parent.left; right: parent.right; top: parent.top; bottom: parent.bottom }
                 spacing: root.gap
 
                 VolumeCard {
                     id: volumeCard
                     width: parent.width
-                    maxDropdownHeight: volBrightArea.height - 70
+                    maxDropdownHeight: Math.max(volBrightArea.height - brightnessCard.implicitHeight - root.gap - 60, 100)
                     onOutputClicked: root.navigate("volume")
                 }
 
                 BrightnessCard {
                     id: brightnessCard
                     width: parent.width
+                }
+            }
+
+            // Silent warning sensor - overlay, shows when brightness would be compressed
+            Item {
+                id: compressionWarning
+                anchors { left: parent.left; right: parent.right; bottom: parent.bottom; margins: 8 }
+                height: brightnessCard.visible && (volBrightColumn.implicitHeight > volBrightArea.height) ? 24 : 0
+                visible: height > 0
+                z: 10
+                Rectangle {
+                    anchors.fill: parent; anchors.margins: 4
+                    radius: 6; color: "#ff9500"; opacity: 0.15; border.color: "#ff9500"; border.width: 1
+                    Text {
+                        anchors.centerIn: parent
+                        text: "⚠ Brightness compressed"
+                        color: "#ff9500"; font.pixelSize: 10; font.bold: true
+                    }
                 }
             }
         }
