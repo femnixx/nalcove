@@ -1,31 +1,49 @@
 import QtQuick
-import QtQuick.Controls
 
-Popup {
+Item {
     id: root
     property var model: []
     property var currentNode: null
-    property bool dropUp: false
+    property bool opened: false
     signal picked(var node)
 
     function labelOf(n) { return n ? (n.description || n.nickname || n.name || "Unknown") : "No device" }
+    function open() { opened = true }
+    function close() { opened = false }
 
     width: parent ? parent.width : 200
-    y: dropUp ? -height - 4 : (parent ? parent.height + 4 : 0)
-    padding: 0
-    closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutsideParent
+    height: 32 + (opened ? list.height + 8 : 0)
+    clip: true
+    Behavior on height { NumberAnimation { duration: 120; easing.type: Easing.OutCubic } }
 
-    enter: Transition { NumberAnimation { property: "opacity"; from: 0; to: 1; duration: 100 } }
-    exit: Transition { NumberAnimation { property: "opacity"; from: 1; to: 0; duration: 100 } }
+    // Header
+    Rectangle {
+        id: header
+        width: parent.width; height: 32; radius: 10; color: "#1a1a1a"
+        Text {
+            anchors.fill: parent; anchors.leftMargin: 10; anchors.rightMargin: 26
+            text: root.labelOf(root.currentNode)
+            color: "#ffffff"; font.pixelSize: 12
+            elide: Text.ElideRight; verticalAlignment: Text.AlignVCenter
+        }
+        Text {
+            anchors.right: parent.right; anchors.rightMargin: 10
+            anchors.verticalCenter: parent.verticalCenter
+            text: root.opened ? "▴" : "▾"; color: "#9a9aa0"
+        }
+        MouseArea {
+            anchors.fill: parent
+            onClicked: { console.log("selector clicked, devices:", root.model ? root.model.length : -1); root.opened = !root.opened }
+        }
+    }
 
-    background: Item {}
-
-    contentItem: Rectangle {
-        radius: 10
-        color: "#1a1a1a"
-        border.color: "#2a2a2a"
-        border.width: 1
-        implicitHeight: list.implicitHeight + 8
+    // List
+    Rectangle {
+        y: 36
+        width: parent.width
+        height: list.height + 8
+        radius: 10; color: "#1a1a1a"; border.color: "#2a2a2a"; border.width: 1
+        visible: root.opened
 
         Column {
             id: list
@@ -33,30 +51,29 @@ Popup {
             width: parent.width - 8
             spacing: 2
 
+            Text {
+                visible: !root.model || root.model.length === 0
+                text: "No devices found"; color: "#9a9aa0"; font.pixelSize: 12
+                height: 30; verticalAlignment: Text.AlignVCenter; leftPadding: 10
+            }
+
             Repeater {
                 model: root.model
                 delegate: Rectangle {
-                    width: list.width
-                    height: 30
-                    radius: 8
-                    color: ma.containsMouse ? "#2a2a2a" : "transparent"
+                    width: list.width; height: 30; radius: 8
                     property bool isCur: root.currentNode !== null && modelData.id === root.currentNode.id
-
+                    color: ma.containsMouse ? "#2a2a2a" : "transparent"
                     Text {
-                        anchors.fill: parent
-                        anchors.leftMargin: 10
-                        anchors.rightMargin: 10
+                        anchors.fill: parent; anchors.leftMargin: 10; anchors.rightMargin: 10
                         text: root.labelOf(modelData)
                         color: parent.isCur ? "#3b8bff" : "#ffffff"
-                        font.pixelSize: 12
-                        elide: Text.ElideRight
+                        font.pixelSize: 12; elide: Text.ElideRight
                         verticalAlignment: Text.AlignVCenter
                     }
                     MouseArea {
                         id: ma
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        onClicked: { root.picked(modelData); root.close() }
+                        anchors.fill: parent; hoverEnabled: true
+                        onClicked: { root.picked(modelData); root.opened = false }
                     }
                 }
             }

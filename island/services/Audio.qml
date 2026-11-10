@@ -6,60 +6,18 @@ import Quickshell.Services.Pipewire
 Singleton {
     id: root
 
-    // Track the default sink and source so their audio properties are available
-    PwObjectTracker {
-        objects: [Pipewire.defaultAudioSink, Pipewire.defaultAudioSource]
-    }
-
-    // Also track all nodes for the device dropdowns
+    // Track all nodes so their audio properties are populated (needed for volume and for the lists below)
     PwObjectTracker { objects: Pipewire.nodes.values }
-
-    // Filter function for sinks and sources
-    function filterNodes(nodes, isSink) {
-        var result = []
-        for (var i = 0; i < nodes.count; i++) {
-            var node = nodes.get(i)
-            if (node && !node.isStream && node.isSink === isSink && node.audio) {
-                result.push(node)
-            }
-        }
-        return result
-    }
-
-    // Use ListModel for sinks and sources so PwObjectTracker can track them
-    ListModel { id: sinksModel }
-    ListModel { id: sourcesModel }
-
-    // Update models when Pipewire.nodes changes
-    Connections {
-        target: Pipewire.nodes
-        function onRowsInserted() { updateModels() }
-        function onRowsRemoved() { updateModels() }
-    }
-
-    function updateModels() {
-        sinksModel.clear()
-        sourcesModel.clear()
-        for (var i = 0; i < Pipewire.nodes.count; i++) {
-            var node = Pipewire.nodes.get(i)
-            if (node && !node.isStream && node.audio) {
-                if (node.isSink) sinksModel.append(node)
-                else sourcesModel.append(node)
-            }
-        }
-    }
-
-    // Initialize
-    Component.onCompleted: updateModels()
 
     readonly property var sink: Pipewire.defaultAudioSink
     readonly property var source: Pipewire.defaultAudioSource
 
-    // Readiness checks - only true when node is bound and has audio interface
+    readonly property var sinks: Pipewire.nodes.values.filter(n => !n.isStream && n.isSink && n.audio)
+    readonly property var sources: Pipewire.nodes.values.filter(n => !n.isStream && !n.isSink && n.audio)
+
     readonly property bool sinkReady: sink !== null && sink.ready && sink.audio !== null
     readonly property bool sourceReady: source !== null && source.ready && source.audio !== null
 
-    // Volume/muted properties - only return values when ready
     readonly property real sinkVolume: sinkReady ? sink.audio.volume : 0
     readonly property bool sinkMuted: sinkReady ? sink.audio.muted : false
     readonly property real sourceVolume: sourceReady ? source.audio.volume : 0
@@ -83,10 +41,6 @@ Singleton {
         if (!sourceReady) return
         source.audio.muted = !source.audio.muted
     }
-    function setDefaultSink(n)   { Pipewire.preferredDefaultAudioSink = n }
-    function setDefaultSource(n) { Pipewire.preferredDefaultAudioSource = n }
-
-    // Track sinks and sources via ListModels for PwObjectTracker
-    PwObjectTracker { objects: sinksModel }
-    PwObjectTracker { objects: sourcesModel }
+    function setDefaultSink(n)   { if (n) Pipewire.preferredDefaultAudioSink = n }
+    function setDefaultSource(n) { if (n) Pipewire.preferredDefaultAudioSource = n }
 }
