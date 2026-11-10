@@ -12,8 +12,25 @@ Item {
     // Unified icon font: FiraMono Nerd Font (installed via otf-firamono-nerd)
     // All icon names used across the project map to glyphs in this single font.
     readonly property var glyphMap: {
+        // Navigation tabs (Dashboard)
+        "home": "\uF015",
+        "music": "\uF001",
+        "clipboard": "\uF07F",
         "bell": "\uF0F3",
+        "folder": "\uF07B",
+        "notebook": "\uF02D",
+        "layers": "\uF0328",
         "bluetooth": "\uF293",
+        // Utility row (Dashboard)
+        "calendar": "\uF133",
+        "search": "\uF002",
+        "wifi": "\uF1EB",
+        "activity": "\uF017",
+        "settings": "\uF013",
+        // Shelf tab
+        "folder-up": "\uF0259",
+        "folder-download": "\uF024D",
+        // Media controls
         "copy": "\uF4BB",
         "file": "\uF15B",
         "lock": "\uF023",
