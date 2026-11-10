@@ -18,6 +18,11 @@ Item {
         fillMode: Image.PreserveAspectFit
         mipmap: true
         visible: false
+        onStatusChanged: {
+            if (status === Image.Error) {
+                console.warn("Icon missing: " + name)
+            }
+        }
     }
 
     MultiEffect {
