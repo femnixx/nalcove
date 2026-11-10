@@ -25,25 +25,35 @@ Rectangle {
         spacing: root.spacing
 
         // ---- Volume row ----
-        Row {
-            id: sliderRow
-            width: parent.width; spacing: 10
-            Item {
-                width: 22; height: 22; anchors.verticalCenter: parent.verticalCenter
-                Icon { name: "volume"; size: 18; anchors.centerIn: parent; opacity: Services.Audio.sinkMuted ? 0.5 : 1.0 }
-                MouseArea { anchors.fill: parent; onClicked: Services.Audio.toggleSinkMute() }
-            }
-            FlatSlider {
-                width: parent.width - 22 - 34 - 20
-                anchors.verticalCenter: parent.verticalCenter
-                value: Services.Audio.sinkVolume
-                enabled: Services.Audio.sinkReady
-                onMoved: if (Services.Audio.sinkReady) Services.Audio.setSinkVolume(value)
-            }
+        Column {
+            width: parent.width
+            spacing: 6
             Text {
-                width: 34; anchors.verticalCenter: parent.verticalCenter
-                text: Math.round(Services.Audio.sinkVolume * 100)
-                color: "#ffffff"; font.pixelSize: 12; horizontalAlignment: Text.AlignRight
+                text: "Output"
+                color: "#9a9aa0"
+                font.pixelSize: 10
+                font.bold: true
+            }
+            Row {
+                id: sliderRow
+                width: parent.width; spacing: 10
+                Item {
+                    width: 22; height: 22; anchors.verticalCenter: parent.verticalCenter
+                    Icon { name: "volume"; size: 18; anchors.centerIn: parent; opacity: Services.Audio.sinkMuted ? 0.5 : 1.0 }
+                    MouseArea { anchors.fill: parent; onClicked: Services.Audio.toggleSinkMute() }
+                }
+                FlatSlider {
+                    width: parent.width - 22 - 34 - 20
+                    anchors.verticalCenter: parent.verticalCenter
+                    value: Services.Audio.sinkVolume
+                    enabled: Services.Audio.sinkReady
+                    onMoved: if (Services.Audio.sinkReady) Services.Audio.setSinkVolume(value)
+                }
+                Text {
+                    width: 34; anchors.verticalCenter: parent.verticalCenter
+                    text: Math.round(Services.Audio.sinkVolume * 100)
+                    color: "#ffffff"; font.pixelSize: 12; horizontalAlignment: Text.AlignRight
+                }
             }
         }
 
@@ -62,21 +72,31 @@ Rectangle {
         }
 
         // ---- Brightness row ----
-        Row {
-            id: brightnessRow
-            width: parent.width; spacing: 10
-            height: 22
-            Icon { name: "sun"; size: 18; anchors.verticalCenter: parent.verticalCenter }
-            FlatSlider {
-                width: parent.width - 18 - 34 - 20
-                anchors.verticalCenter: parent.verticalCenter
-                value: Services.Brightness.level
-                onMoved: Services.Brightness.set(value)
-            }
+        Column {
+            width: parent.width
+            spacing: 6
             Text {
-                width: 34; anchors.verticalCenter: parent.verticalCenter
-                text: Math.round(Services.Brightness.level * 100)
-                color: "#ffffff"; font.pixelSize: 12; horizontalAlignment: Text.AlignRight
+                text: "Brightness"
+                color: "#9a9aa0"
+                font.pixelSize: 10
+                font.bold: true
+            }
+            Row {
+                id: brightnessRow
+                width: parent.width; spacing: 10
+                height: 22
+                Icon { name: "sun"; size: 18; anchors.verticalCenter: parent.verticalCenter }
+                FlatSlider {
+                    width: parent.width - 18 - 34 - 20
+                    anchors.verticalCenter: parent.verticalCenter
+                    value: Services.Brightness.level
+                    onMoved: Services.Brightness.set(value)
+                }
+                Text {
+                    width: 34; anchors.verticalCenter: parent.verticalCenter
+                    text: Math.round(Services.Brightness.level * 100)
+                    color: "#ffffff"; font.pixelSize: 12; horizontalAlignment: Text.AlignRight
+                }
             }
         }
     }
