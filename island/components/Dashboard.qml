@@ -57,6 +57,7 @@ Item {
                                 name: iconName
                                 size: 20
                                 color: isActive ? "#ffffff" : "#9a9aa0"
+                                anchors.horizontalCenter: parent.horizontalCenter
                                 Behavior on color { ColorAnimation { duration: 140 } }
                             }
                             Text {
@@ -64,6 +65,7 @@ Item {
                                 font.pixelSize: 9
                                 font.bold: true
                                 color: isActive ? "#ffffff" : "#9a9aa0"
+                                anchors.horizontalCenter: parent.horizontalCenter
                                 Behavior on color { ColorAnimation { duration: 140 } }
                             }
                         }
@@ -81,7 +83,7 @@ Item {
     // --- UTILITY ROW: Lower icons (aligned with tabs) ---
     Row {
         id: utilityRow
-        x: 20; y: 72
+        x: 20; y: 62
         width: 740
         height: 24
         spacing: 8
