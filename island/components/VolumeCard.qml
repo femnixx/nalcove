@@ -2,14 +2,21 @@ import QtQuick
 import "../services" as Services
 
 Rectangle {
+    id: root
     radius: 18; color: "#1a1a1a"; border.color: "#2a2a2a"; border.width: 1
+    clip: true
+    height: Math.min(content.implicitHeight + 24, maxHeight)
+
+    property real maxHeight: 200
 
     signal outputClicked()
 
     Column {
+        id: content
         anchors.fill: parent; anchors.margins: 12; spacing: 10
 
         Row {
+            id: sliderRow
             width: parent.width; spacing: 10
             Item {
                 width: 22; height: 22; anchors.verticalCenter: parent.verticalCenter
@@ -30,42 +37,14 @@ Rectangle {
             }
         }
 
-        // Device selector with popup
-        Item {
-            id: deviceSelectorWrapper
+        // Device selector with popup - height expands when opened
+        DeviceSelector {
+            id: outputSelector
             width: parent.width
-            height: 32
-
-            Rectangle {
-                id: headerBtn
-                width: parent.width; height: 32; radius: 10; color: "#1a1a1a"
-                Text {
-                    anchors.fill: parent; anchors.leftMargin: 10; anchors.rightMargin: 26
-                    text: outputSelector.labelOf(outputSelector.currentNode)
-                    color: "#ffffff"; font.pixelSize: 12
-                    elide: Text.ElideRight; verticalAlignment: Text.AlignVCenter
-                }
-                Text { 
-                    anchors.right: parent.right; anchors.rightMargin: 10; anchors.verticalCenter: parent.verticalCenter
-                    text: outputSelector.open ? "▴" : "▾"; color: "#9a9aa0" 
-                }
-                MouseArea { 
-                    anchors.fill: parent; 
-                    onClicked: { 
-                        outputSelector.x = headerBtn.mapToItem(null, 0, 0).x
-                        outputSelector.y = headerBtn.mapToItem(null, 0, headerBtn.height).y
-                        outputSelector.open ? outputSelector.close() : outputSelector.open() 
-                    } 
-                }
-            }
-
-            DeviceSelector {
-                id: outputSelector
-                width: parent.width
-                model: Services.Audio.sinks
-                currentNode: Services.Audio.sink
-                onPicked: n => Services.Audio.setDefaultSink(n)
-            }
+            maxDropdownHeight: root.maxHeight - sliderRow.height - content.spacing - 24
+            model: Services.Audio.sinks
+            currentNode: Services.Audio.sink
+            onPicked: n => Services.Audio.setDefaultSink(n)
         }
     }
 }
