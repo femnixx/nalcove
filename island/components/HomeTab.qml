@@ -148,6 +148,7 @@ Item {
         BrightnessCard {
             id: brightnessCard
             width: root.avail * 0.235
+            anchors.left: volumeCard.right
             anchors.top: parent.verticalCenter
             anchors.topMargin: root.gap / 2
             anchors.bottom: parent.bottom
