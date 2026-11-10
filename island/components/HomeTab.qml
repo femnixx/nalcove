@@ -2,7 +2,7 @@ import QtQuick
 import "../services"
 import "../components"
 
-// Alcove-style Home: music | week + weather | clock | volume + brightness
+// Alcove-style Home: music | week + weather | clock | AppMixer | volume + brightness
 Item {
     id: root
     clip: true
@@ -129,10 +129,16 @@ Item {
             }
         }
 
+        // ---- per-app volume mixer ----
+        AppMixer {
+            width: root.avail * 0.235
+            height: parent.height * 0.45
+        }
+
         // ---- volume + brightness ----
         Column {
             width: root.avail * 0.235
-            height: parent.height
+            height: parent.height * 0.55
             spacing: root.gap
 
             VolumeCard {

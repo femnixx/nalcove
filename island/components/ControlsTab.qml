@@ -68,6 +68,11 @@ Item {
 
             Item { width: 1; height: 6; visible: Services.Brightness.available }
 
+            // Per-app volume mixer
+            AppMixer { width: parent.width }
+
+            Item { width: 1; height: 6; visible: Services.Brightness.available }
+
             Text { visible: Services.Brightness.available; text: "Brightness"; color: "#9a9aa0"; font.pixelSize: 11; font.bold: true }
             Row {
                 visible: Services.Brightness.available

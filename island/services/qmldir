@@ -4,3 +4,7 @@ singleton Notifications Notifications.qml
 singleton Audio Audio.qml
 singleton Brightness Brightness.qml
 singleton Battery Battery.qml
+singleton Network Network.qml
+singleton Apps Apps.qml
+singleton Shelf Shelf.qml
+Cmd Cmd.qml

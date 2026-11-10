@@ -5,6 +5,7 @@ import QtQuick 2.15
 import Quickshell.Window
 import Quickshell.WlrLayershell
 import Quickshell.Ipc
+import Quickshell.Io
 import Island 1.0 as Theme
 
 PanelWindow {
@@ -128,6 +129,7 @@ PanelWindow {
             if (triggerMode !== "hotkey") triggerMode = "hotkey"
             openPage("shelf")
         }
+        onDropped: drop => { if (drop.hasUrls) Services.Shelf.addUrls(drop.urls) }
     }
 
     Timer {

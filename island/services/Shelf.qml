@@ -1,7 +1,7 @@
-// island/services/Shelf.qml - Shelf staging area with drag-and-drop support
+// services/Shelf.qml: shelf staging area with drag-and-drop support, using Process for file ops
 
 pragma Singleton
-import QtQuick 2.15
+import QtQuick
 import Quickshell.Io
 
 Item {
@@ -10,68 +10,124 @@ Item {
     property string shelfPath: "/home/archlinux/Downloads/NotchShelf"
     property var stagedFiles: []
 
-    Component.onCompleted: {
-        // Create shelf directory if it doesn't exist
-        var dir = File(shelfPath)
-        if (!dir.exists) {
-            dir.mkpath(".")
+    // Process-based file operations
+    Process {
+        id: listProc
+        command: ["sh", "-c", "ls -1 " + shelfPath + " 2>/dev/null || mkdir -p " + shelfPath + " && ls -1 " + shelfPath]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                if (text) {
+                    var lines = text.trim().split("\n")
+                    if (lines.length === 1 && lines[0] === "") {
+                        stagedFiles = []
+                    } else {
+                        var newFiles = []
+                        for (var i = 0; i < lines.length; i++) {
+                            if (lines[i].trim()) {
+                                var filename = lines[i].trim()
+                                newFiles.push({
+                                    name: filename,
+                                    path: shelfPath + "/" + filename,
+                                    size: 0,
+                                    modified: Date.now()
+                                })
+                            }
+                        }
+                        stagedFiles = newFiles
+                    }
+                }
+            }
         }
-        // Load existing staged files
-        refreshStagedFiles()
+    }
+
+    Process {
+        id: statProc
+        command: ["stat", "-c%s", ""]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                if (text && statIndex >= 0 && statIndex < stagedFiles.length) {
+                    var size = parseInt(text.trim())
+                    if (!isNaN(size)) {
+                        var updated = stagedFiles.slice()
+                        updated[statIndex].size = size
+                        stagedFiles = updated
+                    }
+                }
+            }
+        }
+    }
+
+    property int statIndex: -1
+
+    function getFileSize(path, index) {
+        statIndex = index
+        statProc.command = ["stat", "-c%s", path]
+        statProc.running = true
+    }
+
+    Process {
+        id: copyFileProc
+        command: ["cp", "", ""]
+    }
+
+    Process {
+        id: removeFileProc
+        command: ["rm", ""]
+    }
+
+    Process {
+        id: clearAllProc
+        command: ["rm", "-f", ""]
+    }
+
+    Process {
+        id: openFolderProc
+        command: ["xdg-open", ""]
+    }
+
+    Process {
+        id: copyTextProc
+        command: ["wl-copy", ""]
     }
 
     function refreshStagedFiles() {
-        var dir = File(shelfPath)
-        if (dir.exists) {
-            var entries = dir.entryList(["*"], File.Files | File.NoDotAndDotDot)
-            stagedFiles = []
-            for (var i = 0; i < entries.length; i++) {
-                var fileInfo = File(shelfPath + "/" + entries[i])
-                stagedFiles.push({
-                    name: entries[i],
-                    path: shelfPath + "/" + entries[i],
-                    size: fileInfo.size,
-                    modified: fileInfo.lastModified
-                })
-            }
-        }
+        listProc.running = true
     }
 
     function addFile(sourcePath) {
-        var destPath = shelfPath + "/" + File(sourcePath).name
-        // Copy file to shelf
-        if (File.copy(sourcePath, destPath)) {
-            refreshStagedFiles()
-            return true
+        var destName = sourcePath.split("/").pop()
+        copyFileProc.command = ["cp", sourcePath, shelfPath + "/" + destName]
+        copyFileProc.onCompleted = function() {
+            if (copyFileProc.exitCode === 0) {
+                refreshStagedFiles()
+            }
         }
-        return false
+        copyFileProc.running = true
     }
 
     function removeFile(fileName) {
-        var filePath = shelfPath + "/" + fileName
-        if (File.remove(filePath)) {
-            refreshStagedFiles()
-            return true
+        removeFileProc.command = ["rm", shelfPath + "/" + fileName]
+        removeFileProc.onCompleted = function() {
+            if (removeFileProc.exitCode === 0) {
+                refreshStagedFiles()
+            }
         }
-        return false
+        removeFileProc.running = true
     }
 
     function clearAll() {
-        var dir = File(shelfPath)
-        if (dir.exists) {
-            var entries = dir.entryList(["*"], File.Files | File.NoDotAndDotDot)
-            for (var i = 0; i < entries.length; i++) {
-                File.remove(shelfPath + "/" + entries[i])
+        clearAllProc.command = ["rm", "-f", shelfPath + "/*"]
+        clearAllProc.onCompleted = function() {
+            if (clearAllProc.exitCode === 0) {
+                refreshStagedFiles()
             }
-            refreshStagedFiles()
         }
+        clearAllProc.running = true
     }
 
     function openShelf() {
-        var openProc = Process {
-            command: ["xdg-open", shelfPath]
-        }
-        openProc.running = true
+        openFolderProc.command = ["xdg-open", shelfPath]
+        openFolderProc.running = true
     }
 
     // Handle file drop from external apps
@@ -81,9 +137,20 @@ Item {
             var url = urls[i]
             var localPath = url.startsWith("file://") ? url.slice(7) : url
             if (addFile(localPath)) {
-                added.push(File(localPath).name)
+                added.push(localPath.split("/").pop())
             }
         }
         return added
+    }
+
+    Component.onCompleted: {
+        refreshStagedFiles()
+    }
+
+    Timer {
+        interval: 2000
+        running: true
+        repeat: true
+        onTriggered: refreshStagedFiles()
     }
 }
