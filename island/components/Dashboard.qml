@@ -13,19 +13,18 @@ Item {
         return Math.floor(t / 60) + ":" + String(t % 60).padStart(2, "0")
     }
 
-    // --- TOP BAR: Main tabs on left + Battery on right ---
+    // --- TOP BAR: Main tabs centered + Battery circle on right ---
     Rectangle {
         id: tabBar
         x: 20; y: 12
         width: 740; height: 44
         color: "transparent"
 
-        // Tabs grouped on the left
+        // Tabs centered in available space (balanced left/right margins)
         Row {
             id: tabsRow
-            anchors.left: parent.left
-            anchors.leftMargin: 20
             anchors.verticalCenter: parent.verticalCenter
+            anchors.horizontalCenter: parent.horizontalCenter
             spacing: 8
 
             Repeater {
@@ -83,42 +82,15 @@ Item {
             }
         }
 
-        // Battery indicator on the right
-        Rectangle {
-            id: batteryBar
+        // Battery circle indicator on the right
+        BatteryCircle {
             anchors.right: parent.right
             anchors.rightMargin: 20
             anchors.verticalCenter: parent.verticalCenter
-            radius: 12
-            color: "#1a1a1a"
-            border.color: "#2a2a2e"
-            border.width: 1
-
-            Row {
-                anchors.centerIn: parent
-                spacing: 6
-
-                Icon {
-                    name: Battery.ready ? (Battery.charging ? "battery-charging" : (Battery.low ? "battery-low" : "battery")) : "zap"
-                    size: 16
-                    color: Battery.ready ? Battery.accent : "#30d158"
-                    anchors.verticalCenter: parent.verticalCenter
-                }
-
-                Text {
-                    text: Battery.ready ? Math.round(Battery.pct * 100) + "%" : "AC"
-                    color: Battery.ready ? Battery.accent : "#30d158"
-                    font.pixelSize: 12
-                    font.bold: true
-                    anchors.verticalCenter: parent.verticalCenter
-                }
-
-                Item { width: 8 }
-            }
         }
     }
 
-    // --- SECOND ROW: Smaller icons on left + Battery on right, sitting on top of divider ---
+    // --- SECOND ROW: Smaller icons centered on left side on top of divider ---
     Row {
         id: utilityRow
         anchors.left: parent.left
@@ -164,39 +136,6 @@ Item {
                     anchors.fill: parent
                     onClicked: dashboardRoot.page = pageId
                 }
-            }
-        }
-
-        // Battery indicator on the right
-        Rectangle {
-            anchors.right: parent.right
-            anchors.rightMargin: 20
-            anchors.verticalCenter: parent.verticalCenter
-            radius: 10
-            color: "#1a1a1a"
-            border.color: "#2a2a2e"
-            border.width: 1
-
-            Row {
-                anchors.centerIn: parent
-                spacing: 4
-
-                Icon {
-                    name: Battery.ready ? (Battery.charging ? "battery-charging" : (Battery.low ? "battery-low" : "battery")) : "zap"
-                    size: 12
-                    color: Battery.ready ? Battery.accent : "#30d158"
-                    anchors.verticalCenter: parent.verticalCenter
-                }
-
-                Text {
-                    text: Battery.ready ? Math.round(Battery.pct * 100) + "%" : "AC"
-                    color: Battery.ready ? Battery.accent : "#30d158"
-                    font.pixelSize: 10
-                    font.bold: true
-                    anchors.verticalCenter: parent.verticalCenter
-                }
-
-                Item { width: 6 }
             }
         }
     }

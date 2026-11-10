@@ -6,6 +6,7 @@ Item {
     property var currentNode: null
     property bool opened: false
     property real maxDropdownHeight: root.itemHeight * 7 + root.listSpacing * 6 + root.listPadding
+    property bool overlayMode: false
     signal picked(var node)
 
     readonly property int itemHeight: 30
@@ -17,8 +18,9 @@ Item {
     function close() { opened = false }
 
     width: parent ? parent.width : 200
-    height: header.height + (opened ? dropdownBg.height : 0)
-    clip: true
+    // In overlay mode, height stays at header only; dropdown floats on top
+    height: overlayMode ? header.height : header.height + (opened ? dropdownBg.height : 0)
+    clip: overlayMode ? false : true
     Behavior on height { NumberAnimation { duration: 120; easing.type: Easing.OutCubic } }
 
     // Header
@@ -42,7 +44,7 @@ Item {
         }
     }
 
-    // List - capped at maxDropdownHeight, scrollable when exceeded
+    // List - in overlay mode, floats on top below header; otherwise inline
     Rectangle {
         id: dropdownBg
         y: header.height
@@ -51,6 +53,8 @@ Item {
         radius: 10; color: "#1a1a1a"; border.color: "#2a2a2a"; border.width: 1
         clip: true
         visible: root.opened
+        z: overlayMode ? 10 : 0
+        layer.enabled: overlayMode
 
         Flickable {
             id: flickable

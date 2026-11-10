@@ -11,18 +11,14 @@ Rectangle {
 
     readonly property real spacing: 10
     readonly property real margins: 24
-    readonly property real bottomReserve: 6
 
     readonly property real brightnessHeight: Services.Brightness.available ? brightnessRow.implicitHeight : 0
 
-    // Closed: volume + brightness only. Open: card extends downward to fit the
-    // dropdown (scrollable when there are more outputs than fit) so brightness
-    // stays visible at the bottom, capped so the card never touches the container edge.
+    // Fixed card height - volume slider + brightness only. Dropdown opens as overlay on top.
     height: Math.min(margins * 2
         + sliderRow.height + spacing
-        + outputSelector.height
         + brightnessHeight,
-        root.parent.height > 0 ? root.parent.height - bottomReserve : maxHeight)
+        maxHeight)
 
     Column {
         id: content
@@ -52,15 +48,18 @@ Rectangle {
             }
         }
 
+        // Device selector header - inline, dropdown opens as overlay below
         DeviceSelector {
             id: outputSelector
             width: content.width
             maxDropdownHeight: Math.max(40,
-                (root.parent.height > 0 ? root.parent.height - bottomReserve : maxHeight)
+                (root.parent.height > 0 ? root.parent.height - 24 : maxHeight)
                 - margins * 2 - sliderRow.height - brightnessHeight - root.spacing * 3 - 12)
             model: Services.Audio.sinks
             currentNode: Services.Audio.sink
             onPicked: n => Services.Audio.setDefaultSink(n)
+            // Overlay mode: dropdown floats on top instead of pushing content down
+            overlayMode: true
         }
 
         Row {
