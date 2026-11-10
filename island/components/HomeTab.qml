@@ -134,12 +134,19 @@ Item {
             height: parent.height * 0.45
         }
 
-        // ---- volume + brightness stacked at bottom right ----
+        // ---- volume card ----
         VolumeCard {
             id: volumeCard
             width: root.avail * 0.235
             anchors.top: parent.top
-            anchors.bottom: parent.bottom
+        }
+
+        // ---- brightness card ----
+        BrightnessCard {
+            id: brightnessCard
+            width: root.avail * 0.235
+            anchors.top: volumeCard.bottom
+            anchors.topMargin: root.gap
         }
     }
 }
