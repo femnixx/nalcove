@@ -52,7 +52,15 @@ Singleton {
         }
     }
 
-    function togglePlay() { if (active) active.togglePlaying() }
+    function togglePlay() {
+        console.log("Media.togglePlay called, players:", root.players ? root.players.length : 0)
+        const a = root.active
+        console.log("Media.togglePlay active:", a ? a.identity || a.description || "unknown" : "null", "isPlaying:", a ? a.isPlaying : "N/A")
+        if (a) {
+            console.log("Media.togglePlay calling togglePlaying()")
+            a.togglePlaying()
+        }
+    }
     function next()       { if (active && active.canGoNext) active.next() }
     function previous()   { if (active && active.canGoPrevious) active.previous() }
     function toggleShuffle() { if (active && active.shuffleSupported) active.shuffle = !active.shuffle }
