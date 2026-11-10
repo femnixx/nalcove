@@ -134,24 +134,23 @@ Item {
             height: parent.height * 0.45
         }
 
-        // ---- volume + brightness + battery stacked at bottom right ----
-        Column {
+        // ---- volume card (output + dropdown) ----
+        VolumeCard {
+            id: volumeCard
             width: root.avail * 0.235
             anchors.top: parent.top
+            anchors.left: parent.left
+            height: parent.height * 0.35
+        }
+
+        // ---- brightness card ----
+        BrightnessCard {
+            id: brightnessCard
+            width: root.avail * 0.235
+            anchors.top: volumeCard.bottom
+            anchors.topMargin: root.gap
+            anchors.left: parent.left
             anchors.bottom: parent.bottom
-            spacing: root.gap
-
-            VolumeCard {
-                id: volumeCard
-                width: parent.width
-                height: parent.height * 0.35
-            }
-
-            BatteryCard {
-                id: batteryCard
-                width: parent.width
-                height: parent.height * 0.60
-            }
         }
     }
 }

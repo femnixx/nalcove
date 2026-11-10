@@ -4,7 +4,6 @@ import "../services" as Services
 Rectangle {
     id: root
     radius: 18; color: "#1a1a1a"; border.color: "#2a2a2a"; border.width: 1
-    clip: false
 
     property real maxHeight: 400
     signal outputClicked()
@@ -12,11 +11,8 @@ Rectangle {
     readonly property real spacing: 10
     readonly property real margins: 24
 
-    // Card height: volume slider + brightness slider only.
-    // Device selector dropdown floats as overlay on top and does not affect card height.
-    height: margins * 2
-        + sliderRow.height + spacing
-        + brightnessRow.height
+    // Card height: volume slider only. Dropdown floats as overlay on top.
+    height: margins * 2 + sliderRow.height
 
     Column {
         id: content
@@ -25,59 +21,49 @@ Rectangle {
         spacing: root.spacing
 
         // ---- Volume row ----
-        Row {
-            id: sliderRow
-            width: parent.width; spacing: 10
-            Item {
-                width: 22; height: 22; anchors.verticalCenter: parent.verticalCenter
-                Icon { name: "volume"; size: 18; anchors.centerIn: parent; opacity: Services.Audio.sinkMuted ? 0.5 : 1.0 }
-                MouseArea { anchors.fill: parent; onClicked: Services.Audio.toggleSinkMute() }
-            }
-            FlatSlider {
-                width: parent.width - 22 - 34 - 20
-                anchors.verticalCenter: parent.verticalCenter
-                value: Services.Audio.sinkVolume
-                enabled: Services.Audio.sinkReady
-                onMoved: if (Services.Audio.sinkReady) Services.Audio.setSinkVolume(value)
-            }
+        Column {
+            width: parent.width
+            spacing: 6
             Text {
-                width: 34; anchors.verticalCenter: parent.verticalCenter
-                text: Math.round(Services.Audio.sinkVolume * 100)
-                color: "#ffffff"; font.pixelSize: 12; horizontalAlignment: Text.AlignRight
+                text: "Output"
+                color: "#9a9aa0"
+                font.pixelSize: 10
+                font.bold: true
+            }
+            Row {
+                id: sliderRow
+                width: parent.width; spacing: 10
+                Item {
+                    width: 22; height: 22; anchors.verticalCenter: parent.verticalCenter
+                    Icon { name: "volume"; size: 18; anchors.centerIn: parent; opacity: Services.Audio.sinkMuted ? 0.5 : 1.0 }
+                    MouseArea { anchors.fill: parent; onClicked: Services.Audio.toggleSinkMute() }
+                }
+                FlatSlider {
+                    width: parent.width - 22 - 34 - 20
+                    anchors.verticalCenter: parent.verticalCenter
+                    value: Services.Audio.sinkVolume
+                    enabled: Services.Audio.sinkReady
+                    onMoved: if (Services.Audio.sinkReady) Services.Audio.setSinkVolume(value)
+                }
+                Text {
+                    width: 34; anchors.verticalCenter: parent.verticalCenter
+                    text: Math.round(Services.Audio.sinkVolume * 100)
+                    color: "#ffffff"; font.pixelSize: 12; horizontalAlignment: Text.AlignRight
+                }
             }
         }
 
         // ---- Device selector ----
-        // Overlay mode: dropdown floats on top of the card, does not push brightness down
         DeviceSelector {
             id: outputSelector
             width: content.width
             maxDropdownHeight: Math.max(40,
                 (parent.height > 0 ? parent.height : maxHeight)
-                - margins * 2 - sliderRow.height - brightnessRow.height - root.spacing * 3 - 12)
+                - margins * 2 - sliderRow.height - root.spacing * 2 - 12)
             model: Services.Audio.sinks
             currentNode: Services.Audio.sink
             onPicked: n => Services.Audio.setDefaultSink(n)
             overlayMode: true
-        }
-
-        // ---- Brightness row ----
-        Row {
-            id: brightnessRow
-            width: parent.width; spacing: 10
-            height: 22
-            Icon { name: "sun"; size: 18; anchors.verticalCenter: parent.verticalCenter }
-            FlatSlider {
-                width: parent.width - 18 - 34 - 20
-                anchors.verticalCenter: parent.verticalCenter
-                value: Services.Brightness.level
-                onMoved: Services.Brightness.set(value)
-            }
-            Text {
-                width: 34; anchors.verticalCenter: parent.verticalCenter
-                text: Math.round(Services.Brightness.level * 100)
-                color: "#ffffff"; font.pixelSize: 12; horizontalAlignment: Text.AlignRight
-            }
         }
     }
 }
