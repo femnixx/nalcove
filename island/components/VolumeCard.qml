@@ -6,13 +6,11 @@ Rectangle {
     radius: 18; color: "#1a1a1a"; border.color: "#2a2a2a"; border.width: 1
 
     property real maxHeight: 400
+    property real explicitHeight: 0
     signal outputClicked()
 
     readonly property real spacing: 10
     readonly property real margins: 24
-
-    // Card height: volume slider only. Dropdown floats as overlay on top.
-    height: margins * 2 + sliderRow.height
 
     Column {
         id: content
@@ -53,17 +51,18 @@ Rectangle {
             }
         }
 
-        // ---- Device selector ----
+        // ---- Device selector (overlay, floats on top within reserved space) ----
         DeviceSelector {
             id: outputSelector
             width: content.width
-            maxDropdownHeight: Math.max(40,
-                (parent.height > 0 ? parent.height : maxHeight)
-                - margins * 2 - sliderRow.height - root.spacing * 2 - 12)
+            maxDropdownHeight: outputSelector.itemHeight * 3 + outputSelector.listSpacing * 2 + outputSelector.listPadding
             model: Services.Audio.sinks
             currentNode: Services.Audio.sink
             onPicked: n => Services.Audio.setDefaultSink(n)
             overlayMode: true
         }
     }
+
+    // Explicit height from parent (balanced split); otherwise fit slider + closed selector header.
+    height: explicitHeight > 0 ? explicitHeight : margins * 2 + sliderRow.height + root.spacing + outputSelector.height
 }

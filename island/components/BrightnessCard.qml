@@ -12,8 +12,8 @@ Rectangle {
 
     Column {
         id: content
-        anchors.fill: parent
-        anchors.margins: root.margins
+        anchors.centerIn: parent
+        width: parent.width - root.margins * 2
         spacing: 6
 
         Text {

@@ -128,29 +128,25 @@ Item {
             }
         }
 
-        // ---- per-app volume mixer ----
-        AppMixer {
+        // ---- output selector / brightness ----
+        Column {
             width: root.avail * 0.235
-            height: parent.height * 0.45
-        }
+            height: parent.height
+            spacing: root.gap
 
-        // ---- volume card (output + dropdown) ----
-        VolumeCard {
-            id: volumeCard
-            width: root.avail * 0.235
-            anchors.top: parent.top
-            anchors.left: parent.left
-            height: parent.height * 0.35
-        }
+            // ---- output selector ----
+            VolumeCard {
+                id: volumeCard
+                width: parent.width
+                height: (parent.height - root.gap) / 2
+            }
 
-        // ---- brightness card ----
-        BrightnessCard {
-            id: brightnessCard
-            width: root.avail * 0.235
-            anchors.top: volumeCard.bottom
-            anchors.topMargin: root.gap
-            anchors.left: parent.left
-            anchors.bottom: parent.bottom
+            // ---- brightness card ----
+            BrightnessCard {
+                id: brightnessCard
+                width: parent.width
+                height: (parent.height - root.gap) / 2
+            }
         }
     }
 }

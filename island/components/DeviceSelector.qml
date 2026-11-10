@@ -47,7 +47,7 @@ Item {
     // List - in overlay mode, floats on top below header; otherwise inline
     Rectangle {
         id: dropdownBg
-        y: header.height
+        y: overlayMode ? -dropdownBg.height : header.height
         width: parent.width
         height: Math.min(list.implicitHeight + listPadding, root.maxDropdownHeight)
         radius: 10; color: "#1a1a1a"; border.color: "#2a2a2a"; border.width: 1
