@@ -38,7 +38,7 @@ Rectangle {
         spacing: root.text && root.icon ? Theme.s2 : 0
 
         Loader {
-            sourceComponent: root.icon ? IconComponent : null
+            sourceComponent: root.icon ? iconComp : null
             active: !!root.icon
         }
 
@@ -55,7 +55,7 @@ Rectangle {
     }
 
     Component {
-        id: IconComponent
+        id: iconComp
         Icon {
             name: root.icon
             size: Theme.iconMd
@@ -79,4 +79,4 @@ Rectangle {
         visible: root.iconOnly && root.tooltip !== "" && root.hovered
         delay: 500
     }
-}
+}// FORCE RECOMPILE 1794284322
