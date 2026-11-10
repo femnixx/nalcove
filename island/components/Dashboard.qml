@@ -32,7 +32,7 @@ Item {
                     ["alerts", "bell", "Alerts"],
                     ["shelf", "folder", "Shelf"],
                     ["notes", "notebook", "Notes"],
-                    ["controls", "layers", "Controls"],
+                    ["controls", "sliders", "Controls"],
                     ["bluetooth", "bluetooth", "Bluetooth"]
                 ]
                 delegate: Item {

@@ -19,9 +19,8 @@ Item {
         "bell": "\uF0F3",
         "folder": "\uF07B",
         "notebook": "\uF02D",
-        "layers": "\uF0328",
+        "sliders": "\uF1DE",
         "bluetooth": "\uF293",
-        // Utility row (Dashboard)
         "calendar": "\uF133",
         "search": "\uF002",
         "wifi": "\uF1EB",
