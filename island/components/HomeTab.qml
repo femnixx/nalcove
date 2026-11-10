@@ -147,6 +147,7 @@ Item {
 
             BatteryCard {
                 width: parent.width
+                height: parent.height * 0.55
             }
         }
     }
