@@ -1,6 +1,6 @@
 import QtQuick
-import qs.components as Theme
-import ".." 1.0 as Theme
+import qs.components 1.0
+
 
 Rectangle {
     id: root

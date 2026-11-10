@@ -1,5 +1,5 @@
 // island/components/Hud.qml - Stub for HUD replacements (volume, brightness)
-import qs.components as Theme
+import qs.components 1.0
 
 import QtQuick 2.15
 

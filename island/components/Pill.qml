@@ -1,5 +1,5 @@
 import QtQuick
-import qs.components as Theme
+import qs.components 1.0
 import QtQuick.Controls
 
 Rectangle {

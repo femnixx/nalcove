@@ -1,7 +1,7 @@
 import QtQuick
-import qs.components as Theme
+import qs.components 1.0
 import QtQuick.Layouts
-import ".." 1.0 as Theme
+
 
 Item {
     id: root

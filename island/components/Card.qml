@@ -1,7 +1,5 @@
 import QtQuick
-import qs.components as Theme
-import QtQuick.Layouts
-import ".." 1.0 as Theme
+import QtQuick.Controls
 
 Rectangle {
     id: root
@@ -37,19 +35,19 @@ Rectangle {
     transitions: [
         Transition {
             from: ""; to: "hovered"
-            ColorAnimation { properties: "color"; duration: Theme.dFast; easing.type: Theme.easingOutCubic }
+            ColorAnimation { properties: "color"; duration: 120; easing.type: Easing.OutCubic }
         },
         Transition {
             from: "hovered"; to: ""
-            ColorAnimation { properties: "color"; duration: Theme.dFast; easing.type: Theme.easingOutCubic }
+            ColorAnimation { properties: "color"; duration: 120; easing.type: Easing.OutCubic }
         },
         Transition {
             from: ""; to: "pressed"
-            PropertyAnimation { properties: "opacity"; duration: Theme.dFast; easing.type: Theme.easingOutCubic }
+            PropertyAnimation { properties: "opacity"; duration: 120; easing.type: Easing.OutCubic }
         },
         Transition {
             from: "pressed"; to: ""
-            PropertyAnimation { properties: "opacity"; duration: Theme.dFast; easing.type: Theme.easingOutCubic }
+            PropertyAnimation { properties: "opacity"; duration: 120; easing.type: Easing.OutCubic }
         }
     ]
 

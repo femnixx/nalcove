@@ -12,14 +12,13 @@ import QtQuick.Shapes
 import QtQuick.Controls
 import "services"
 import "components"
-import qs.components as Theme
 
 ShellRoot {
     PanelWindow {
         id: islandWindow
 
         anchors { top: true; left: true; right: true }
-        implicitHeight: Theme.windowHeight
+        implicitHeight: 470
         color: "transparent"
         exclusionMode: ExclusionMode.Ignore
         WlrLayershell.layer: WlrLayer.Overlay
@@ -47,22 +46,90 @@ ShellRoot {
         property var peekNotification: null
         property bool peekHovered: false
 
-        property real currentWidth: triggerMode === "hotkey" ? Theme.expandedWidth
-            : (triggerMode === "notify" ? Theme.notifyWidth
-            : (triggerMode === "hover" ? Theme.hoverWidth : (Media.isPlaying ? 270 : Theme.idleWidth)))
-        property real currentHeight: triggerMode === "hotkey" ? Theme.expandedHeight
-            : (triggerMode === "notify" ? Theme.notifyHeight
-            : (triggerMode === "hover" ? Theme.hoverHeight : Theme.idleHeight))
-        property real currentBottomRadius: triggerMode === "closed" ? Theme.rSm : Theme.expandedBottomRadius
+        // Theme object with all styling properties
+        property QtObject theme: QtObject {
+            readonly property color bg: "#f2101013"
+            readonly property color card: "#0fffffff"
+            readonly property color cardHi: "#1fffffff"
+            readonly property color cardBorder: "#14ffffff"
+            readonly property color fg: "#ffffff"
+            readonly property color dim: "#9a9aa0"
+            readonly property color faint: "#44ffffff"
+            readonly property color accent: "#3b8bff"
+            readonly property color accentSoft: "#2a3b8bff"
+            readonly property color danger: "#ff453a"
+            readonly property color dangerSoft: "#33ff453a"
+            readonly property color success: "#34c759"
+            readonly property color track: "#2a2a2e"
+            readonly property color border: "#1fffffff"
+            readonly property color overlay: "#000000"
+            readonly property int s1: 4
+            readonly property int s2: 8
+            readonly property int s3: 12
+            readonly property int s4: 16
+            readonly property int s5: 24
+            readonly property int rSm: 8
+            readonly property int rMd: 12
+            readonly property int rLg: 18
+            readonly property int flareRadius: 12
+            readonly property int expandedBottomRadius: 32
+            readonly property int hoverBottomRadius: 24
+            readonly property string fontFamily: "Inter, Roboto, Noto Sans, sans-serif"
+            readonly property int tTitle: 16
+            readonly property int tBody: 13
+            readonly property int tSmall: 11
+            readonly property int tCaption: 10
+            readonly property int tClock: 36
+            readonly property int dFast: 120
+            readonly property int dBase: 180
+            readonly property string easingOutCubic: "OutCubic"
+            readonly property real springWidth: 3.5
+            readonly property real dampingWidth: 0.35
+            readonly property real epsilonWidth: 0.25
+            readonly property real springHeight: 3.5
+            readonly property real dampingHeight: 0.35
+            readonly property real epsilonHeight: 0.25
+            readonly property real springRadius: 3.0
+            readonly property real dampingRadius: 0.4
+            readonly property real epsilonRadius: 0.1
+            readonly property int idleWidth: 200
+            readonly property int idleHeight: 34
+            readonly property int hoverWidth: 360
+            readonly property int hoverHeight: 80
+            readonly property int notifyWidth: 420
+            readonly property int notifyHeight: 120
+            readonly property int expandedWidth: 780
+            readonly property int expandedHeight: 400
+            readonly property int windowWidth: 780
+            readonly property int windowHeight: 470
+            readonly property int overshootMargin: 0
+            readonly property int iconSm: 14
+            readonly property int iconMd: 18
+            readonly property int iconLg: 24
+            readonly property int rowH: 36
+            readonly property int controlH: 32
+            readonly property int hoverDebounceMs: 150
+            readonly property int contentFadeInMs: 180
+            readonly property int contentFadeDelayMs: 80
+            readonly property bool glass: true
+        }
+
+        property real currentWidth: triggerMode === "hotkey" ? theme.expandedWidth
+            : (triggerMode === "notify" ? theme.notifyWidth
+            : (triggerMode === "hover" ? theme.hoverWidth : (Media.isPlaying ? 270 : theme.idleWidth)))
+        property real currentHeight: triggerMode === "hotkey" ? theme.expandedHeight
+            : (triggerMode === "notify" ? theme.notifyHeight
+            : (triggerMode === "hover" ? theme.hoverHeight : theme.idleHeight))
+        property real currentBottomRadius: triggerMode === "closed" ? theme.rSm : theme.expandedBottomRadius
 
         Behavior on currentWidth {
-            SpringAnimation { spring: Theme.springWidth; damping: Theme.dampingWidth; epsilon: Theme.epsilonWidth }
+            SpringAnimation { spring: theme.springWidth; damping: theme.dampingWidth; epsilon: theme.epsilonWidth }
         }
         Behavior on currentHeight {
-            SpringAnimation { spring: Theme.springHeight; damping: Theme.dampingHeight; epsilon: Theme.epsilonHeight }
+            SpringAnimation { spring: theme.springHeight; damping: theme.dampingHeight; epsilon: theme.epsilonHeight }
         }
         Behavior on currentBottomRadius {
-            SpringAnimation { spring: Theme.springRadius; damping: Theme.dampingRadius; epsilon: Theme.epsilonRadius }
+            SpringAnimation { spring: theme.springRadius; damping: theme.dampingRadius; epsilon: theme.epsilonRadius }
         }
 
         // Only poll playback position while the island is open
@@ -107,11 +174,11 @@ ShellRoot {
 
         Item {
             id: islandShape
-            property real flare: Theme.flareRadius
+            property real flare: theme.flareRadius
             width: islandWindow.currentWidth
             height: islandWindow.currentHeight
             x: (parent.width - width) / 2
-            y: Theme.overshootMargin
+            y: theme.overshootMargin
 
             Shape {
                 anchors.fill: parent
@@ -125,8 +192,8 @@ ShellRoot {
                     property real r: Math.max(0, islandWindow.currentBottomRadius)
 
                     strokeWidth: islandWindow.triggerMode === "hotkey" ? 1 : 0
-                    strokeColor: Theme.border
-                    fillColor: islandWindow.triggerMode === "hotkey" ? Theme.bg : "#000000"
+                    strokeColor: theme.border
+                    fillColor: islandWindow.triggerMode === "hotkey" ? theme.bg : "#000000"
                     Behavior on fillColor { ColorAnimation { duration: 200 } }
                     startX: -f
                     startY: 0
@@ -197,7 +264,7 @@ ShellRoot {
                                 Rectangle {
                                     width: 3
                                     radius: 1.5
-                                    color: Theme.fg
+                                    color: theme.fg
                                     anchors.centerIn: parent
                                     height: 4 + index * 2
                                     SequentialAnimation on height {
@@ -268,7 +335,7 @@ ShellRoot {
                         Text {
                             width: parent.width
                             text: Media.hasPlayer ? Media.title : "Nothing playing"
-                            color: Theme.fg
+                            color: theme.fg
                             font.pixelSize: 13
                             font.bold: true
                             elide: Text.ElideRight
@@ -276,7 +343,7 @@ ShellRoot {
                         Text {
                             width: parent.width
                             text: Media.artist
-                            color: Theme.dim
+                            color: theme.dim
                             font.pixelSize: 11
                             elide: Text.ElideRight
                         }
@@ -290,7 +357,7 @@ ShellRoot {
                             anchors.centerIn: parent
                             width: 16; height: 16
                             kind: Media.isPlaying ? "pause" : "play"
-                            color: Theme.fg
+                            color: theme.fg
                         }
                         MouseArea {
                             anchors.fill: parent
@@ -330,15 +397,15 @@ ShellRoot {
                         id: notificationContent
                         Row {
                             anchors.fill: parent
-                            anchors.margins: Theme.s4
-                            spacing: Theme.s3
+                            anchors.margins: theme.s4
+                            spacing: theme.s3
 
                             // App icon or image
                             Rectangle {
                                 width: 64; height: 64
-                                radius: Theme.rMd
-                                color: Theme.card
-                                border.color: Theme.cardBorder
+                                radius: theme.rMd
+                                color: theme.card
+                                border.color: theme.cardBorder
                                 border.width: 1
 
                                 Image {
@@ -351,55 +418,55 @@ ShellRoot {
                                 Icon {
                                     anchors.centerIn: parent
                                     name: "bell"
-                                    size: Theme.iconLg
-                                    color: Theme.accent
+                                    size: theme.iconLg
+                                    color: theme.accent
                                     visible: !(islandWindow.peekNotification.image || islandWindow.peekNotification.appIcon)
                                 }
                             }
 
                             // Text content
                             Column {
-                                width: parent.width - 64 - Theme.s3 - 48
+                                width: parent.width - 64 - theme.s3 - 48
                                 spacing: 2
                                 anchors.verticalCenter: parent.verticalCenter
 
                                 Row {
-                                    spacing: Theme.s2
+                                    spacing: theme.s2
                                     Text {
                                         text: islandWindow.peekNotification.appName || "Unknown"
-                                        color: Theme.dim
-                                        font.pixelSize: Theme.tSmall
+                                        color: theme.dim
+                                        font.pixelSize: theme.tSmall
                                         font.bold: true
-                                        font.family: Theme.fontFamily
+                                        font.family: theme.fontFamily
                                     }
                                     Text {
                                         text: "·"
-                                        color: Theme.faint
-                                        font.pixelSize: Theme.tSmall
-                                        font.family: Theme.fontFamily
+                                        color: theme.faint
+                                        font.pixelSize: theme.tSmall
+                                        font.family: theme.fontFamily
                                     }
                                     Text {
                                         text: islandWindow.peekNotification.urgency === 2 ? "Critical" : "Notification"
-                                        color: islandWindow.peekNotification.urgency === 2 ? Theme.danger : Theme.dim
-                                        font.pixelSize: Theme.tSmall
-                                        font.family: Theme.fontFamily
+                                        color: islandWindow.peekNotification.urgency === 2 ? theme.danger : theme.dim
+                                        font.pixelSize: theme.tSmall
+                                        font.family: theme.fontFamily
                                     }
                                 }
 
                                 Text {
                                     text: islandWindow.peekNotification.summary || ""
-                                    color: Theme.fg
-                                    font.pixelSize: Theme.tBody
+                                    color: theme.fg
+                                    font.pixelSize: theme.tBody
                                     font.bold: true
-                                    font.family: Theme.fontFamily
+                                    font.family: theme.fontFamily
                                     elide: Text.ElideRight
                                 }
 
                                 Text {
                                     text: islandWindow.peekNotification.body || ""
-                                    color: Theme.dim
-                                    font.pixelSize: Theme.tSmall
-                                    font.family: Theme.fontFamily
+                                    color: theme.dim
+                                    font.pixelSize: theme.tSmall
+                                    font.family: theme.fontFamily
                                     wrapMode: Text.WordWrap
                                     maximumLineCount: 2
                                     elide: Text.ElideRight
@@ -407,14 +474,14 @@ ShellRoot {
 
                                 // Action buttons
                                 Row {
-                                    spacing: Theme.s2
+                                    spacing: theme.s2
                                     visible: islandWindow.peekNotification.actions && islandWindow.peekNotification.actions.length > 0
                                     Repeater {
                                         model: islandWindow.peekNotification.actions
                                         delegate: Pill {
                                             text: modelData.label
                                             accent: true
-                                            height: Theme.controlH
+                                            height: theme.controlH
                                             onClicked: {
                                                 modelData.invoke()
                                                 islandWindow.peekNotification.dismiss()
@@ -438,7 +505,7 @@ ShellRoot {
                     Behavior on opacity {
                         SequentialAnimation {
                             PauseAnimation { duration: fullView.active ? 100 : 0 }
-                            NumberAnimation { duration: Theme.dBase }
+                            NumberAnimation { duration: theme.dBase }
                         }
                     }
                 }
@@ -461,7 +528,7 @@ ShellRoot {
 
         Timer {
             id: hoverDebounce
-            interval: Theme.hoverDebounceMs
+            interval: theme.hoverDebounceMs
             onTriggered: {
                 if (islandWindow.triggerMode === "hover")
                     islandWindow.triggerMode = "closed"
