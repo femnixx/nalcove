@@ -21,7 +21,7 @@ Item {
                 Item { width: 22; height: 22; anchors.verticalCenter: parent.verticalCenter
                     Icon { name: "volume"; size: 18; anchors.centerIn: parent; opacity: Services.Audio.sinkMuted ? 0.5 : 1.0 }
                     MouseArea { anchors.fill: parent; onClicked: Services.Audio.toggleSinkMute() } }
-                FlatSlider { 
+                FlatSlider {
                     width: parent.width - 22 - 34 - 20; anchors.verticalCenter: parent.verticalCenter
                     value: Services.Audio.sinkVolume
                     enabled: Services.Audio.sinkReady
@@ -32,11 +32,28 @@ Item {
                        horizontalAlignment: Text.AlignRight }
             }
 
+            // Device selector - full card width; expands the column when opened so
+            // brightness below moves down instead of being clipped
             DeviceSelector {
                 id: outputSelector
+                width: parent.width
                 model: Services.Audio.sinks
                 currentNode: Services.Audio.sink
                 onPicked: n => Services.Audio.setDefaultSink(n)
+            }
+
+            // Brightness sits directly below the volume output
+            Item { width: 1; height: 6; visible: Services.Brightness.available }
+            Text { visible: Services.Brightness.available; text: "Brightness"; color: "#9a9aa0"; font.pixelSize: 11; font.bold: true }
+            Row {
+                visible: Services.Brightness.available
+                width: parent.width; spacing: 10
+                Icon { name: "sun"; size: 18; anchors.verticalCenter: parent.verticalCenter }
+                FlatSlider { width: parent.width - 18 - 34 - 20; anchors.verticalCenter: parent.verticalCenter
+                             value: Services.Brightness.level; onMoved: Services.Brightness.set(value) }
+                Text { width: 34; anchors.verticalCenter: parent.verticalCenter
+                       text: Math.round(Services.Brightness.level * 100); color: "#ffffff"; font.pixelSize: 12
+                       horizontalAlignment: Text.AlignRight }
             }
 
             Item { width: 1; height: 6 }
@@ -48,7 +65,7 @@ Item {
                 Item { width: 22; height: 22; anchors.verticalCenter: parent.verticalCenter
                     Icon { name: "volume"; size: 18; color: Services.Audio.sourceMuted ? "#ff453a" : "#ffffff"; anchors.centerIn: parent }
                     MouseArea { anchors.fill: parent; onClicked: Services.Audio.toggleSourceMute() } }
-                FlatSlider { 
+                FlatSlider {
                     width: parent.width - 22 - 34 - 20; anchors.verticalCenter: parent.verticalCenter
                     value: Services.Audio.sourceVolume
                     enabled: Services.Audio.sourceReady
@@ -61,29 +78,16 @@ Item {
 
             DeviceSelector {
                 id: inputSelector
+                width: parent.width
                 model: Services.Audio.sources
                 currentNode: Services.Audio.source
                 onPicked: n => Services.Audio.setDefaultSource(n)
             }
 
-            Item { width: 1; height: 6; visible: Services.Brightness.available }
+            Item { width: 1; height: 6 }
 
             // Per-app volume mixer
             AppMixer { width: parent.width }
-
-            Item { width: 1; height: 6; visible: Services.Brightness.available }
-
-            Text { visible: Services.Brightness.available; text: "Brightness"; color: "#9a9aa0"; font.pixelSize: 11; font.bold: true }
-            Row {
-                visible: Services.Brightness.available
-                width: parent.width; spacing: 10
-                Icon { name: "sun"; size: 18; anchors.verticalCenter: parent.verticalCenter }
-                FlatSlider { width: parent.width - 18 - 34 - 20; anchors.verticalCenter: parent.verticalCenter
-                             value: Services.Brightness.level; onMoved: Services.Brightness.set(value) }
-                Text { width: 34; anchors.verticalCenter: parent.verticalCenter
-                       text: Math.round(Services.Brightness.level * 100); color: "#ffffff"; font.pixelSize: 12
-                       horizontalAlignment: Text.AlignRight }
-            }
         }
     }
 }

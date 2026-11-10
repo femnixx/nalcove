@@ -10,11 +10,12 @@ Rectangle {
     radius: Style.cardRadius
     clip: true
 
-    readonly property int art: Math.min(72, Math.round(height * 0.32))
+    readonly property int art: Math.min(150, Math.round(height * 0.55))
 
     ClippingRectangle {
         id: artBox
-        x: 14; y: 14
+        anchors.horizontalCenter: parent.horizontalCenter
+        y: 14
         width: root.art; height: root.art
         radius: 12
         color: "#222222"
@@ -24,29 +25,32 @@ Rectangle {
             fillMode: Image.PreserveAspectCrop
             asynchronous: true
             cache: false
-            sourceSize: Qt.size(160, 160)
+            sourceSize: Qt.size(240, 240)
         }
     }
 
     Column {
-        x: artBox.x + artBox.width + 12
-        y: 16
-        width: root.width - x - 14
-        spacing: 3
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.top: artBox.bottom
+        anchors.topMargin: 10
+        width: root.width - 28
+        spacing: 4
         Text {
             width: parent.width
             text: Media.hasPlayer && Media.title !== "" ? Media.title : "Nothing playing"
             color: Style.fg
-            font.pixelSize: 13
+            font.pixelSize: 14
             font.bold: true
             elide: Text.ElideRight
+            horizontalAlignment: Text.AlignHCenter
         }
         Text {
             width: parent.width
             text: Media.artist
             color: Style.dim
-            font.pixelSize: 11
+            font.pixelSize: 12
             elide: Text.ElideRight
+            horizontalAlignment: Text.AlignHCenter
         }
     }
 

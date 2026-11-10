@@ -5,15 +5,29 @@ Rectangle {
     id: root
     radius: 18; color: "#1a1a1a"; border.color: "#2a2a2a"; border.width: 1
     clip: true
-    height: Math.min(content.implicitHeight + 24, maxHeight)
 
-    property real maxHeight: 200
-
+    property real maxHeight: 400
     signal outputClicked()
+
+    readonly property real spacing: 10
+    readonly property real margins: 24
+
+    readonly property real brightnessHeight: Services.Brightness.available ? brightnessRow.implicitHeight : 0
+
+    // Closed: volume + brightness only. Open: card extends downward to fit the
+    // dropdown (capped at maxHeight) so brightness stays visible at the bottom.
+    // Dropdown is scrollable when there are more outputs than fit in the space.
+    height: Math.min(margins * 2
+        + sliderRow.height + spacing
+        + outputSelector.height
+        + brightnessHeight,
+        maxHeight)
 
     Column {
         id: content
-        anchors.fill: parent; anchors.margins: 12; spacing: 10
+        anchors.fill: parent
+        anchors.margins: root.margins
+        spacing: root.spacing
 
         Row {
             id: sliderRow
@@ -37,14 +51,32 @@ Rectangle {
             }
         }
 
-        // Device selector with popup - height expands when opened
         DeviceSelector {
             id: outputSelector
-            width: parent.width
-            maxDropdownHeight: root.maxHeight - sliderRow.height - content.spacing - 24
+            width: content.width
+            maxDropdownHeight: Math.max(40,
+                root.maxHeight - margins * 2 - sliderRow.height - brightnessHeight - root.spacing * 3 - 12)
             model: Services.Audio.sinks
             currentNode: Services.Audio.sink
             onPicked: n => Services.Audio.setDefaultSink(n)
+        }
+
+        Row {
+            id: brightnessRow
+            visible: Services.Brightness.available
+            width: parent.width; spacing: 10
+            Icon { name: "sun"; size: 18; anchors.verticalCenter: parent.verticalCenter }
+            FlatSlider {
+                width: parent.width - 18 - 34 - 20
+                anchors.verticalCenter: parent.verticalCenter
+                value: Services.Brightness.level
+                onMoved: Services.Brightness.set(value)
+            }
+            Text {
+                width: 34; anchors.verticalCenter: parent.verticalCenter
+                text: Math.round(Services.Brightness.level * 100)
+                color: "#ffffff"; font.pixelSize: 12; horizontalAlignment: Text.AlignRight
+            }
         }
     }
 }

@@ -5,7 +5,7 @@ Item {
     property var model: []
     property var currentNode: null
     property bool opened: false
-    property real maxDropdownHeight: 200
+    property real maxDropdownHeight: root.itemHeight * 7 + root.listSpacing * 6 + root.listPadding
     signal picked(var node)
 
     readonly property int itemHeight: 30
