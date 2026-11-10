@@ -136,19 +136,27 @@ Item {
         }
 
         // ---- volume + brightness ----
-        Column {
+        Item {
+            id: volBrightArea
             width: root.avail * 0.235
             height: parent.height * 0.55
-            spacing: root.gap
 
-            VolumeCard {
-                width: parent.width
-                height: (parent.height - root.gap) * 0.6
-                onOutputClicked: root.navigate("volume")
-            }
-            BrightnessCard {
-                width: parent.width
-                height: (parent.height - root.gap) * 0.4
+            Column {
+                id: volBrightColumn
+                anchors.fill: parent
+                spacing: root.gap
+
+                VolumeCard {
+                    id: volumeCard
+                    width: parent.width
+                    maxDropdownHeight: volBrightArea.height - 70
+                    onOutputClicked: root.navigate("volume")
+                }
+
+                BrightnessCard {
+                    id: brightnessCard
+                    width: parent.width
+                }
             }
         }
     }
