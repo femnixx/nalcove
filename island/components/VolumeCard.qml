@@ -5,15 +5,30 @@ Rectangle {
     id: root
     radius: 18; color: "#1a1a1a"; border.color: "#2a2a2a"; border.width: 1
     clip: true
-    height: content.implicitHeight + 24
 
-    property real maxDropdownHeight: 200
-
+    property real maxHeight: 400
     signal outputClicked()
+
+    readonly property real spacing: 10
+    readonly property real margins: 24
+    readonly property real bottomReserve: 6
+
+    readonly property real brightnessHeight: Services.Brightness.available ? brightnessRow.implicitHeight : 0
+
+    // Closed: volume + brightness only. Open: card extends downward to fit the
+    // dropdown (scrollable when there are more outputs than fit) so brightness
+    // stays visible at the bottom, capped so the card never touches the container edge.
+    height: Math.min(margins * 2
+        + sliderRow.height + spacing
+        + outputSelector.height
+        + brightnessHeight,
+        root.parent.height > 0 ? root.parent.height - bottomReserve : maxHeight)
 
     Column {
         id: content
-        anchors.fill: parent; anchors.margins: 12; spacing: 10
+        anchors.fill: parent
+        anchors.margins: root.margins
+        spacing: root.spacing
 
         Row {
             id: sliderRow
@@ -37,14 +52,33 @@ Rectangle {
             }
         }
 
-        // Device selector with popup - height expands when opened
         DeviceSelector {
             id: outputSelector
-            width: parent.width
-            maxDropdownHeight: root.maxDropdownHeight
+            width: content.width
+            maxDropdownHeight: Math.max(40,
+                (root.parent.height > 0 ? root.parent.height - bottomReserve : maxHeight)
+                - margins * 2 - sliderRow.height - brightnessHeight - root.spacing * 3 - 12)
             model: Services.Audio.sinks
             currentNode: Services.Audio.sink
             onPicked: n => Services.Audio.setDefaultSink(n)
+        }
+
+        Row {
+            id: brightnessRow
+            visible: Services.Brightness.available
+            width: parent.width; spacing: 10
+            Icon { name: "sun"; size: 18; anchors.verticalCenter: parent.verticalCenter }
+            FlatSlider {
+                width: parent.width - 18 - 34 - 20
+                anchors.verticalCenter: parent.verticalCenter
+                value: Services.Brightness.level
+                onMoved: Services.Brightness.set(value)
+            }
+            Text {
+                width: 34; anchors.verticalCenter: parent.verticalCenter
+                text: Math.round(Services.Brightness.level * 100)
+                color: "#ffffff"; font.pixelSize: 12; horizontalAlignment: Text.AlignRight
+            }
         }
     }
 }
