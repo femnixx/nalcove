@@ -29,9 +29,8 @@ Item {
         return out
     }
 
-    Row {
+    Item {
         anchors.fill: parent
-        spacing: root.gap
 
         // ---- music ----
         MusicCard { width: root.avail * 0.31; height: parent.height }
