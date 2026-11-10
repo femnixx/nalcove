@@ -4,7 +4,7 @@ import "../services" as Services
 Rectangle {
     id: root
     radius: 18; color: "#1a1a1a"; border.color: "#2a2a2a"; border.width: 1
-    clip: true
+    clip: false
 
     property real maxHeight: 400
     signal outputClicked()
@@ -12,12 +12,10 @@ Rectangle {
     readonly property real spacing: 10
     readonly property real margins: 24
 
-    readonly property real brightnessHeight: brightnessRow.implicitHeight
-
-    // Fixed card height: volume + brightness only. Dropdown floats as overlay on top.
+    // Card height: volume slider + brightness only. Dropdown floats as overlay on top.
     height: Math.min(margins * 2
         + sliderRow.height + spacing
-        + brightnessHeight,
+        + brightnessRow.implicitHeight,
         maxHeight)
 
     Column {
@@ -54,7 +52,7 @@ Rectangle {
             width: content.width
             maxDropdownHeight: Math.max(40,
                 (parent.height > 0 ? parent.height : maxHeight)
-                - margins * 2 - sliderRow.height - brightnessHeight - root.spacing * 3 - 12)
+                - margins * 2 - sliderRow.height - brightnessRow.implicitHeight - root.spacing * 3 - 12)
             model: Services.Audio.sinks
             currentNode: Services.Audio.sink
             onPicked: n => Services.Audio.setDefaultSink(n)

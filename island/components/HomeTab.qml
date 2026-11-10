@@ -2,7 +2,7 @@ import QtQuick
 import "../services"
 import "../components"
 
-// Alcove-style Home: music | week + weather | clock | AppMixer | volume + brightness
+// Alcove-style Home: music | week + weather | clock | AppMixer | volume + brightness | battery
 Item {
     id: root
     clip: true
@@ -96,47 +96,36 @@ Item {
             }
         }
 
-        // ---- clock + battery ----
-        Column {
+        // ---- clock (full height) ----
+        Rectangle {
             width: root.avail * 0.17
             height: parent.height
-            spacing: root.gap
+            color: Style.card
+            radius: Style.cardRadius
+            clip: true
 
-            Rectangle {
-                width: parent.width
-                height: parent.height * 0.5
-                color: Style.card
-                radius: Style.cardRadius
-                clip: true
-
-                Column {
-                    anchors.centerIn: parent
-                    spacing: 4
-                    Text {
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        text: Qt.formatTime(Clock.now, "HH:mm")
-                        color: Style.fg
-                        font.pixelSize: 28
-                        font.bold: true
-                    }
-                    Text {
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        text: Qt.formatDate(Clock.now, "dddd")
-                        color: Style.fg
-                        font.pixelSize: 12
-                    }
-                    Text {
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        text: Qt.formatDate(Clock.now, "d MMMM")
-                        color: Style.dim
-                        font.pixelSize: 11
-                    }
+            Column {
+                anchors.centerIn: parent
+                spacing: 4
+                Text {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    text: Qt.formatTime(Clock.now, "HH:mm")
+                    color: Style.fg
+                    font.pixelSize: 28
+                    font.bold: true
                 }
-            }
-
-            BatteryCard {
-                width: parent.width
-                height: (parent.height - root.gap) / 2
+                Text {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    text: Qt.formatDate(Clock.now, "dddd")
+                    color: Style.fg
+                    font.pixelSize: 12
+                }
+                Text {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    text: Qt.formatDate(Clock.now, "d MMMM")
+                    color: Style.dim
+                    font.pixelSize: 11
+                }
             }
         }
 
@@ -146,11 +135,19 @@ Item {
             height: parent.height * 0.45
         }
 
-        // ---- volume + brightness ----
-        VolumeCard {
-            id: volumeCard
+        // ---- volume + brightness + battery stacked at bottom right ----
+        Column {
             width: root.avail * 0.235
-            onOutputClicked: root.navigate("volume")
+            anchors.bottom: parent.bottom
+            spacing: root.gap
+
+            VolumeCard {
+                width: parent.width
+            }
+
+            BatteryCard {
+                width: parent.width
+            }
         }
     }
 }
