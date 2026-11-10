@@ -85,14 +85,17 @@ Item {
         }
     }
 
-    // --- SECOND ROW: Smaller icons centered + battery on right ---
+    // --- SECOND ROW: Smaller icons spread across + battery on right ---
     Row {
         id: utilityRow
-        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.left: parent.left
+        anchors.leftMargin: 20
+        anchors.right: parent.right
+        anchors.rightMargin: 20
         anchors.top: tabBar.bottom
         anchors.topMargin: 12
         height: 20
-        spacing: 6
+        spacing: 20
 
         Repeater {
             model: [
