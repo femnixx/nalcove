@@ -94,8 +94,8 @@ Item {
         anchors.right: parent.right
         anchors.rightMargin: 20
         anchors.top: tabBar.bottom
-        anchors.topMargin: 12
-        height: 20
+        anchors.topMargin: 4
+        height: 30
         spacing: 10
 
         Repeater {
