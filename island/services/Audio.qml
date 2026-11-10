@@ -53,9 +53,10 @@ Singleton {
         try {
             return JSON.parse(text)
                 .filter(d => {
-                    // Skip sinks/sources with no usable name or description
+                    // Skip sinks/sources with no usable name
                     if (!d.name || d.name.trim() === "") return false
-                    if (d.description && d.description.trim() === "" && !d.name) return false
+                    // Skip SUSPENDED (ghost/phantom) outputs — only show active ones
+                    if (d.state === "SUSPENDED") return false
                     // Skip monitor/virtual devices
                     if (d.name.endsWith(".monitor")) return false
                     if (d.properties && d.properties["device.class"] === "monitor") return false
@@ -63,7 +64,7 @@ Singleton {
                                || (d.properties && d.properties["device.class"] === "monitor"))) return false
                     return true
                 })
-                .map(d => ({ name: d.name, description: d.description || d.name, index: d.index }))
+                .map(d => ({ name: d.name, description: d.description || d.name, index: d.index, state: d.state }))
         } catch (e) {
             return []
         }

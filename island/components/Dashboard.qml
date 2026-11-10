@@ -99,19 +99,17 @@ Item {
                 spacing: 6
 
                 Icon {
-                    name: Battery.charging ? "battery-charging" : (Battery.low ? "battery-low" : "battery")
+                    name: Battery.ready ? (Battery.charging ? "battery-charging" : (Battery.low ? "battery-low" : "battery")) : "zap"
                     size: 16
-                    color: Battery.accent
-                    visible: Battery.ready
+                    color: Battery.ready ? Battery.accent : "#30d158"
                     anchors.verticalCenter: parent.verticalCenter
                 }
 
                 Text {
-                    text: Battery.ready ? Math.round(Battery.pct * 100) + "%" : "—"
-                    color: Battery.accent
+                    text: Battery.ready ? Math.round(Battery.pct * 100) + "%" : "AC"
+                    color: Battery.ready ? Battery.accent : "#30d158"
                     font.pixelSize: 12
                     font.bold: true
-                    visible: Battery.ready
                     anchors.verticalCenter: parent.verticalCenter
                 }
 
@@ -184,19 +182,17 @@ Item {
                 spacing: 4
 
                 Icon {
-                    name: Battery.charging ? "battery-charging" : (Battery.low ? "battery-low" : "battery")
+                    name: Battery.ready ? (Battery.charging ? "battery-charging" : (Battery.low ? "battery-low" : "battery")) : "zap"
                     size: 12
-                    color: Battery.accent
-                    visible: Battery.ready
+                    color: Battery.ready ? Battery.accent : "#30d158"
                     anchors.verticalCenter: parent.verticalCenter
                 }
 
                 Text {
-                    text: Battery.ready ? Math.round(Battery.pct * 100) + "%" : "—"
-                    color: Battery.accent
+                    text: Battery.ready ? Math.round(Battery.pct * 100) + "%" : "AC"
+                    color: Battery.ready ? Battery.accent : "#30d158"
                     font.pixelSize: 10
                     font.bold: true
-                    visible: Battery.ready
                     anchors.verticalCenter: parent.verticalCenter
                 }
 
