@@ -15,6 +15,7 @@ Rectangle {
     // Card height: volume slider + brightness only. Dropdown floats as overlay on top.
     height: margins * 2
         + sliderRow.height + spacing
+        + outputSelector.height + spacing
         + brightnessRow.height
 
     Column {

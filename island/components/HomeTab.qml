@@ -145,8 +145,7 @@ Item {
             VolumeCard {
                 id: volumeCard
                 width: parent.width
-                anchors.top: parent.top
-                anchors.bottom: batteryCard.top
+                // Size to content; battery card positioned below via Column spacing
             }
 
             BatteryCard {

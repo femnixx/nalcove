@@ -57,14 +57,14 @@ Rectangle {
             // For simplicity, draw a partial circle border
             Item {
                 anchors.fill: parent
-                anchors.margins: 8
+                anchors.margins: 6
                 // Ring segments drawn via rotated rectangles
                 Repeater {
                     model: 100
                     delegate: Rectangle {
-                        width: 2; height: parent.height * 0.9
+                        width: 5; height: parent.height * 0.9
                         color: index < Math.round(pct * 100) ? accent : "#2a2a2e"
-                        radius: 1
+                        radius: 2
                         rotation: index * 3.6
                         transformOrigin: Item.Center
                         anchors.centerIn: parent
