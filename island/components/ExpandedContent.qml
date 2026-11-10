@@ -1,7 +1,7 @@
 // island/components/ExpandedContent.qml - Stub for expanded dashboard content
 
 import QtQuick 2.15
-import Island 1.0 as Theme
+
 
 Item {
     id: expandedContentRoot

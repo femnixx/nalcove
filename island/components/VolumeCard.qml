@@ -1,71 +1,58 @@
 import QtQuick
+import QtQuick.Layouts
 import "../services" as Services
 
-Rectangle {
-    radius: 18; color: "#1a1a1a"; border.color: "#2a2a2a"; border.width: 1
+
+Card {
+    id: root
+    hoverEnabled: false
+    Layout.fillWidth: true
 
     signal outputClicked()
 
-    Column {
-        anchors.fill: parent; anchors.margins: 12; spacing: 10
+    ColumnLayout {
+        anchors.fill: parent
+        anchors.margins: Theme.s4
+        spacing: Theme.s3
 
-        Row {
-            width: parent.width; spacing: 10
+        // Output volume row
+        RowLayout {
+            Layout.fillWidth: true
+            Layout.minimumHeight: Theme.controlH
+            Layout.preferredHeight: Theme.controlH
+            spacing: Theme.s2
+
             Item {
-                width: 22; height: 22; anchors.verticalCenter: parent.verticalCenter
-                Icon { name: "volume"; size: 18; anchors.centerIn: parent; opacity: Services.Audio.sinkMuted ? 0.5 : 1.0 }
+                width: Theme.iconMd + Theme.s2; height: Theme.controlH
+                Icon { name: "volume"; size: Theme.iconMd; anchors.centerIn: parent; opacity: Services.Audio.sinkMuted ? 0.5 : 1.0 }
                 MouseArea { anchors.fill: parent; onClicked: Services.Audio.toggleSinkMute() }
             }
+
             FlatSlider {
-                width: parent.width - 22 - 34 - 20
-                anchors.verticalCenter: parent.verticalCenter
+                Layout.fillWidth: true
                 value: Services.Audio.sinkVolume
                 enabled: Services.Audio.sinkReady
                 onMoved: if (Services.Audio.sinkReady) Services.Audio.setSinkVolume(value)
             }
+
             Text {
-                width: 34; anchors.verticalCenter: parent.verticalCenter
+                width: 34
+                Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
                 text: Math.round(Services.Audio.sinkVolume * 100)
-                color: "#ffffff"; font.pixelSize: 12; horizontalAlignment: Text.AlignRight
+                color: Theme.fg
+                font.pixelSize: Theme.tBody
+                font.family: Theme.fontFamily
             }
         }
 
-        // Device selector with popup
-        Item {
-            id: deviceSelectorWrapper
-            width: parent.width
-            height: 32
-
-            Rectangle {
-                id: headerBtn
-                width: parent.width; height: 32; radius: 10; color: "#1a1a1a"
-                Text {
-                    anchors.fill: parent; anchors.leftMargin: 10; anchors.rightMargin: 26
-                    text: outputSelector.labelOf(outputSelector.currentNode)
-                    color: "#ffffff"; font.pixelSize: 12
-                    elide: Text.ElideRight; verticalAlignment: Text.AlignVCenter
-                }
-                Text { 
-                    anchors.right: parent.right; anchors.rightMargin: 10; anchors.verticalCenter: parent.verticalCenter
-                    text: outputSelector.open ? "▴" : "▾"; color: "#9a9aa0" 
-                }
-                MouseArea { 
-                    anchors.fill: parent; 
-                    onClicked: { 
-                        outputSelector.x = headerBtn.mapToItem(null, 0, 0).x
-                        outputSelector.y = headerBtn.mapToItem(null, 0, headerBtn.height).y
-                        outputSelector.open ? outputSelector.close() : outputSelector.open() 
-                    } 
-                }
-            }
-
-            DeviceSelector {
-                id: outputSelector
-                width: parent.width
-                model: Services.Audio.sinks
-                currentNode: Services.Audio.sink
-                onPicked: n => Services.Audio.setDefaultSink(n)
-            }
+        // Output device selector
+        DeviceSelector {
+            id: outputSelector
+            Layout.fillWidth: true
+            accordionGroup: true
+            model: Services.Audio.sinks
+            currentNode: Services.Audio.sink
+            onPicked: n => Services.Audio.setDefaultSink(n)
         }
     }
 }

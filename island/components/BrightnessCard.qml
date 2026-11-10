@@ -1,23 +1,44 @@
 import QtQuick
+import QtQuick.Layouts
 import "../services" as Services
 
-Rectangle {
-    radius: 18; color: "#1a1a1a"; border.color: "#2a2a2a"; border.width: 1
+
+Card {
+    id: root
+    hoverEnabled: false
+    Layout.fillWidth: true
     visible: Services.Brightness.available
 
-    Row {
-        anchors.fill: parent; anchors.margins: 12; spacing: 10
-        Icon { name: "sun"; size: 18; anchors.verticalCenter: parent.verticalCenter }
-        FlatSlider {
-            width: parent.width - 18 - 34 - 20
-            anchors.verticalCenter: parent.verticalCenter
-            value: Services.Brightness.level
-            onMoved: Services.Brightness.set(value)
-        }
-        Text {
-            width: 34; anchors.verticalCenter: parent.verticalCenter
-            text: Math.round(Services.Brightness.level * 100)
-            color: "#ffffff"; font.pixelSize: 12; horizontalAlignment: Text.AlignRight
+    ColumnLayout {
+        anchors.fill: parent
+        anchors.margins: Theme.s4
+        spacing: Theme.s3
+
+        RowLayout {
+            Layout.fillWidth: true
+            Layout.minimumHeight: Theme.controlH
+            Layout.preferredHeight: Theme.controlH
+            spacing: Theme.s2
+
+            Item {
+                width: Theme.iconMd + Theme.s2; height: Theme.controlH
+                Icon { name: "sun"; size: Theme.iconMd; anchors.centerIn: parent; color: Theme.fg }
+            }
+
+            FlatSlider {
+                Layout.fillWidth: true
+                value: Services.Brightness.level
+                onMoved: Services.Brightness.set(value)
+            }
+
+            Text {
+                width: 34
+                Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
+                text: Math.round(Services.Brightness.level * 100)
+                color: Theme.fg
+                font.pixelSize: Theme.tBody
+                font.family: Theme.fontFamily
+            }
         }
     }
 }

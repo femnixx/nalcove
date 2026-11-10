@@ -1,8 +1,10 @@
 import QtQuick
+import QtQuick.Controls
 import Quickshell
 import Quickshell.Io
 import Quickshell.Services.UPower
 import "../services" as Services
+
 
 Item {
     id: root
@@ -56,37 +58,68 @@ Item {
 
     readonly property var rows: {
         const r = [
-            { label: "CPU", text: Math.round(cpu * 100) + "%", frac: cpu, color: "#3b8bff" },
+            { label: "CPU", text: Math.round(cpu * 100) + "%", frac: cpu, color: Theme.accent },
             { label: "Memory", text: memUsed.toFixed(1) + " / " + memTotal.toFixed(1) + " GiB",
               frac: memTotal > 0 ? memUsed / memTotal : 0, color: "#bf5af2" }
         ]
-        if (temp >= 0) r.push({ label: "CPU Temp", text: Math.round(temp) + " °C", frac: Math.min(1, temp / 100),
-                                color: temp > 80 ? "#ff453a" : "#ff9f0a" })
+        if (temp >= 0) r.push({ label: "CPU Temp", text: Math.round(temp) + " \u00b0C", frac: Math.min(1, temp / 100),
+                                color: temp > 80 ? Theme.danger : "#ff9f0a" })
         if (power >= 0) r.push({ label: "Power draw", text: power.toFixed(1) + " W  " + powerState,
-                                 frac: Math.min(1, power / 60), color: "#30d158" })
-        if (gpu >= 0) r.push({ label: "GPU", text: Math.round(gpu) + "%  " + Math.round(gpuTemp) + " °C",
+                                 frac: Math.min(1, power / 60), color: Theme.success })
+        if (gpu >= 0) r.push({ label: "GPU", text: Math.round(gpu) + "%  " + Math.round(gpuTemp) + " \u00b0C",
                                frac: gpu / 100, color: "#64d2ff" })
         return r
     }
 
     Column {
-        anchors.fill: parent; anchors.margins: 6; spacing: 14
+        anchors.fill: parent; anchors.margins: Theme.s4; spacing: Theme.s3
+
         Repeater {
             model: root.rows
-            delegate: Column {
-                width: parent.width; spacing: 5
-                Item {
-                    width: parent.width; height: 16
-                    Text { text: modelData.label; color: "#9a9aa0"; font.pixelSize: 12 }
-                    Text { anchors.right: parent.right; text: modelData.text; color: "#ffffff"
-                           font.pixelSize: 12; font.bold: true }
-                }
-                Rectangle {
-                    width: parent.width; height: 6; radius: 3; color: "#22ffffff"
+            delegate: Card {
+                Layout.fillWidth: true
+                hoverEnabled: false
+
+                Column {
+                    anchors.fill: parent
+                    anchors.margins: Theme.s4
+                    spacing: Theme.s2
+
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: Theme.s2
+
+                        Text {
+                            text: modelData.label
+                            color: Theme.dim
+                            font.pixelSize: Theme.tSmall
+                            font.family: Theme.fontFamily
+                            Layout.alignment: Qt.AlignVCenter
+                        }
+
+                        Item { Layout.fillWidth: true }
+
+                        Text {
+                            text: modelData.text
+                            color: Theme.fg
+                            font.pixelSize: Theme.tSmall
+                            font.bold: true
+                            font.family: Theme.fontFamily
+                            Layout.alignment: Qt.AlignVCenter
+                        }
+                    }
+
                     Rectangle {
-                        width: parent.width * Math.max(0, Math.min(1, modelData.frac)); height: parent.height
-                        radius: 3; color: modelData.color
-                        Behavior on width { NumberAnimation { duration: 400 } }
+                        Layout.fillWidth: true
+                        height: 6
+                        radius: 3
+                        color: Theme.track
+
+                        Rectangle {
+                            width: parent.width * Math.max(0, Math.min(1, modelData.frac)); height: parent.height
+                            radius: 3; color: modelData.color
+                            Behavior on width { NumberAnimation { duration: 400 } }
+                        }
                     }
                 }
             }

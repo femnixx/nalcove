@@ -3,21 +3,20 @@ import Quickshell.Widgets
 import "../services"
 import "../components"
 
+
 // Compact Alcove-style music card (Home tab)
-Rectangle {
+Card {
     id: root
-    color: Theme.card
-    radius: Theme.cardRadius
-    clip: true
+    hoverEnabled: false
 
     readonly property int art: Math.min(72, Math.round(height * 0.32))
 
     ClippingRectangle {
         id: artBox
-        x: 14; y: 14
+        x: Theme.s4; y: Theme.s4
         width: root.art; height: root.art
         radius: 12
-        color: "#222222"
+        color: Theme.cardHi
         Image {
             anchors.fill: parent
             source: Media.artUrl
@@ -29,23 +28,25 @@ Rectangle {
     }
 
     Column {
-        x: artBox.x + artBox.width + 12
-        y: 16
-        width: root.width - x - 14
-        spacing: 3
+        x: artBox.x + artBox.width + Theme.s3
+        y: Theme.s4
+        width: root.width - x - Theme.s4
+        spacing: Theme.s1
         Text {
             width: parent.width
             text: Media.hasPlayer && Media.title !== "" ? Media.title : "Nothing playing"
             color: Theme.fg
-            font.pixelSize: 13
+            font.pixelSize: Theme.tBody
             font.bold: true
+            font.family: Theme.fontFamily
             elide: Text.ElideRight
         }
         Text {
             width: parent.width
             text: Media.artist
             color: Theme.dim
-            font.pixelSize: 11
+            font.pixelSize: Theme.tSmall
+            font.family: Theme.fontFamily
             elide: Text.ElideRight
         }
     }
@@ -53,8 +54,8 @@ Rectangle {
     Row {
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.bottom: parent.bottom
-        anchors.bottomMargin: 16
-        spacing: 24
+        anchors.bottomMargin: Theme.s4
+        spacing: Theme.s3
         visible: Media.hasPlayer
 
         Item {

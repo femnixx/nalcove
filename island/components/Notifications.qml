@@ -1,15 +1,19 @@
-// island/services/Notifications.qml - Notifications service wrapper (singleton)
+// island/components/Notifications.qml - Notifications service wrapper (singleton)
 
 pragma Singleton
 import QtQuick 2.15
-import Quickshell.Services.Notifications
+import "../services" as Services
 
 Item {
     id: notificationsService
 
-    readonly property var notifications: Notifications.notifications
+    readonly property var notifications: Services.Notifications.list
 
     function clearAll() {
-        Notifications.clearAll()
+        Services.Notifications.clearAll()
+    }
+
+    function dismiss(id) {
+        Services.Notifications.dismiss(id)
     }
 }

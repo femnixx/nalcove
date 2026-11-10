@@ -1,47 +1,72 @@
 import QtQuick
+import QtQuick.Controls
+
 
 // Scratch notes (kept in memory while the island is running)
-Rectangle {
+Card {
     id: root
-    color: Theme.card
-    radius: Theme.cardRadius
+    hoverEnabled: false
+    Layout.fillWidth: true
+    Layout.fillHeight: true
 
-    Text {
-        x: 20; y: 14
-        text: "NOTES"
-        color: Theme.dim
-        font.pixelSize: 11
-        font.bold: true
-    }
+    Column {
+        anchors.fill: parent
+        anchors.margins: Theme.s4
+        spacing: Theme.s3
 
-    Rectangle {
-        x: 16; y: 40
-        width: root.width - 32; height: root.height - 56
-        radius: 12
-        color: "#1f1f23"
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: Theme.s2
 
-        TextEdit {
-            id: edit
-            anchors.fill: parent
-            anchors.margins: 12
-            color: Theme.fg
-            font.pixelSize: 14
-            wrapMode: TextEdit.Wrap
-            selectByMouse: true
-            clip: true
+            Text {
+                text: "Notes"
+                color: Theme.dim
+                font.pixelSize: Theme.tSmall
+                font.bold: true
+                font.family: Theme.fontFamily
+                Layout.alignment: Qt.AlignVCenter
+            }
+
+            Item { Layout.fillWidth: true }
         }
-        Text {
-            x: 12; y: 12
-            visible: edit.text.length === 0 && !edit.activeFocus
-            text: "Jot something down..."
-            color: Theme.dim
-            font.pixelSize: 14
-        }
-        MouseArea {
-            anchors.fill: parent
-            acceptedButtons: Qt.NoButton
-            onPressed: edit.forceActiveFocus()
-            propagateComposedEvents: true
+
+        Divider {}
+
+        Rectangle {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            radius: Theme.rMd
+            color: Theme.cardHi
+            border.color: Theme.cardBorder
+            border.width: 1
+
+            TextEdit {
+                id: edit
+                anchors.fill: parent
+                anchors.margins: Theme.s3
+                color: Theme.fg
+                font.pixelSize: Theme.tBody
+                font.family: Theme.fontFamily
+                wrapMode: TextEdit.Wrap
+                selectByMouse: true
+                clip: true
+            }
+
+            Text {
+                anchors.centerIn: parent
+                visible: edit.text.length === 0 && !edit.activeFocus
+                text: "Jot something down\u2026"
+                color: Theme.dim
+                font.pixelSize: Theme.tBody
+                font.family: Theme.fontFamily
+            }
+
+            MouseArea {
+                anchors.fill: parent
+                acceptedButtons: Qt.NoButton
+                onPressed: edit.forceActiveFocus()
+                propagateComposedEvents: true
+            }
         }
     }
 }
