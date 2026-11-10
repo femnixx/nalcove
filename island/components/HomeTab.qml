@@ -138,7 +138,8 @@ Item {
         // ---- volume + brightness + battery stacked at bottom right ----
         Column {
             width: root.avail * 0.235
-            anchors.fill: parent
+            anchors.top: parent.top
+            anchors.bottom: parent.bottom
             spacing: root.gap
 
             VolumeCard {
