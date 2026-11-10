@@ -96,36 +96,46 @@ Item {
             }
         }
 
-        // ---- clock ----
-        Rectangle {
+        // ---- clock + battery ----
+        Column {
             width: root.avail * 0.17
             height: parent.height
-            color: Style.card
-            radius: Style.cardRadius
-            clip: true
+            spacing: root.gap
 
-            Column {
-                anchors.centerIn: parent
-                spacing: 4
-                Text {
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    text: Qt.formatTime(Clock.now, "HH:mm")
-                    color: Style.fg
-                    font.pixelSize: 28
-                    font.bold: true
+            Rectangle {
+                width: parent.width
+                height: parent.height * 0.5
+                color: Style.card
+                radius: Style.cardRadius
+                clip: true
+
+                Column {
+                    anchors.centerIn: parent
+                    spacing: 4
+                    Text {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        text: Qt.formatTime(Clock.now, "HH:mm")
+                        color: Style.fg
+                        font.pixelSize: 28
+                        font.bold: true
+                    }
+                    Text {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        text: Qt.formatDate(Clock.now, "dddd")
+                        color: Style.fg
+                        font.pixelSize: 12
+                    }
+                    Text {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        text: Qt.formatDate(Clock.now, "d MMMM")
+                        color: Style.dim
+                        font.pixelSize: 11
+                    }
                 }
-                Text {
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    text: Qt.formatDate(Clock.now, "dddd")
-                    color: Style.fg
-                    font.pixelSize: 12
-                }
-                Text {
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    text: Qt.formatDate(Clock.now, "d MMMM")
-                    color: Style.dim
-                    font.pixelSize: 11
-                }
+            }
+
+            BatteryCard {
+                width: parent.width
             }
         }
 
@@ -139,6 +149,7 @@ Item {
         VolumeCard {
             id: volumeCard
             width: root.avail * 0.235
+            height: parent.height
             onOutputClicked: root.navigate("volume")
         }
     }

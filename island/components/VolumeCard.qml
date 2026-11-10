@@ -4,26 +4,27 @@ import "../services" as Services
 Rectangle {
     id: root
     radius: 18; color: "#1a1a1a"; border.color: "#2a2a2a"; border.width: 1
-    clip: true
-
+    // No clip - dropdown can extend below card boundary
     property real maxHeight: 400
     signal outputClicked()
 
     readonly property real spacing: 10
     readonly property real margins: 24
 
-    readonly property real brightnessHeight: Services.Brightness.available ? brightnessRow.implicitHeight : 0
+    // Always show brightness
+    readonly property real brightnessHeight: brightnessRow.implicitHeight
 
-    // Fixed card height - volume slider + brightness only. Dropdown opens as overlay on top.
-    height: Math.min(margins * 2
+    // Size naturally to content; grows to fit dropdown when open
+    implicitHeight: margins * 2
         + sliderRow.height + spacing
-        + brightnessHeight,
-        maxHeight)
+        + brightnessHeight
+    height: implicitHeight
 
     Column {
         id: content
-        anchors.fill: parent
-        anchors.margins: root.margins
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.right: parent.right
         spacing: root.spacing
 
         Row {
@@ -48,23 +49,21 @@ Rectangle {
             }
         }
 
-        // Device selector header - inline, dropdown opens as overlay below
+        // Device selector - inline, dropdown extends card downward when open
         DeviceSelector {
             id: outputSelector
             width: content.width
             maxDropdownHeight: Math.max(40,
-                (root.parent.height > 0 ? root.parent.height - 24 : maxHeight)
+                (parent.height > 0 ? parent.height : maxHeight)
                 - margins * 2 - sliderRow.height - brightnessHeight - root.spacing * 3 - 12)
             model: Services.Audio.sinks
             currentNode: Services.Audio.sink
             onPicked: n => Services.Audio.setDefaultSink(n)
-            // Overlay mode: dropdown floats on top instead of pushing content down
-            overlayMode: true
+            overlayMode: false
         }
 
         Row {
             id: brightnessRow
-            visible: Services.Brightness.available
             width: parent.width; spacing: 10
             Icon { name: "sun"; size: 18; anchors.verticalCenter: parent.verticalCenter }
             FlatSlider {
