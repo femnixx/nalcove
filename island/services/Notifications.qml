@@ -1,55 +1,60 @@
 pragma Singleton
 import QtQuick
 import Quickshell
-import Quickshell.Io
+import Quickshell.Services.Notifications
 
 Singleton {
     id: root
-    property var list: []              // newest first
-    readonly property int count: list.length
-    property int maxItems: 50
-    property int _seq: 0
-    signal received(var n)             // use this to pop the island open
 
-    function dismiss(id) { list = list.filter(n => n.id !== id) }
-    function clearAll()  { list = [] }
+    // NotificationServer properly registers as a D-Bus notification daemon
+    NotificationServer {
+        id: server
+        keepOnReload: true
+        bodySupported: true
+        bodyMarkupSupported: true
+        bodyImagesSupported: true
+        actionsSupported: true
+        imageSupported: true
 
-    function push(n) {
-        const top = list[0]
-        // ignore exact duplicates within 1 second
-        if (top && top.app === n.app && top.summary === n.summary && top.body === n.body
-            && (n.time - top.time) < 1000) return
-        list = [n].concat(list).slice(0, maxItems)
-        received(n)
-    }
-
-    Process {
-        id: monitor
-        running: true
-        command: ["busctl", "--user", "monitor", "--json=short", "--match",
-                  "type='method_call',interface='org.freedesktop.Notifications',member='Notify'"]
-        stdout: SplitParser {
-            onRead: line => {
-                if (!line || line[0] !== "{") return
-                try {
-                    const m = JSON.parse(line)
-                    if (m.member !== "Notify" || !m.payload || !m.payload.data) return
-                    const d = m.payload.data
-                    const hints = d[6] || {}
-                    root.push({
-                        id: ++root._seq,
-                        app: d[0] || "",
-                        icon: d[2] || "",
-                        summary: d[3] || "",
-                        body: d[4] || "",
-                        urgency: hints.urgency ? hints.urgency.data : 1,
-                        time: new Date()
-                    })
-                } catch (e) { console.warn("notif parse failed:", e) }
-            }
+        // Track all notifications so they persist in the model
+        onNotification: n => {
+            n.tracked = true
+            root._updateList()
         }
-        stderr: SplitParser { onRead: l => console.warn("notif monitor:", l) }
-        onExited: restart.start()
     }
-    Timer { id: restart; interval: 2000; onTriggered: monitor.running = true }
+
+    // Public API for UI
+    readonly property var list: server.trackedNotifications.values
+    readonly property int count: list.length
+
+    signal received(var n)
+
+    function dismiss(id) {
+        var n = findById(id)
+        if (n) n.dismiss()
+    }
+
+    function clearAll() {
+        server.clearAll()
+        root._updateList()
+    }
+
+    function findById(id) {
+        for (var i = 0; i < list.length; i++) {
+            if (list[i].id === id) return list[i]
+        }
+        return null
+    }
+
+    // DND support
+    property bool dnd: false
+
+    function setDnd(enabled) {
+        dnd = enabled
+    }
+
+    function _updateList() {
+        // Force property update
+        list = server.trackedNotifications.values
+    }
 }

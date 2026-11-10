@@ -1,73 +1,76 @@
 import QtQuick
-import Quickshell.Io
-import Quickshell.Services.Notifications
+import QtQuick.Layouts
+import "../services" as Services
 
-Rectangle {
+
+Card {
     id: root
-    color: Theme.card
-    radius: Theme.cardRadius
-    clip: true
+    hoverEnabled: false
+    Layout.fillWidth: true
+    Layout.fillHeight: true
 
     Column {
         anchors.fill: parent
-        anchors.margins: 16
-        spacing: 12
+        anchors.margins: Theme.s4
+        spacing: Theme.s3
 
-        Row {
-            spacing: 12
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: Theme.s2
+
             Text {
                 text: "Notifications"
-                color: "#ffffff"
-                opacity: 1.0
-                font.pixelSize: 18
+                color: Theme.fg
+                font.pixelSize: Theme.tTitle
                 font.bold: true
+                font.family: Theme.fontFamily
+                Layout.alignment: Qt.AlignVCenter
             }
-            Item { width: 40 }
-            Rectangle {
-                width: 100; height: 28; radius: 14
-                color: Theme.cardHi
-                border.color: Theme.border; border.width: 1
-                Text {
-                    anchors.centerIn: parent
-                    text: "Clear All"
-                    color: "#ffffff"
-                    opacity: 1.0
-                    font.pixelSize: 12
-                }
-                MouseArea {
-                    anchors.fill: parent
-                    onClicked: Notifications.clearAll()
-                }
+
+            Item { Layout.fillWidth: true }
+
+            Pill {
+                text: "Clear All"
+                danger: true
+                enabled: Services.Notifications.count > 0
+                Layout.alignment: Qt.AlignVCenter
+                onClicked: Services.Notifications.clearAll()
             }
         }
 
         ListView {
-            width: parent.width
-            height: parent.height - 60
-            model: Notifications
-            spacing: 8
-            delegate: Rectangle {
-                width: parent.width
-                height: Math.max(72, content.implicitHeight + 16)
-                color: Theme.cardHi
-                radius: 10
-                clip: true
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            model: Services.Notifications.list
+            spacing: Theme.s2
+            clip: true
+
+            delegate: Card {
+                width: ListView.view.width
+                hoverEnabled: true
+                implicitHeight: Math.max(72, content.implicitHeight + Theme.s4 * 2)
 
                 property bool hovered: false
 
                 Column {
                     id: content
                     anchors.fill: parent
-                    anchors.margins: 16
-                    spacing: 6
+                    anchors.margins: Theme.s4
+                    spacing: Theme.s2
 
-                    Row {
-                        spacing: 12
-                        Rectangle {
-                            width: 40; height: 40; radius: 20
-                            color: (modelData.appIcon && modelData.appIcon !== "") ? "transparent" : Theme.accent
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: Theme.s3
+
+                        Card {
+                            width: 40; height: 40
+                            radius: Theme.rMd
+                            hoverEnabled: false
+                            color: (modelData.appIcon && modelData.appIcon !== "") ? "transparent" : Theme.accentSoft
+
                             Image {
                                 anchors.fill: parent
+                                anchors.margins: 4
                                 source: modelData.appIcon || ""
                                 fillMode: Image.PreserveAspectFit
                                 visible: !!(modelData.appIcon && modelData.appIcon !== "")
@@ -75,32 +78,36 @@ Rectangle {
                             Icon {
                                 anchors.centerIn: parent
                                 name: "bell"
-                                size: 20
-                                color: "white"
+                                size: Theme.iconLg
+                                color: Theme.accent
                                 visible: !(modelData.appIcon && modelData.appIcon !== "")
                             }
                         }
 
                         Column {
+                            Layout.fillWidth: true
                             spacing: 2
+
                             Text {
                                 text: modelData.appName || "Unknown"
-                                color: "#9a9aa0"
-                                font.pixelSize: 11
+                                color: Theme.dim
+                                font.pixelSize: Theme.tSmall
                                 font.bold: true
+                                font.family: Theme.fontFamily
                             }
                             Text {
                                 text: modelData.summary || ""
-                                color: "#ffffff"
-                                opacity: 1.0
-                                font.pixelSize: 14
+                                color: Theme.fg
+                                font.pixelSize: Theme.tBody
                                 font.bold: true
+                                font.family: Theme.fontFamily
                                 elide: Text.ElideRight
                             }
                             Text {
                                 text: modelData.body || ""
-                                color: "#9a9aa0"
-                                font.pixelSize: 12
+                                color: Theme.dim
+                                font.pixelSize: Theme.tSmall
+                                font.family: Theme.fontFamily
                                 wrapMode: Text.WordWrap
                                 maximumLineCount: 2
                                 elide: Text.ElideRight
@@ -108,79 +115,40 @@ Rectangle {
                         }
                     }
 
-                    Row {
-                        spacing: 8
-                        Item { width: 52 }
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: Theme.s2
+
+                        Item { Layout.fillWidth: true }
+
                         Repeater {
                             model: modelData.actions || []
-                            delegate: Item {
-                                id: actionDelegate
-                                property bool hovered: false
-                                width: Math.max(60, actionText.implicitWidth + 24)
-                                height: 30
-
-                                Rectangle {
-                                    anchors.fill: parent
-                                    radius: 15
-                                    color: actionDelegate.hovered ? Theme.accent : "transparent"
-                                    border.color: Theme.border; border.width: 1
-
-                                    Text {
-                                        id: actionText
-                                        anchors.centerIn: parent
-                                        text: modelData.label
-                                        color: actionDelegate.hovered ? "white" : "#ffffff"
-                                        opacity: 1.0
-                                        font.pixelSize: 12
-                                    }
-                                }
-
-                                MouseArea {
-                                    anchors.fill: parent
-                                    hoverEnabled: true
-                                    onEntered: actionDelegate.hovered = true
-                                    onExited: actionDelegate.hovered = false
-                                    onClicked: modelData.invoke()
-                                }
+                            delegate: Pill {
+                                text: modelData.label
+                                accent: true
+                                height: Theme.controlH
+                                onClicked: modelData.invoke()
                             }
                         }
 
-                        Item { width: 40 }
-                        Rectangle {
-                            width: 32; height: 32; radius: 16
-                            color: dismissDelegate.hovered ? "#ff453a20" : "transparent"
-                            border.color: Theme.border; border.width: 1
-                            Icon {
-                                anchors.centerIn: parent
-                                name: "x"
-                                size: 14
-                                color: dismissDelegate.hovered ? "#ff453a" : "#9a9aa0"
-                            }
-                            MouseArea {
-                                id: dismissDelegate
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                property bool hovered: false
-                                onEntered: dismissDelegate.hovered = true
-                                onExited: dismissDelegate.hovered = false
-                                onClicked: modelData.dismiss()
-                            }
+                        Pill {
+                            icon: "x"
+                            iconOnly: true
+                            danger: true
+                            height: Theme.controlH
+                            onClicked: modelData.dismiss()
                         }
                     }
                 }
             }
         }
 
-        Item {
-            visible: Notifications.length === 0
-            anchors.fill: parent
-            Text {
-                anchors.centerIn: parent
-                text: "No notifications"
-                color: "#ffffff"
-                opacity: 1.0
-                font.pixelSize: 14
-            }
+        EmptyState {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            visible: Services.Notifications.count === 0
+            icon: "bell-off"
+            text: "No notifications"
         }
     }
 }

@@ -28,6 +28,8 @@ Rectangle {
     border.color: root.accent || root.danger ? "transparent" : Theme.cardBorder
     border.width: root.accent || root.danger ? 0 : 1
 
+    Behavior on bgColor { ColorAnimation { duration: Theme.dFast; easing.type: Theme.easingOutCubic } }
+
     property real _opacity: root.enabled ? 1.0 : 0.5
 
     Row {
