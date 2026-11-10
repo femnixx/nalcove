@@ -12,10 +12,10 @@ Rectangle {
     readonly property real spacing: 10
     readonly property real margins: 24
 
-    // Card height: volume slider + brightness only. Dropdown floats as overlay on top.
+    // Card height: volume slider + brightness slider only.
+    // Device selector dropdown floats as overlay on top and does not affect card height.
     height: margins * 2
         + sliderRow.height + spacing
-        + outputSelector.height + spacing
         + brightnessRow.height
 
     Column {
@@ -24,6 +24,7 @@ Rectangle {
         anchors.margins: root.margins
         spacing: root.spacing
 
+        // ---- Volume row ----
         Row {
             id: sliderRow
             width: parent.width; spacing: 10
@@ -46,7 +47,8 @@ Rectangle {
             }
         }
 
-        // Device selector - overlay mode, dropdown floats on top without pushing brightness
+        // ---- Device selector ----
+        // Overlay mode: dropdown floats on top of the card, does not push brightness down
         DeviceSelector {
             id: outputSelector
             width: content.width
@@ -59,6 +61,7 @@ Rectangle {
             overlayMode: true
         }
 
+        // ---- Brightness row ----
         Row {
             id: brightnessRow
             width: parent.width; spacing: 10
