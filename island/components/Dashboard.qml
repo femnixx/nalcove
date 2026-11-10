@@ -61,7 +61,7 @@ Item {
                             spacing: 2
                             Icon {
                                 name: iconName
-                                size: 20
+                                size: 16
                                 color: isActive ? "#ffffff" : "#9a9aa0"
                                 anchors.horizontalCenter: parent.horizontalCenter
                                 Behavior on color { ColorAnimation { duration: 140 } }
@@ -119,7 +119,7 @@ Item {
                     spacing: 1
                     Icon {
                         name: iconName
-                        size: 14
+                        size: 16
                         color: "#9a9aa0"
                         anchors.horizontalCenter: parent.horizontalCenter
                     }
@@ -156,7 +156,7 @@ Item {
 
             Icon {
                 name: Services.Battery.charging ? "battery-charging" : (Services.Battery.low ? "battery-low" : "battery")
-                size: 14
+                size: 16
                 color: "#9a9aa0"
                 anchors.verticalCenter: parent.verticalCenter
             }
