@@ -164,10 +164,12 @@ Item {
     }
 
     // Separator line below utility row
-    Divider {
+    Rectangle {
         x: Theme.s4
         y: utilityRow.y + utilityRow.height + Theme.s2
         width: parent.width - Theme.s4 * 2
+        height: 1
+        color: Theme.cardBorder
     }
 
     // --- CONTENT AREA: Tab panels ---
@@ -202,4 +204,4 @@ Item {
             indicatorWidth = activeItem.width
         }
     }
-}
+}// RECOMPILE Tue Nov 10 11:25:54 AM WIB 2026

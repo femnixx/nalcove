@@ -30,7 +30,7 @@ Card {
             Item { Layout.fillWidth: true }
         }
 
-        Divider {}
+        Rectangle { Layout.fillWidth: true; height: 1; color: Theme.cardBorder }
 
         Rectangle {
             Layout.fillWidth: true

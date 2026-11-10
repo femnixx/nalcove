@@ -67,7 +67,11 @@ Item {
             }
         }
 
-        Divider {}
+        Rectangle {
+            Layout.fillWidth: true
+            height: 1
+            color: Theme.cardBorder
+        }
 
         ListView {
             Layout.fillWidth: true

@@ -80,7 +80,11 @@ Item {
                 }
             }
 
-            Divider {}
+            Rectangle {
+                Layout.fillWidth: true
+                height: 1
+                color: Theme.cardBorder
+            }
 
             // Input section
             Text {
@@ -142,12 +146,12 @@ Item {
                 }
             }
 
-            Divider { visible: Services.Brightness.available }
+            Rectangle { Layout.fillWidth: true; height: 1; color: Theme.cardBorder; visible: Services.Brightness.available }
 
             // Per-app volume mixer
             AppMixer { Layout.fillWidth: true }
 
-            Divider { visible: Services.Brightness.available }
+            Rectangle { Layout.fillWidth: true; height: 1; color: Theme.cardBorder; visible: Services.Brightness.available }
 
             // Brightness section
             Text {
