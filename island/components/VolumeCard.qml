@@ -47,6 +47,20 @@ Rectangle {
             }
         }
 
+        // ---- Device selector ----
+        // Overlay mode: dropdown floats on top of the card, does not push brightness down
+        DeviceSelector {
+            id: outputSelector
+            width: content.width
+            maxDropdownHeight: Math.max(40,
+                (parent.height > 0 ? parent.height : maxHeight)
+                - margins * 2 - sliderRow.height - brightnessRow.height - root.spacing * 3 - 12)
+            model: Services.Audio.sinks
+            currentNode: Services.Audio.sink
+            onPicked: n => Services.Audio.setDefaultSink(n)
+            overlayMode: true
+        }
+
         // ---- Brightness row ----
         Row {
             id: brightnessRow
@@ -64,20 +78,6 @@ Rectangle {
                 text: Math.round(Services.Brightness.level * 100)
                 color: "#ffffff"; font.pixelSize: 12; horizontalAlignment: Text.AlignRight
             }
-        }
-
-        // ---- Device selector ----
-        // Overlay mode: dropdown floats on top of the card, does not push brightness down
-        DeviceSelector {
-            id: outputSelector
-            width: content.width
-            maxDropdownHeight: Math.max(40,
-                (parent.height > 0 ? parent.height : maxHeight)
-                - margins * 2 - sliderRow.height - brightnessRow.height - root.spacing * 3 - 12)
-            model: Services.Audio.sinks
-            currentNode: Services.Audio.sink
-            onPicked: n => Services.Audio.setDefaultSink(n)
-            overlayMode: true
         }
     }
 }
