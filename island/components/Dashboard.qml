@@ -108,6 +108,7 @@ Item {
             ]
             delegate: Item {
                 Layout.preferredWidth: 60
+                Layout.preferredHeight: 60
                 Layout.alignment: Qt.AlignHCenter
                 property string pageId: modelData[0]
                 property string iconName: modelData[1]
