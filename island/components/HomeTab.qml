@@ -140,6 +140,7 @@ Item {
             id: volBrightArea
             width: root.avail * 0.235
             height: parent.height * 0.55
+            clip: true
 
             Column {
                 id: volBrightColumn
@@ -149,7 +150,7 @@ Item {
                 VolumeCard {
                     id: volumeCard
                     width: parent.width
-                    maxHeight: Math.max(volBrightArea.height - brightnessCard.implicitHeight - root.gap, 100)
+                    maxHeight: volBrightArea.height * 0.6
                     onOutputClicked: root.navigate("volume")
                 }
 
