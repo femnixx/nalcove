@@ -352,7 +352,7 @@ Item {
                                 x: ListView.view.width - 44; y: 30
                                 width: 36; height: 36
                                 iconName: modelData.audio && modelData.audio.muted ? "volume-x" : "volume-2"
-                                active: modelData.audio && modelData.audio.muted
+                                active: !!(modelData.audio && modelData.audio.muted)
                                 onClicked: Services.Audio.toggleNodeMute(modelData)
                             }
 

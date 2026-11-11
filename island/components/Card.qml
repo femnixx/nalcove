@@ -7,11 +7,13 @@ Rectangle {
     Layout.fillHeight: true
     implicitWidth: 200
     implicitHeight: 200
-    radius: 14
-    color: "#141414"
-    border.color: "#3a3a3a"
+    radius: root.cardRadius
+    color: root.cardFill
+    border.color: root.cardBorderColor
     border.width: 1
 
+    property color cardFill: "#141414"
+    property color cardBorderColor: "#3a3a3a"
     property int cardRadius: 14
     property int cardPadding: 16
 
