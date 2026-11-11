@@ -95,12 +95,31 @@ Singleton {
     }
     Timer { id: debounce; interval: 300; onTriggered: root.refreshDevices() }
 
-    Component.onCompleted: refreshDevices()
-
     // ---------- Per-application streams (optional; used by AppMixer.qml) ----------
-    readonly property var appStreams: Pipewire.nodes.values
-        .filter(n => n.isStream && !n.isSink && n.audio)
-        .sort((a, b) => a.id - b.id)
+    property var appStreams: []
+    property int appStreamRev: 0
+
+    function recomputeAppStreams() {
+        appStreams = Pipewire.nodes.values
+            .filter(n => n.isStream && !n.isSink && n.audio)
+            .sort((a, b) => a.id - b.id)
+        appStreamRev++
+    }
+
+    // Periodic refresh so newly appearing app streams (e.g. Waterfox starting)
+    // show up in the mixer
+    Component.onCompleted: {
+        refreshDevices()
+        recomputeAppStreams()
+    }
+
+    Timer {
+        id: appStreamTimer
+        interval: 500
+        repeat: true
+        running: true
+        onTriggered: root.recomputeAppStreams()
+    }
 
     function appName(n) {
         var p = n.properties
