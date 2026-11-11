@@ -56,25 +56,26 @@ Item {
                         border.width: isActive ? 1 : 0
                         Behavior on color { ColorAnimation { duration: 140 } }
 
-                        Column {
-                            anchors.centerIn: parent
-                            spacing: 2
-                            Icon {
-                                name: iconName
-                                size: 16
-                                color: isActive ? "#ffffff" : "#9a9aa0"
-                                anchors.horizontalCenter: parent.horizontalCenter
-                                Behavior on color { ColorAnimation { duration: 140 } }
-                            }
-                            Text {
-                                text: label
-                                font.pixelSize: 9
-                                font.bold: true
-                                color: isActive ? "#ffffff" : "#9a9aa0"
-                                anchors.horizontalCenter: parent.horizontalCenter
-                                Behavior on color { ColorAnimation { duration: 140 } }
-                            }
+                    Column {
+                        anchors.left: parent.left
+                        anchors.top: parent.top
+                        spacing: 2
+                        Icon {
+                            name: iconName
+                            size: 14
+                            color: isActive ? "#ffffff" : "#9a9aa0"
+                            anchors.left: parent.left
+                            Behavior on color { ColorAnimation { duration: 140 } }
                         }
+                        Text {
+                            text: label
+                            font.pixelSize: 9
+                            font.bold: true
+                            color: isActive ? "#ffffff" : "#9a9aa0"
+                            anchors.left: parent.left
+                            Behavior on color { ColorAnimation { duration: 140 } }
+                        }
+                    }
 
                         MouseArea {
                             anchors.fill: parent
@@ -115,20 +116,21 @@ Item {
                 property string label: modelData[2]
 
                 Column {
-                    anchors.centerIn: parent
+                    anchors.left: parent.left
+                    anchors.top: parent.top
                     spacing: 1
                     Icon {
                         name: iconName
-                        size: 16
+                        size: 14
                         color: "#9a9aa0"
-                        anchors.horizontalCenter: parent.horizontalCenter
+                        anchors.left: parent.left
                     }
                     Text {
                         text: label
                         font.pixelSize: 7
                         font.bold: true
                         color: "#9a9aa0"
-                        anchors.horizontalCenter: parent.horizontalCenter
+                        anchors.left: parent.left
                     }
                 }
 
