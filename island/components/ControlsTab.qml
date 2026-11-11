@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Layouts
 import "../services" as Services
 import qs.components 1.0
 
@@ -20,14 +21,15 @@ Item {
             spacing: 16
 
             // ---- Top row: Output and Input cards ----
-            Row {
+            RowLayout {
                 id: topRow
-                width: parent.width; spacing: 14
+                Layout.fillWidth: true
+                spacing: 14
 
                 // Output card
                 Card {
                     id: outputCard
-                    width: (topRow.width - 14) / 2
+                    Layout.fillWidth: true
                     cardFill: "#141414"
                     cardBorderColor: "#3a3a3a"
                     cardRadius: 14
@@ -35,12 +37,10 @@ Item {
 
                     // Header: title + kebab
                     Row {
-                        id: outputHeader
                         width: parent.width
                         Text { text: "Output"; color: "#ffffff"; font.pixelSize: 12; font.bold: true }
                         Item { width: 1 }
                         IconButton {
-                            id: outputKebab
                             anchors.right: parent.right
                             anchors.verticalCenter: parent.verticalCenter
                             iconName: "ellipsis-vertical"
@@ -58,8 +58,10 @@ Item {
                         anchors.top: outputHeader.bottom
                         anchors.topMargin: 10
                         anchors.left: parent.left
+                        anchors.leftMargin: 16
                         anchors.right: parent.right
-                        width: parent.width
+                        anchors.rightMargin: 16
+                        width: parent.width - 32
                     }
 
                     // Slider + pct + mute button
@@ -68,8 +70,10 @@ Item {
                         anchors.top: outputDeviceName.bottom
                         anchors.topMargin: 14
                         anchors.left: parent.left
+                        anchors.leftMargin: 16
                         anchors.right: parent.right
-                        width: parent.width
+                        anchors.rightMargin: 16
+                        width: parent.width - 32
                         spacing: 8
 
                         FlatSlider {
@@ -107,7 +111,7 @@ Item {
                     DeviceSelector {
                         id: outputDeviceList
                         overlayMode: false
-                        width: parent.width
+                        width: parent.width - 32
                         model: Services.Audio.sinks
                         currentNode: Services.Audio.sink
                         onPicked: n => Services.Audio.setDefaultSink(n)
@@ -116,14 +120,16 @@ Item {
                         anchors.top: outputSliderRow.bottom
                         anchors.topMargin: 10
                         anchors.left: parent.left
+                        anchors.leftMargin: 16
                         anchors.right: parent.right
+                        anchors.rightMargin: 16
                     }
                 }
 
                 // Input card
                 Card {
                     id: inputCard
-                    width: (topRow.width - 14) / 2
+                    Layout.fillWidth: true
                     cardFill: "#141414"
                     cardBorderColor: "#3a3a3a"
                     cardRadius: 14
@@ -131,12 +137,10 @@ Item {
 
                     // Header: title + kebab
                     Row {
-                        id: inputHeader
                         width: parent.width
                         Text { text: "Input"; color: "#ffffff"; font.pixelSize: 12; font.bold: true }
                         Item { width: 1 }
                         IconButton {
-                            id: inputKebab
                             anchors.right: parent.right
                             anchors.verticalCenter: parent.verticalCenter
                             iconName: "ellipsis-vertical"
@@ -154,8 +158,10 @@ Item {
                         anchors.top: inputHeader.bottom
                         anchors.topMargin: 10
                         anchors.left: parent.left
+                        anchors.leftMargin: 16
                         anchors.right: parent.right
-                        width: parent.width
+                        anchors.rightMargin: 16
+                        width: parent.width - 32
                     }
 
                     // Slider + pct + mute button
@@ -164,8 +170,10 @@ Item {
                         anchors.top: inputDeviceName.bottom
                         anchors.topMargin: 14
                         anchors.left: parent.left
+                        anchors.leftMargin: 16
                         anchors.right: parent.right
-                        width: parent.width
+                        anchors.rightMargin: 16
+                        width: parent.width - 32
                         spacing: 8
 
                         FlatSlider {
@@ -202,7 +210,7 @@ Item {
                     DeviceSelector {
                         id: inputDeviceList
                         overlayMode: false
-                        width: parent.width
+                        width: parent.width - 32
                         model: Services.Audio.sources
                         currentNode: Services.Audio.source
                         onPicked: n => Services.Audio.setDefaultSource(n)
@@ -211,7 +219,9 @@ Item {
                         anchors.top: inputSliderRow.bottom
                         anchors.topMargin: 10
                         anchors.left: parent.left
+                        anchors.leftMargin: 16
                         anchors.right: parent.right
+                        anchors.rightMargin: 16
                     }
                 }
             }
@@ -219,7 +229,7 @@ Item {
             // ---- Application Volumes card ----
             Card {
                 id: appCard
-                width: parent.width
+                Layout.fillWidth: true
                 cardFill: "#141414"
                 cardBorderColor: "#3a3a3a"
                 cardRadius: 14
@@ -249,6 +259,7 @@ Item {
                         }
 
                         Item {
+                            id: appIconContainer
                             x: 18; y: 14
                             width: 28; height: 28
 

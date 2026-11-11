@@ -1,10 +1,12 @@
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Layouts
 import qs.components 1.0
 
 Rectangle {
     id: root
     Layout.fillWidth: true
+    implicitHeight: contentItem.implicitHeight + root.cardPadding * 2
     radius: root.cardRadius
     color: root.cardFill
     border.color: root.cardBorderColor
@@ -22,8 +24,7 @@ Rectangle {
 
     Column {
         id: contentItem
-        anchors.fill: parent
-        anchors.margins: root.cardPadding
+        width: parent.width
         spacing: 0
     }
 
