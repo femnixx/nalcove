@@ -1,5 +1,5 @@
 import QtQuick
-import qs.components 1.0 as Style
+import qs.components 1.0
 
 Item {
     id: root

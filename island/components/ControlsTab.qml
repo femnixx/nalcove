@@ -1,6 +1,6 @@
 import QtQuick
 import "../services" as Services
-import qs.components 1.0 as Style
+import qs.components 1.0
 
 Item {
     id: root

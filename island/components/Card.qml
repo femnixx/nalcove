@@ -1,6 +1,6 @@
 import QtQuick
 import QtQuick.Controls
-import qs.components 1.0 as Style
+import qs.components 1.0
 
 Rectangle {
     id: root
