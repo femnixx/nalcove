@@ -11,11 +11,14 @@ Rectangle {
     color: root.cardFill
     border.color: root.cardBorderColor
     border.width: 1
+    clip: true
 
     property color cardFill: "#141414"
     property color cardBorderColor: "#3a3a3a"
     property int cardRadius: 14
     property int cardPadding: 16
+
+    Behavior on height { NumberAnimation { duration: 150; easing.type: Easing.OutCubic } }
 
     property bool hoverEnabled: true
     property bool pressed: false

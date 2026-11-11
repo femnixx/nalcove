@@ -25,7 +25,8 @@ Item {
             Card {
                 id: outputCard
                 width: parent.width
-                height: 160
+                height: outputDeviceList.y + outputDeviceList.height + 32
+                Behavior on height { NumberAnimation { duration: 150; easing.type: Easing.OutCubic } }
                 cardFill: "#141414"
                 cardBorderColor: "#3a3a3a"
                 cardRadius: 14
@@ -119,7 +120,8 @@ Item {
             Card {
                 id: inputCard
                 width: parent.width
-                height: 160
+                height: inputDeviceList.y + inputDeviceList.height + 32
+                Behavior on height { NumberAnimation { duration: 150; easing.type: Easing.OutCubic } }
                 cardFill: "#141414"
                 cardBorderColor: "#3a3a3a"
                 cardRadius: 14
