@@ -361,13 +361,15 @@ Item {
                                 onClicked: {}
                             }
                         }
+                    }
 
-                        empty: Text {
-                            anchors.centerIn: parent
-                            text: "No apps are playing audio"
-                            color: "#9a9aa0"
-                            font.pixelSize: 12
-                        }
+                    Text {
+                        id: appEmptyState
+                        anchors.centerIn: parent
+                        visible: appListView.count === 0
+                        text: "No apps are playing audio"
+                        color: "#9a9aa0"
+                        font.pixelSize: 12
                     }
                 }
             }
