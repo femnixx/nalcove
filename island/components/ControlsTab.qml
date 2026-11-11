@@ -1,35 +1,37 @@
 import QtQuick
-import QtQuick.Layouts
 import "../services" as Services
 import qs.components 1.0
 
 Item {
     id: root
+    width: 700
+    height: 800
     property bool outputOpen: false
     property bool inputOpen: false
 
     // Main content area - Flickable for scrolling
-    Flickable {
-        anchors.fill: parent
-        contentWidth: 360
-        contentHeight: contentColumn.implicitHeight
-        clip: true
+        Flickable {
+            anchors.fill: parent
+            contentWidth: 700
+            contentHeight: contentColumn.height
+            clip: true
 
         Column {
             id: contentColumn
-            width: 360
+            width: 700
+            height: 560
             spacing: 16
 
             // ---- Top row: Output and Input cards ----
-            RowLayout {
+            Row {
                 id: topRow
-                Layout.fillWidth: true
-                spacing: 14
+                width: parent.width; spacing: 14
 
                 // Output card
                 Card {
                     id: outputCard
-                    Layout.fillWidth: true
+                    width: (topRow.width - 14) / 2
+                    height: 220
                     cardFill: "#141414"
                     cardBorderColor: "#3a3a3a"
                     cardRadius: 14
@@ -37,6 +39,7 @@ Item {
 
                     // Header: title + kebab
                     Row {
+                        id: outputHeader
                         width: parent.width
                         Text { text: "Output"; color: "#ffffff"; font.pixelSize: 12; font.bold: true }
                         Item { width: 1 }
@@ -129,7 +132,8 @@ Item {
                 // Input card
                 Card {
                     id: inputCard
-                    Layout.fillWidth: true
+                    width: (topRow.width - 14) / 2
+                    height: 220
                     cardFill: "#141414"
                     cardBorderColor: "#3a3a3a"
                     cardRadius: 14
@@ -137,6 +141,7 @@ Item {
 
                     // Header: title + kebab
                     Row {
+                        id: inputHeader
                         width: parent.width
                         Text { text: "Input"; color: "#ffffff"; font.pixelSize: 12; font.bold: true }
                         Item { width: 1 }
@@ -229,7 +234,8 @@ Item {
             // ---- Application Volumes card ----
             Card {
                 id: appCard
-                Layout.fillWidth: true
+                width: parent.width
+                height: 300
                 cardFill: "#141414"
                 cardBorderColor: "#3a3a3a"
                 cardRadius: 14
