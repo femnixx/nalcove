@@ -1,5 +1,6 @@
 import QtQuick
 import "../services" as Services
+import qs.components 1.0 as Style
 
 Item {
     // Main content area - Flickable for scrolling
@@ -12,81 +13,60 @@ Item {
         Column {
             id: contentColumn
             width: 360
-            spacing: 10
+            spacing: 16
 
-            // Output section
-            Text { text: "Output"; color: "#9a9aa0"; font.pixelSize: 11; font.bold: true }
+            // ---- Output section (matches image design) ----
+            Text { text: "Output"; color: Style.dim; font.pixelSize: 11; font.bold: true }
+
             Row {
-                width: parent.width; spacing: 10
-                Item { width: 22; height: 22; anchors.verticalCenter: parent.verticalCenter
-                    Icon { name: "volume"; size: 18; anchors.centerIn: parent; opacity: Services.Audio.sinkMuted ? 0.5 : 1.0 }
-                    MouseArea { anchors.fill: parent; onClicked: Services.Audio.toggleSinkMute() } }
+                width: parent.width; spacing: 8
+
+                // Output name dropdown
+                DeviceSelector {
+                    id: outputSelector
+                    width: 140
+                    model: Services.Audio.sinks
+                    currentNode: Services.Audio.sink
+                    onPicked: n => Services.Audio.setDefaultSink(n)
+                }
+
+                // Mute button
+                Item {
+                    width: 32; height: 32; anchors.verticalCenter: parent.verticalCenter
+                    Rectangle {
+                        anchors.fill: parent; radius: 8; color: Services.Audio.sinkMuted ? "#3a3a3e" : "#1a1a1a"
+                        border.color: "#33ffffff"; border.width: 1
+                        Icon {
+                            anchors.centerIn: parent; size: 16
+                            name: Services.Audio.sinkMuted ? "volume-mute" : "volume"
+                            color: Services.Audio.sinkMuted ? Style.dim : Style.fg
+                        }
+                        MouseArea {
+                            anchors.fill: parent
+                            onClicked: Services.Audio.toggleSinkMute()
+                        }
+                    }
+                }
+
+                // Volume slider
                 FlatSlider {
-                    width: parent.width - 22 - 34 - 20; anchors.verticalCenter: parent.verticalCenter
+                    anchors.verticalCenter: parent.verticalCenter
+                    left: outputSelector.right; leftMargin: 8
+                    right: pct.left; rightMargin: 8
                     value: Services.Audio.sinkVolume
                     enabled: Services.Audio.sinkReady
                     onMoved: if (Services.Audio.sinkReady) Services.Audio.setSinkVolume(value)
                 }
-                Text { width: 34; anchors.verticalCenter: parent.verticalCenter
-                       text: Math.round(Services.Audio.sinkVolume * 100); color: "#ffffff"; font.pixelSize: 12
-                       horizontalAlignment: Text.AlignRight }
-            }
 
-            // Device selector - full card width; expands the column when opened so
-            // brightness below moves down instead of being clipped
-            DeviceSelector {
-                id: outputSelector
-                width: parent.width
-                model: Services.Audio.sinks
-                currentNode: Services.Audio.sink
-                onPicked: n => Services.Audio.setDefaultSink(n)
-            }
-
-            // Brightness sits directly below the volume output
-            Item { width: 1; height: 6; visible: Services.Brightness.available }
-            Text { visible: Services.Brightness.available; text: "Brightness"; color: "#9a9aa0"; font.pixelSize: 11; font.bold: true }
-            Row {
-                visible: Services.Brightness.available
-                width: parent.width; spacing: 10
-                Icon { name: "sun"; size: 18; anchors.verticalCenter: parent.verticalCenter }
-                FlatSlider { width: parent.width - 18 - 34 - 20; anchors.verticalCenter: parent.verticalCenter
-                             value: Services.Brightness.level; onMoved: Services.Brightness.set(value) }
-                Text { width: 34; anchors.verticalCenter: parent.verticalCenter
-                       text: Math.round(Services.Brightness.level * 100); color: "#ffffff"; font.pixelSize: 12
-                       horizontalAlignment: Text.AlignRight }
-            }
-
-            Item { width: 1; height: 6 }
-
-            // Input section
-            Text { text: "Input"; color: "#9a9aa0"; font.pixelSize: 11; font.bold: true }
-            Row {
-                width: parent.width; spacing: 10
-                Item { width: 22; height: 22; anchors.verticalCenter: parent.verticalCenter
-                    Icon { name: "volume"; size: 18; color: Services.Audio.sourceMuted ? "#ff453a" : "#ffffff"; anchors.centerIn: parent }
-                    MouseArea { anchors.fill: parent; onClicked: Services.Audio.toggleSourceMute() } }
-                FlatSlider {
-                    width: parent.width - 22 - 34 - 20; anchors.verticalCenter: parent.verticalCenter
-                    value: Services.Audio.sourceVolume
-                    enabled: Services.Audio.sourceReady
-                    onMoved: if (Services.Audio.sourceReady) Services.Audio.setSourceVolume(value)
+                Text {
+                    id: pct
+                    width: 34; anchors.verticalCenter: parent.verticalCenter
+                    text: Math.round(Services.Audio.sinkVolume * 100); color: Style.fg; font.pixelSize: 12
+                    horizontalAlignment: Text.AlignRight
                 }
-                Text { width: 34; anchors.verticalCenter: parent.verticalCenter
-                       text: Math.round(Services.Audio.sourceVolume * 100); color: "#ffffff"; font.pixelSize: 12
-                       horizontalAlignment: Text.AlignRight }
             }
 
-            DeviceSelector {
-                id: inputSelector
-                width: parent.width
-                model: Services.Audio.sources
-                currentNode: Services.Audio.source
-                onPicked: n => Services.Audio.setDefaultSource(n)
-            }
-
-            Item { width: 1; height: 6 }
-
-            // Per-app volume mixer
+            // ---- Per-app volume mixer ----
             AppMixer { width: parent.width }
         }
     }

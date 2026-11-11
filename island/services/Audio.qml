@@ -110,4 +110,10 @@ Singleton {
     function appIconName(n) { return n.properties["application.icon-name"] || "" }
     function setNodeVolume(n, v) { if (n && n.audio) n.audio.volume = Math.max(0, Math.min(1, v)) }
     function toggleNodeMute(n) { if (n && n.audio) n.audio.muted = !n.audio.muted }
+
+    // Move an application stream to a specific sink/output
+    function moveStreamToSink(n, sinkName) {
+        if (!n || !sinkName) return
+        Quickshell.execDetached(["pactl", "move-sink-input", String(n.id), sinkName])
+    }
 }
