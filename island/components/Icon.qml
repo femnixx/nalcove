@@ -67,7 +67,6 @@ Item {
         "mic": "\uF130",
         "mic-off": "\uF130",
         "ellipsis-vertical": "\u22EE",
-        "headphones": "\uF589",
         "app-window": "\uF10B",
     }
 
