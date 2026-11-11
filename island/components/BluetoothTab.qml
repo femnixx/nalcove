@@ -1,7 +1,6 @@
 import QtQuick
 import Quickshell
 import Quickshell.Bluetooth
-import qs.components 1.0
 
 Item {
     id: bt
@@ -37,9 +36,9 @@ Item {
 
         Column {
             x: 0; anchors.verticalCenter: parent.verticalCenter; spacing: 2
-            Icon { name: "bluetooth"; size: 20; color: Style.fg }
-            Text { text: selectedName || "Bluetooth"; color: Style.fg; font.pixelSize: 16; font.bold: true }
-            Text { text: "Open the case near your PC to see battery"; color: Style.dim; font.pixelSize: 11 }
+            Icon { name: "bluetooth"; size: 20; color: "#ffffff" }
+            Text { text: selectedName || "Bluetooth"; color: "#ffffff"; font.pixelSize: 16; font.bold: true }
+            Text { text: "Open the case near your PC to see battery"; color: "#9a9aa0"; font.pixelSize: 11 }
         }
 
         Item {
@@ -54,10 +53,10 @@ Item {
 
                 // Power toggle switch
                 Rectangle {
-                    width: 40; height: 22; radius: 11; color: "#1a1a1a"
+                    width: 40; height: 22; radius: 11
                     border.color: "#33ffffff"; border.width: 1
-                    color: adapter && adapter.enabled ? Style.accent : "#3a3a3e"
-                    enabled: adapter && adapter.state !== BluetoothAdapterState.Blocked
+                    color: adapter && adapter.enabled ? "#3b8bff" : "#3a3a3e"
+                    enabled: !!adapter && adapter.state !== BluetoothAdapterState.Blocked
                     Rectangle { width: 18; height: 18; radius: 9; y: 2; color: "#ffffff"
                                 x: adapter && adapter.enabled ? parent.width - width - 2 : 2
                                 Behavior on x { NumberAnimation { duration: 120 } } }
@@ -68,7 +67,7 @@ Item {
                 Pill {
                     id: scanPill
                     text: adapter && adapter.discovering ? "Stop" : "Scan"
-                    visible: adapter && adapter.enabled && adapter.state !== BluetoothAdapterState.Blocked
+                    visible: !!adapter && adapter.enabled && adapter.state !== BluetoothAdapterState.Blocked
                     onClicked: adapter.discovering = !adapter.discovering
                 }
 
@@ -76,7 +75,7 @@ Item {
                 Rectangle {
                     width: 24; height: 24; radius: 12; color: "#1a1a1a"
                     border.color: "#33ffffff"; border.width: 1
-                    Icon { anchors.centerIn: parent; name: "refresh-ccw"; size: 14; color: Style.dim }
+                    Icon { anchors.centerIn: parent; name: "refresh-ccw"; size: 14; color: "#9a9aa0" }
                     MouseArea { anchors.fill: parent; onClicked: if (adapter) adapter.discovering = !adapter.discovering }
                 }
 
@@ -84,7 +83,7 @@ Item {
                 Pill {
                     id: unblockPill
                     text: "Unblock"
-                    visible: adapter && adapter.state === BluetoothAdapterState.Blocked
+                    visible: !!adapter && adapter.state === BluetoothAdapterState.Blocked
                     onClicked: unblockRfkill()
                 }
 
@@ -97,9 +96,9 @@ Item {
 
                 // Bluetooth is off text (shown when off and not blocked)
                 Text {
-                    visible: adapter && !adapter.enabled && adapter.state !== BluetoothAdapterState.Blocked
+                    visible: !!adapter && !adapter.enabled && adapter.state !== BluetoothAdapterState.Blocked
                     text: "Bluetooth is off"
-                    color: Style.dim
+                    color: "#9a9aa0"
                     font.pixelSize: 11
                 }
             }
@@ -109,7 +108,7 @@ Item {
     // ---- section label ----
     Text {
         id: sectionLabel
-        text: "BLUETOOTH DEVICES"; color: Style.dim; font.pixelSize: 11; font.bold: true
+        text: "BLUETOOTH DEVICES"; color: "#9a9aa0"; font.pixelSize: 11; font.bold: true
         anchors.top: header.bottom; anchors.topMargin: 16; anchors.left: parent.left
     }
 
@@ -133,14 +132,14 @@ Item {
                 Icon {
                     x: 12; anchors.verticalCenter: parent.verticalCenter
                     name: "bluetooth"; size: 16
-                    color: modelData.connected ? Style.accent : Style.dim
+                    color: modelData.connected ? "#3b8bff" : "#9a9aa0"
                 }
                 Column {
                     x: 38; anchors.verticalCenter: parent.verticalCenter; width: parent.width - 160; spacing: 1
-                    Text { text: modelData.name || modelData.address; color: Style.fg
+                    Text { text: modelData.name || modelData.address; color: "#ffffff"
                            font.pixelSize: 13; elide: Text.ElideRight }
                     Text { text: modelData.batteryAvailable ? Math.round(modelData.battery * 100) + "%" : ""
-                           color: Style.dim; font.pixelSize: 11; visible: modelData.batteryAvailable }
+                           color: "#9a9aa0"; font.pixelSize: 11; visible: modelData.batteryAvailable }
                 }
             }
 
@@ -160,19 +159,19 @@ Item {
     // ---- empty states ----
     Text {
         anchors.centerIn: parent
-        visible: adapter && adapter.state === BluetoothAdapterState.Blocked
-        text: "Bluetooth blocked by rfkill"; color: Style.dim; font.pixelSize: 13
+        visible: !!adapter && adapter.state === BluetoothAdapterState.Blocked
+        text: "Bluetooth blocked by rfkill"; color: "#9a9aa0"; font.pixelSize: 13
     }
 
     Text {
         anchors.centerIn: parent
-        visible: adapter && adapter.enabled && devices.length === 0
-        text: "No Bluetooth devices found"; color: Style.dim; font.pixelSize: 13
+        visible: !!adapter && adapter.enabled && devices.length === 0
+        text: "No Bluetooth devices found"; color: "#9a9aa0"; font.pixelSize: 13
     }
 
     Text {
         anchors.centerIn: parent
         visible: !adapter
-        text: "No Bluetooth adapter found"; color: Style.dim; font.pixelSize: 13
+        text: "No Bluetooth adapter found"; color: "#9a9aa0"; font.pixelSize: 13
     }
 }

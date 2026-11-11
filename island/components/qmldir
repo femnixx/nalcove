@@ -23,6 +23,7 @@ Glyph 1.0 Glyph.qml
 HomeTab 1.0 HomeTab.qml
 Hud 1.0 Hud.qml
 Icon 1.0 Icon.qml
+IconButton 1.0 IconButton.qml
 LineSlider 1.0 LineSlider.qml
 LyricsPanel 1.0 LyricsPanel.qml
 MusicCard 1.0 MusicCard.qml
