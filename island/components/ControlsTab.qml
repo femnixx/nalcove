@@ -245,24 +245,22 @@ Item {
                         spacing: 8
                         model: Services.Audio.appStreams
                         delegate: Item {
+                            id: appRow
+                            property bool pickerOpen: false
                             width: ListView.view.width
-                            height: 56
+                            height: pickerOpen ? 84 + Services.Audio.sinks.length * 30 + 8 : 84
+                            Behavior on height { NumberAnimation { duration: 150; easing.type: Easing.OutCubic } }
+                            clip: true
 
                             Rectangle {
-                                id: rowBg
-                                anchors.fill: parent
-                                anchors.margins: 6
-                                color: "#0a0a0a"
-                                radius: 12
-                                border.color: "#2a2a2a"
-                                border.width: 1
+                                anchors.fill: parent; anchors.margins: 2
+                                color: "#0a0a0a"; radius: 12
+                                border.color: "#2a2a2a"; border.width: 1
                             }
 
+                            // app icon / letter fallback
                             Item {
-                                id: appIconContainer
-                                x: 18; y: 14
-                                width: 28; height: 28
-
+                                x: 14; y: 12; width: 28; height: 28
                                 Image {
                                     id: appIcon
                                     anchors.fill: parent
@@ -271,87 +269,112 @@ Item {
                                     source: Quickshell.iconPath(Services.Audio.appIconName(modelData), "app-window")
                                     opacity: modelData.audio && modelData.audio.muted ? 0.4 : 1
                                 }
-
                                 Rectangle {
-                                    id: letterAvatar
-                                    anchors.fill: parent
-                                    radius: 14
-                                    color: "#2a2a2e"
+                                    anchors.fill: parent; radius: 14; color: "#2a2a2e"
                                     visible: appIcon.status === Image.Error || appIcon.source === ""
                                     Text {
                                         anchors.centerIn: parent
                                         text: Services.Audio.appName(modelData).charAt(0).toUpperCase()
-                                        color: "#ffffff"
-                                        font.pixelSize: 14
-                                        font.bold: true
+                                        color: "#ffffff"; font.pixelSize: 14; font.bold: true
                                     }
                                 }
-
-                                MouseArea { anchors.fill: parent; onClicked: Services.Audio.toggleNodeMute(modelData) }
                             }
 
+                            // name + detail
                             Column {
-                                x: 56; y: 12
-                                width: 180
+                                x: 52; y: 10
+                                width: appRow.width - 52 - 100
                                 spacing: 2
                                 Text {
                                     width: parent.width
                                     text: Services.Audio.appName(modelData)
-                                    color: "#ffffff"
-                                    font.pixelSize: 12
-                                    font.bold: true
-                                    elide: Text.ElideRight
+                                    color: "#ffffff"; font.pixelSize: 12; font.bold: true; elide: Text.ElideRight
                                 }
                                 Text {
                                     width: parent.width
                                     text: Services.Audio.appDetail(modelData)
-                                    color: "#9a9aa0"
-                                    font.pixelSize: 10
-                                    elide: Text.ElideRight
+                                    color: "#9a9aa0"; font.pixelSize: 10; elide: Text.ElideRight
                                     visible: text !== ""
                                 }
                             }
 
-                            FlatSlider {
-                                x: 56; y: 36
-                                width: ListView.view.width - 56 - 120
-                                bold: true
-                                value: modelData.audio ? modelData.audio.volume : 0
-                                enabled: modelData.audio !== null
-                                onMoved: Services.Audio.setNodeVolume(modelData, value)
-                            }
-
-                            Text {
-                                id: appPct
-                                x: ListView.view.width - 54
-                                y: 14
-                                width: 44
-                                text: modelData.audio ? Math.round(modelData.audio.volume * 100) + "%" : "0%"
-                                color: "#ffffff"; font.pixelSize: 11; font.bold: true
-                                horizontalAlignment: Text.AlignRight
-                            }
-
-                            IconButton {
-                                id: appHeadphonesBtn
-                                x: ListView.view.width - 44; y: 30
-                                width: 36; height: 36
-                                iconName: "headphones"
-                                visible: false
-                            }
-
+                            // buttons (top right)
                             IconButton {
                                 id: appMuteBtn
-                                x: ListView.view.width - 44; y: 30
-                                width: 36; height: 36
+                                width: 32; height: 32
+                                x: appRow.width - width - 12; y: 8
                                 iconName: modelData.audio && modelData.audio.muted ? "volume-x" : "volume-2"
-                                active: !! (modelData.audio && modelData.audio.muted)
+                                active: !!(modelData.audio && modelData.audio.muted)
                                 onClicked: Services.Audio.toggleNodeMute(modelData)
                             }
-
-                            MouseArea {
-                                anchors.fill: parent
-                                onClicked: {}
+                            IconButton {
+                                id: appOutBtn
+                                width: 32; height: 32
+                                x: appMuteBtn.x - width - 6; y: 8
+                                iconName: "headphones"
+                                active: appRow.pickerOpen
+                                onClicked: appRow.pickerOpen = !appRow.pickerOpen
                             }
+
+                            // volume slider row
+                            Item {
+                                id: appSliderRow
+                                x: 52; y: 48
+                                width: appRow.width - 52 - 14
+                                height: 28
+
+                                Text {
+                                    id: appPct
+                                    width: 44
+                                    anchors.right: parent.right
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    horizontalAlignment: Text.AlignRight
+                                    text: modelData.audio ? Math.round(modelData.audio.volume * 100) + "%" : "0%"
+                                    color: "#ffffff"; font.pixelSize: 11; font.bold: true
+                                }
+                                FlatSlider {
+                                    bold: true
+                                    anchors.left: parent.left
+                                    anchors.right: appPct.left; anchors.rightMargin: 8
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    value: modelData.audio ? modelData.audio.volume : 0
+                                    enabled: modelData.audio !== null
+                                    onMoved: Services.Audio.setNodeVolume(modelData, value)
+                                }
+                            }
+
+                            // per-app output picker
+                            Column {
+                                x: 14; y: 84
+                                width: appRow.width - 28
+                                spacing: 2
+                                visible: appRow.pickerOpen
+                                Repeater {
+                                    model: Services.Audio.sinks
+                                    delegate: Rectangle {
+                                        width: parent.width; height: 28; radius: 8
+                                        color: sinkMouse.containsMouse ? "#2a2a2e" : "#1a1a1a"
+                                        Text {
+                                            anchors.verticalCenter: parent.verticalCenter
+                                            x: 10; width: parent.width - 20
+                                            text: Services.Audio.label(modelData)
+                                            color: "#ffffff"; font.pixelSize: 11; elide: Text.ElideRight
+                                        }
+                                        MouseArea {
+                                            id: sinkMouse
+                                            anchors.fill: parent
+                                            hoverEnabled: true
+                                            onClicked: {
+                                                Quickshell.execDetached(["pactl", "move-sink-input",
+                                                    String(appStream.id), modelData.name])
+                                                appRow.pickerOpen = false
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            property var appStream: modelData
                         }
                     }
 
