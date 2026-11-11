@@ -16,6 +16,7 @@ ControlsTab 1.0 ControlsTab.qml
 Dashboard 1.0 Dashboard.qml
 DeviceSelector 1.0 DeviceSelector.qml
 Divider 1.0 Divider.qml
+DynamicNotch 1.0 DynamicNotch.qml
 EmptyState 1.0 EmptyState.qml
 ExpandedContent 1.0 ExpandedContent.qml
 FlatSlider 1.0 FlatSlider.qml

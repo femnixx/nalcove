@@ -1,6 +1,6 @@
-// island/shell.qml - Quickshell Dynamic Island (niri / any wlr-layer-shell compositor)
+// island/shell.qml - Quickshell Dynamic Island with DynamicNotch integration
 // Run with: qs -p ./island
-// Toggle:   qs -p ./island ipc call island toggle
+// Toggle:   qs ipc call island toggle
 //@ pragma IconTheme "Papirus-Dark"
 
 import Quickshell
@@ -10,7 +10,7 @@ import Quickshell.Widgets
 import QtQuick
 import QtQuick.Shapes
 import QtQuick.Controls
-import "services"
+import "services" as Services
 import "components"
 import qs.components 1.0
 
@@ -19,7 +19,7 @@ ShellRoot {
         id: islandWindow
 
         anchors { top: true; left: true; right: true }
-        implicitHeight: 470
+        implicitHeight: notch.expandedH + 40
         color: "transparent"
         exclusionMode: ExclusionMode.Ignore
         WlrLayershell.layer: WlrLayer.Overlay
@@ -28,142 +28,90 @@ ShellRoot {
             ? WlrKeyboardFocus.OnDemand
             : WlrKeyboardFocus.None
 
-        // Close the island as soon as the user clicks outside it.
+        // State machine: "closed" | "hover" | "hotkey"
+        property string triggerMode: "closed"
+
+        // Close the island as soon as the user clicks outside it (unless pinned).
         MouseArea {
             anchors.fill: parent
             propagateComposedEvents: false
             z: -1
             onClicked: {
-                // Ignore outside clicks while the dashboard is pinned open.
-                if (islandWindow.triggerMode === "hotkey" && !fullView.pinned)
+                if (islandWindow.triggerMode === "hotkey" && !notch.expandedContent.pinned)
                     islandWindow.triggerMode = "closed"
             }
         }
 
-        // State machine: "closed" | "hover" | "hotkey"
-        property string triggerMode: "closed"
-
-        property real currentWidth: triggerMode === "hotkey" ? 780
-            : (triggerMode === "hover" ? 360 : (Media.isPlaying ? 270 : 200))
-        property real currentHeight: triggerMode === "hotkey" ? 400 : (triggerMode === "hover" ? 80 : 34)
-        property real currentBottomRadius: triggerMode === "closed" ? 14 : 32
-
-        Behavior on currentWidth {
-            SpringAnimation { spring: 3.5; damping: 0.35; epsilon: 0.25 }
-        }
-        Behavior on currentHeight {
-            SpringAnimation { spring: 3.5; damping: 0.35; epsilon: 0.25 }
-        }
-        Behavior on currentBottomRadius {
-            SpringAnimation { spring: 3.0; damping: 0.4; epsilon: 0.1 }
-        }
-
-        // Only poll playback position while the island is open
-        Binding {
-            target: Media
-            property: "tracking"
-            value: islandWindow.triggerMode !== "closed"
-        }
-
-        // Clock only ticks while the dashboard is open
-        Binding {
-            target: Clock
-            property: "active"
-            value: islandWindow.triggerMode === "hotkey"
-        }
-
         function toggleHotkey() {
             // While pinned the island stays locked open: toggle unpins first, then closes.
-            if (fullView.pinned) {
-                fullView.pinned = false
+            if (notch.expandedContent.pinned) {
+                notch.expandedContent.pinned = false
                 islandWindow.triggerMode = "closed"
                 return
             }
             triggerMode = (triggerMode === "hotkey") ? "closed" : "hotkey"
         }
 
-        mask: Region { item: hitbox }
-
-        Item {
-            id: hitbox
-            x: islandShape.x - islandShape.flare - 2
-            y: islandShape.y
-            width: islandShape.width + 2 * islandShape.flare + 4
-            height: islandShape.height + 2
+        Component.onCompleted: updateKeyboardFocus()
+        function updateKeyboardFocus() {
+            WlrLayershell.keyboardFocus = (triggerMode === "hotkey")
+                ? WlrKeyboardFocus.OnDemand
+                : WlrKeyboardFocus.None
         }
-
-        Item {
-            anchors.fill: parent
-            focus: islandWindow.triggerMode === "hotkey"
-            Keys.onEscapePressed: { if (!fullView.pinned) islandWindow.triggerMode = "closed" }
-        }
-
-        Item {
-            id: islandShape
-            property real flare: 12
-            width: islandWindow.currentWidth
-            height: islandWindow.currentHeight
-            x: (parent.width - width) / 2
-            y: 0
-
-            Shape {
-                anchors.fill: parent
-                preferredRendererType: Shape.CurveRenderer
-
-                ShapePath {
-                    id: notchPath
-                    property real w: islandShape.width
-                    property real h: islandShape.height
-                    property real f: islandShape.flare
-                    property real r: Math.max(0, islandWindow.currentBottomRadius)
-
-                    strokeWidth: islandWindow.triggerMode === "hotkey" ? 1 : 0
-                    strokeColor: Style.border
-                    fillColor: islandWindow.triggerMode === "hotkey" ? Style.islandFill : "#000000"
-                    Behavior on fillColor { ColorAnimation { duration: 200 } }
-                    startX: -f
-                    startY: 0
-
-                    PathLine { x: notchPath.w + notchPath.f; y: 0 }
-                    PathArc {
-                        x: notchPath.w; y: notchPath.f
-                        radiusX: notchPath.f; radiusY: notchPath.f
-                        direction: PathArc.Counterclockwise
-                    }
-                    PathLine { x: notchPath.w; y: notchPath.h - notchPath.r }
-                    PathArc {
-                        x: notchPath.w - notchPath.r; y: notchPath.h
-                        radiusX: notchPath.r; radiusY: notchPath.r
-                        direction: PathArc.Clockwise
-                    }
-                    PathLine { x: notchPath.r; y: notchPath.h }
-                    PathArc {
-                        x: 0; y: notchPath.h - notchPath.r
-                        radiusX: notchPath.r; radiusY: notchPath.r
-                        direction: PathArc.Clockwise
-                    }
-                    PathLine { x: 0; y: notchPath.f }
-                    PathArc {
-                        x: -notchPath.f; y: 0
-                        radiusX: notchPath.f; radiusY: notchPath.f
-                        direction: PathArc.Counterclockwise
-                    }
-                }
+        onTriggerModeChanged: {
+            updateKeyboardFocus()
+            // Map shell state to notch mode:
+            //   hotkey   -> expanded (full dashboard)
+            //   hover    -> compact  (live activity strip)
+            //   closed   -> collapsed (small pill)
+            if (triggerMode === "hotkey") {
+                notch.mode = "expanded"
+                notch.hoverExpands = false
+            } else if (triggerMode === "hover") {
+                notch.mode = "compact"
+                notch.hoverExpands = true
+            } else {
+                notch.mode = "collapsed"
+                notch.hoverExpands = true
             }
+        }
 
-            // ---------- CONTENT ----------
-            Item {
-                id: content
-                anchors.fill: parent
-                clip: true
+        Keys.enabled: triggerMode === "hotkey"
+        Keys.onPressed: {
+            if (event.key === Qt.Key.Key_Escape)
+                islandWindow.triggerMode = "closed"
+        }
 
-                // ===== Compact pill (closed + playing): art left, bars right =====
+        // IPC handler for all other compositors: qs ipc call island toggle
+        IpcHandler {
+            id: islandIpc
+            target: "island"
+            function toggle() {
+                islandWindow.toggleHotkey()
+            }
+        }
+
+        // Global keybind: Ctrl+Alt+Space toggles the island open/closed.
+        Shortcut {
+            sequence: "Ctrl+Alt+Space"
+            onActivated: {
+                if (islandWindow.triggerMode === "closed")
+                    islandWindow.triggerMode = "hotkey"
+                else
+                    islandWindow.triggerMode = "closed"
+            }
+        }
+
+        // ---- DynamicNotch: three-state dynamic island container ----
+        DynamicNotch {
+            id: notch
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.top: parent.top
+
+            // ---- Collapsed: small pill with media art + activity bars ----
+            collapsedContent: Component {
                 Item {
-                    id: compactPill
-                    anchors.fill: parent
-                    opacity: (islandWindow.triggerMode === "closed" && Media.isPlaying) ? 1 : 0
-                    visible: opacity > 0.01
-                    Behavior on opacity { NumberAnimation { duration: 150 } }
+                    width: notch.collapsedW; height: notch.collapsedH
 
                     ClippingRectangle {
                         x: 14; y: 6
@@ -172,7 +120,7 @@ ShellRoot {
                         color: "#222222"
                         Image {
                             anchors.fill: parent
-                            source: Media.artUrl
+                            source: Services.Media.artUrl
                             fillMode: Image.PreserveAspectCrop
                             asynchronous: true
                         }
@@ -185,17 +133,15 @@ ShellRoot {
                         Repeater {
                             model: 4
                             delegate: Item {
-                                width: 3
-                                height: 16
+                                width: 3; height: 16
                                 Rectangle {
-                                    width: 3
-                                    radius: 1.5
+                                    width: 3; radius: 1.5
                                     color: Style.fg
                                     anchors.centerIn: parent
                                     height: 4 + index * 2
                                     SequentialAnimation on height {
                                         loops: Animation.Infinite
-                                        running: compactPill.visible && Media.isPlaying
+                                        running: notch.mode === "compact" && Media.isPlaying
                                         NumberAnimation { to: 16; duration: 280 + index * 70; easing.type: Easing.InOutSine }
                                         NumberAnimation { to: 4; duration: 320 + index * 50; easing.type: Easing.InOutSine }
                                     }
@@ -203,38 +149,13 @@ ShellRoot {
                             }
                         }
                     }
-
-                    // swipe left/right > 40 px = next / previous
-                    DragHandler {
-                        id: swipe
-                        target: null
-                        yAxis.enabled: false
-                        property real lastDx: 0
-                        onTranslationChanged: lastDx = translation.x
-                        onActiveChanged: {
-                            if (active) {
-                                lastDx = 0
-                            } else if (lastDx > 40) {
-                                Media.previous()
-                            } else if (lastDx < -40) {
-                                Media.next()
-                            }
-                        }
-                    }
                 }
+            }
 
-                // ===== Hover peek: art, title/artist, play/pause =====
+            // ---- Compact: media info strip (peek state) ----
+            compactContent: Component {
                 Item {
-                    id: peekView
-                    anchors.fill: parent
-                    opacity: islandWindow.triggerMode === "hover" ? 1 : 0
-                    visible: opacity > 0.01
-                    Behavior on opacity {
-                        SequentialAnimation {
-                            PauseAnimation { duration: islandWindow.triggerMode === "hover" ? 80 : 0 }
-                            NumberAnimation { duration: 150 }
-                        }
-                    }
+                    width: notch.compactW; height: notch.compactH
 
                     MouseArea {
                         anchors.fill: parent
@@ -248,7 +169,7 @@ ShellRoot {
                         color: "#222222"
                         Image {
                             anchors.fill: parent
-                            source: Media.artUrl
+                            source: Services.Media.artUrl
                             fillMode: Image.PreserveAspectCrop
                             asynchronous: true
                         }
@@ -260,7 +181,7 @@ ShellRoot {
                         spacing: 3
                         Text {
                             width: parent.width
-                            text: Media.hasPlayer ? Media.title : "Nothing playing"
+                            text: Services.Media.hasPlayer ? Services.Media.title : "Nothing playing"
                             color: Style.fg
                             font.pixelSize: 13
                             font.bold: true
@@ -268,7 +189,7 @@ ShellRoot {
                         }
                         Text {
                             width: parent.width
-                            text: Media.artist
+                            text: Services.Media.artist
                             color: Style.dim
                             font.pixelSize: 11
                             elide: Text.ElideRight
@@ -278,74 +199,27 @@ ShellRoot {
                     Item {
                         x: parent.width - 52; y: 22
                         width: 36; height: 36
-                        visible: Media.hasPlayer
+                        visible: Services.Media.hasPlayer
                         Glyph {
                             anchors.centerIn: parent
                             width: 16; height: 16
-                            kind: Media.isPlaying ? "pause" : "play"
+                            kind: Services.Media.isPlaying ? "pause" : "play"
                             color: Style.fg
                         }
                         MouseArea {
                             anchors.fill: parent
-                            onClicked: Media.playPause()
+                            onClicked: Services.Media.playPause()
                         }
                     }
                 }
+            }
 
-                // ===== Expanded (hotkey): tabbed dashboard =====
+            // ---- Expanded: full dashboard with tabbed content ----
+            expandedContent: Component {
                 Dashboard {
-                    id: fullView
+                    id: dashboardRoot
                     anchors.fill: parent
-                    active: islandWindow.triggerMode === "hotkey"
-                    opacity: active ? 1 : 0
-                    visible: opacity > 0.01
-                    Behavior on opacity {
-                        SequentialAnimation {
-                            PauseAnimation { duration: fullView.active ? 100 : 0 }
-                            NumberAnimation { duration: 180 }
-                        }
-                    }
                 }
-            }
-
-            // Hover peek (disabled while locked open)
-            HoverHandler {
-                enabled: islandWindow.triggerMode !== "hotkey"
-                onHoveredChanged: {
-                    if (hovered) {
-                        hoverDebounce.stop()
-                        if (islandWindow.triggerMode === "closed")
-                            islandWindow.triggerMode = "hover"
-                    } else if (islandWindow.triggerMode === "hover") {
-                        hoverDebounce.restart()
-                    }
-                }
-            }
-        }
-
-        Timer {
-            id: hoverDebounce
-            interval: 150
-            onTriggered: {
-                if (islandWindow.triggerMode === "hover")
-                    islandWindow.triggerMode = "closed"
-            }
-        }
-
-        IpcHandler {
-            target: "island"
-            function toggle(): void { islandWindow.toggleHotkey() }
-        }
-
-        // Global keybind: Ctrl+Alt+Space toggles the island open/closed.
-        // If already expanded (hotkey or hover), it instantly shrinks back to closed.
-        Shortcut {
-            sequence: "Ctrl+Alt+Space"
-            onActivated: {
-                if (islandWindow.triggerMode === "closed")
-                    islandWindow.triggerMode = "hotkey"
-                else
-                    islandWindow.triggerMode = "closed"
             }
         }
     }
