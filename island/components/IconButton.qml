@@ -1,5 +1,4 @@
 import QtQuick
-import qs.components 1.0
 
 Item {
     id: root
@@ -23,7 +22,7 @@ Item {
             anchors.centerIn: parent
             name: root.iconName
             size: 18
-            color: root.active ? Style.accent : "#ffffff"
+            color: root.active ? "#3b8bff" : "#ffffff"
         }
     }
 

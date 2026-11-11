@@ -1,6 +1,5 @@
 import QtQuick
 import QtQuick.Layouts
-import qs.components 1.0
 
 Rectangle {
     id: root
@@ -8,14 +7,12 @@ Rectangle {
     Layout.fillHeight: true
     implicitWidth: 200
     implicitHeight: 200
-    radius: root.cardRadius
-    color: root.cardFill
-    border.color: root.cardBorderColor
+    radius: 14
+    color: "#141414"
+    border.color: "#3a3a3a"
     border.width: 1
 
-    property color cardFill: Style.card
-    property color cardBorderColor: Style.cardBorder
-    property int cardRadius: Style.rLg
+    property int cardRadius: 14
     property int cardPadding: 16
 
     property bool hoverEnabled: true
@@ -26,12 +23,12 @@ Rectangle {
         State {
             name: "hovered"
             when: root.hoverEnabled && root.hovered && !root.pressed
-            PropertyChanges { target: root; color: Style.cardHi }
+            PropertyChanges { target: root; color: "#1fffffff" }
         },
         State {
             name: "pressed"
             when: root.pressed
-            PropertyChanges { target: root; color: Style.cardHi; opacity: 0.9 }
+            PropertyChanges { target: root; color: "#1fffffff"; opacity: 0.9 }
         }
     ]
 
