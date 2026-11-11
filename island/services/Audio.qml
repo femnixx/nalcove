@@ -133,7 +133,35 @@ Singleton {
         return p["application.name"] || p["node.description"] || n.description || n.name || "Unknown"
     }
     function appDetail(n) { return n.properties["media.name"] || "" }
-    function appIconName(n) { return n.properties["application.icon-name"] || "" }
+    function appIconName(n) { return resolveAppIcon(n) }
+
+    // Resolve app icon through the chain: application.icon-name -> desktop entry -> fallback
+    function resolveAppIcon(n) {
+        var p = n.properties || {}
+
+        // 1. application.icon-name from PipeWire
+        var icon = p["application.icon-name"]
+        if (icon && Quickshell.iconPath(icon, true) !== "") return icon
+
+        // 2. Desktop entry lookup by application.id, application.process.binary, or application.name
+        var appId = p["application.id"] || p["application.process.binary"] || p["application.name"]
+        if (appId) {
+            var apps = DesktopEntries.applications.values
+            for (var i = 0; i < apps.length; i++) {
+                var e = apps[i]
+                var entryId = e.id || ""
+                // Match exact, or with .desktop suffix added/removed
+                if (entryId === appId ||
+                    entryId === appId + ".desktop" ||
+                    entryId.replace(/\.desktop$/, "") === appId.replace(/\.desktop$/, "")) {
+                    if (e.icon && Quickshell.iconPath(e.icon, true) !== "") return e.icon
+                }
+            }
+        }
+
+        // 3. Neutral fallback
+        return "app-window"
+    }
     function setNodeVolume(n, v) { if (n && n.audio) n.audio.volume = Math.max(0, Math.min(1, v)) }
     function toggleNodeMute(n) { if (n && n.audio) n.audio.muted = !n.audio.muted }
 

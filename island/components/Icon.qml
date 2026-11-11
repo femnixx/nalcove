@@ -61,6 +61,14 @@ Item {
         "hovered": "\u25CF",
         "pressed": "\uF110",
         "refresh-ccw": "\uF021",
+        // Audio controls (Phase 13)
+        "volume-2": "\uF028",
+        "volume-x": "\uF028",
+        "mic": "\uF130",
+        "mic-off": "\uF130",
+        "ellipsis-vertical": "\u22EE",
+        "headphones": "\uF589",
+        "app-window": "\uF10B",
     }
 
     // Font glyph when name is mapped; SVG fallback otherwise
