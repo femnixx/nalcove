@@ -15,8 +15,8 @@ Item {
             width: 360
             spacing: 16
 
-            // ---- Output section (matches image design) ----
-            Text { text: "Output"; color: Style.dim; font.pixelSize: 11; font.bold: true }
+            // ---- Output section ----
+            Text { text: "Output"; color: "#9a9aa0"; font.pixelSize: 11; font.bold: true }
 
             Row {
                 width: parent.width; spacing: 8
@@ -39,7 +39,7 @@ Item {
                         Icon {
                             anchors.centerIn: parent; size: 16
                             name: Services.Audio.sinkMuted ? "volume-mute" : "volume"
-                            color: Services.Audio.sinkMuted ? Style.dim : Style.fg
+                            color: Services.Audio.sinkMuted ? "#9a9aa0" : "#ffffff"
                         }
                         MouseArea {
                             anchors.fill: parent
@@ -50,9 +50,8 @@ Item {
 
                 // Volume slider
                 FlatSlider {
+                    width: parent.width - 140 - 32 - 34 - 40
                     anchors.verticalCenter: parent.verticalCenter
-                    left: outputSelector.right; leftMargin: 8
-                    right: pct.left; rightMargin: 8
                     value: Services.Audio.sinkVolume
                     enabled: Services.Audio.sinkReady
                     onMoved: if (Services.Audio.sinkReady) Services.Audio.setSinkVolume(value)
@@ -61,7 +60,7 @@ Item {
                 Text {
                     id: pct
                     width: 34; anchors.verticalCenter: parent.verticalCenter
-                    text: Math.round(Services.Audio.sinkVolume * 100); color: Style.fg; font.pixelSize: 12
+                    text: Math.round(Services.Audio.sinkVolume * 100); color: "#ffffff"; font.pixelSize: 12
                     horizontalAlignment: Text.AlignRight
                 }
             }
