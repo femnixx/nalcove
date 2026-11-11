@@ -101,7 +101,14 @@ Singleton {
 
     function recomputeAppStreams() {
         appStreams = Pipewire.nodes.values
-            .filter(n => n.isStream && !n.isSink && n.audio)
+            .filter(n => {
+                var p = n.properties || {}
+                // App streams have application.name or media.name properties
+                var isApp = p["application.name"] || p["media.name"]
+                // Must have audio control
+                var hasAudio = n.audio !== null
+                return isApp && hasAudio
+            })
             .sort((a, b) => a.id - b.id)
         appStreamRev++
     }

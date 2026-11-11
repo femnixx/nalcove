@@ -20,10 +20,12 @@ Item {
 
             Row {
                 width: parent.width; spacing: 8
+                anchors.verticalCenter: parent.verticalCenter
 
                 DeviceSelector {
                     id: outputSelector
                     width: 140
+                    anchors.verticalCenter: parent.verticalCenter
                     model: Services.Audio.sinks
                     currentNode: Services.Audio.sink
                     onPicked: n => Services.Audio.setDefaultSink(n)
@@ -64,10 +66,12 @@ Item {
 
             Row {
                 width: parent.width; spacing: 8
+                anchors.verticalCenter: parent.verticalCenter
 
                 DeviceSelector {
                     id: inputSelector
                     width: 140
+                    anchors.verticalCenter: parent.verticalCenter
                     model: Services.Audio.sources
                     currentNode: Services.Audio.source
                     onPicked: n => Services.Audio.setDefaultSource(n)
