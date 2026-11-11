@@ -20,13 +20,12 @@ Item {
     Rectangle {
         id: tabBar
         x: 20; y: 12
-        width: 740; height: 44
+        width: parent.width - 40; height: 44
         color: "transparent"
 
         Row {
             id: tabsRow
             anchors.left: parent.left
-            anchors.leftMargin: 20
             anchors.verticalCenter: parent.verticalCenter
             spacing: 8
 
@@ -37,12 +36,10 @@ Item {
                     ["clipboard", "clipboard", "Clipboard"],
                     ["alerts", "bell", "Alerts"],
                     ["shelf", "folder", "Shelf"],
-                    ["notes", "notebook", "Notes"],
-                    ["controls", "sliders", "Controls"],
-                    ["bluetooth", "bluetooth", "Bluetooth"]
+                    ["notes", "notebook", "Notes"]
                 ]
                 delegate: Item {
-                    width: 72; height: 44
+                    width: 56; height: 36
                     property string pageId: modelData[0]
                     property string iconName: modelData[1]
                     property string label: modelData[2]
@@ -50,7 +47,7 @@ Item {
 
                     Rectangle {
                         anchors.fill: parent
-                        radius: 12
+                        radius: 10
                         color: isActive ? "#3b8bff" : "transparent"
                         border.color: isActive ? "#3b8bff" : "transparent"
                         border.width: isActive ? 1 : 0
@@ -94,12 +91,14 @@ Item {
         anchors.right: parent.right
         anchors.rightMargin: 20
         anchors.top: tabBar.bottom
-        anchors.topMargin: 4
+        anchors.topMargin: 6
         height: 30
         spacing: 10
 
         Repeater {
             model: [
+                ["controls", "sliders", "Controls"],
+                ["bluetooth", "bluetooth", "Bluetooth"],
                 ["calendar", "calendar", "Calendar"],
                 ["search", "search", "Search"],
                 ["wifi", "wifi", "Wi-Fi"],
@@ -107,8 +106,8 @@ Item {
                 ["settings", "settings", "Settings"]
             ]
             delegate: Item {
-                Layout.preferredWidth: 60
-                Layout.preferredHeight: 60
+                Layout.preferredWidth: 56
+                Layout.preferredHeight: 36
                 Layout.alignment: Qt.AlignHCenter
                 property string pageId: modelData[0]
                 property string iconName: modelData[1]
@@ -156,7 +155,7 @@ Item {
 
             Icon {
                 name: Services.Battery.charging ? "battery-charging" : (Services.Battery.low ? "battery-low" : "battery")
-                size: 16
+                size: 14
                 color: "#9a9aa0"
                 anchors.verticalCenter: parent.verticalCenter
             }
@@ -168,14 +167,14 @@ Item {
     // Divider line below second row
     Rectangle {
         x: 20; y: utilityRow.y + utilityRow.height + 12
-        width: 740; height: 1
+        width: parent.width - 40; height: 1
         color: "#2a2a2e"
     }
 
     // --- CONTENT AREA: Tab panels ---
     Item {
         x: 20
-        width: 740
+        width: parent.width - 40
         anchors.top: utilityRow.bottom
         anchors.topMargin: 20
         anchors.bottom: parent.bottom
