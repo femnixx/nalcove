@@ -53,25 +53,25 @@ Item {
                         border.width: isActive ? 1 : 0
                         Behavior on color { ColorAnimation { duration: 140 } }
 
-                    Column {
-                        anchors.centerIn: parent
-                        spacing: 2
-                        Icon {
-                            name: iconName
-                            size: 14
-                            color: isActive ? "#ffffff" : "#9a9aa0"
-                            anchors.horizontalCenter: parent.horizontalCenter
-                            Behavior on color { ColorAnimation { duration: 140 } }
+                        Column {
+                            anchors.centerIn: parent
+                            spacing: 2
+                            Icon {
+                                name: iconName
+                                size: 14
+                                color: isActive ? "#ffffff" : "#9a9aa0"
+                                anchors.horizontalCenter: parent.horizontalCenter
+                                Behavior on color { ColorAnimation { duration: 140 } }
+                            }
+                            Text {
+                                text: label
+                                font.pixelSize: 9
+                                font.bold: true
+                                color: isActive ? "#ffffff" : "#9a9aa0"
+                                anchors.horizontalCenter: parent.horizontalCenter
+                                Behavior on color { ColorAnimation { duration: 140 } }
+                            }
                         }
-                        Text {
-                            text: label
-                            font.pixelSize: 9
-                            font.bold: true
-                            color: isActive ? "#ffffff" : "#9a9aa0"
-                            anchors.horizontalCenter: parent.horizontalCenter
-                            Behavior on color { ColorAnimation { duration: 140 } }
-                        }
-                    }
 
                         MouseArea {
                             anchors.fill: parent
@@ -84,7 +84,7 @@ Item {
     }
 
     // --- SECOND ROW: Smaller icons spread across + battery on right ---
-    RowLayout {
+    Row {
         id: utilityRow
         anchors.left: parent.left
         anchors.leftMargin: 20
@@ -92,7 +92,7 @@ Item {
         anchors.rightMargin: 20
         anchors.top: tabBar.bottom
         anchors.topMargin: 6
-        height: 30
+        height: 36
         spacing: 10
 
         Repeater {
@@ -106,40 +106,50 @@ Item {
                 ["settings", "settings", "Settings"]
             ]
             delegate: Item {
-                Layout.preferredWidth: 56
-                Layout.preferredHeight: 36
-                Layout.alignment: Qt.AlignHCenter
+                width: 56; height: 36
                 property string pageId: modelData[0]
                 property string iconName: modelData[1]
                 property string label: modelData[2]
+                property bool isActive: dashboardRoot.page === pageId
 
-                Column {
-                    anchors.centerIn: parent
-                    spacing: 1
-                    Icon {
-                        name: iconName
-                        size: 14
-                        color: "#9a9aa0"
-                        anchors.horizontalCenter: parent.horizontalCenter
-                    }
-                    Text {
-                        text: label
-                        font.pixelSize: 7
-                        font.bold: true
-                        color: "#9a9aa0"
-                        anchors.horizontalCenter: parent.horizontalCenter
-                    }
-                }
-
-                MouseArea {
+                Rectangle {
                     anchors.fill: parent
-                    onClicked: dashboardRoot.page = pageId
+                    radius: 10
+                    color: isActive ? "#3b8bff" : "transparent"
+                    border.color: isActive ? "#3b8bff" : "transparent"
+                    border.width: isActive ? 1 : 0
+                    Behavior on color { ColorAnimation { duration: 140 } }
+
+                    Column {
+                        anchors.centerIn: parent
+                        spacing: 1
+                        Icon {
+                            name: iconName
+                            size: 14
+                            color: isActive ? "#ffffff" : "#9a9aa0"
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            Behavior on color { ColorAnimation { duration: 140 } }
+                        }
+                        Text {
+                            text: label
+                            font.pixelSize: 7
+                            font.bold: true
+                            color: isActive ? "#ffffff" : "#9a9aa0"
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            Behavior on color { ColorAnimation { duration: 140 } }
+                        }
+                    }
+
+                    MouseArea {
+                        anchors.fill: parent
+                        onClicked: dashboardRoot.page = pageId
+                    }
                 }
             }
         }
 
         // Spacer pushes battery to the right
-        Item { Layout.fillWidth: true }
+        Item { width: 1; Layout.fillWidth: true }
 
         // Battery indicator on the right - percentage first, then icon
         Row {
