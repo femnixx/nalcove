@@ -1,12 +1,13 @@
 import QtQuick
-import QtQuick.Controls
 import QtQuick.Layouts
 import qs.components 1.0
 
 Rectangle {
     id: root
     Layout.fillWidth: true
-    implicitHeight: contentItem.implicitHeight + root.cardPadding * 2
+    Layout.fillHeight: true
+    implicitWidth: 200
+    implicitHeight: 200
     radius: root.cardRadius
     color: root.cardFill
     border.color: root.cardBorderColor
@@ -17,16 +18,9 @@ Rectangle {
     property int cardRadius: Style.rLg
     property int cardPadding: 16
 
-    property alias content: contentItem.children
     property bool hoverEnabled: true
     property bool pressed: false
     property bool hovered: false
-
-    Column {
-        id: contentItem
-        width: parent.width
-        spacing: 0
-    }
 
     states: [
         State {

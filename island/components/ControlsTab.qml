@@ -1,41 +1,36 @@
 import QtQuick
+import QtQuick.Layouts
 import "../services" as Services
 import qs.components 1.0
 
 Item {
     id: root
-    width: 700
-    height: 800
+    anchors.fill: parent
     property bool outputOpen: false
     property bool inputOpen: false
 
-    // Main content area - Flickable for scrolling
-        Flickable {
-            anchors.fill: parent
-            contentWidth: 700
-            contentHeight: contentColumn.height
-            clip: true
+    ColumnLayout {
+        Layout.fillWidth: true
+        Layout.fillHeight: true
+        spacing: 16
 
-        Column {
-            id: contentColumn
-            width: 700
-            height: 560
-            spacing: 16
+        // ---- Top row: Output and Input cards ----
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: 14
 
-            // ---- Top row: Output and Input cards ----
-            Row {
-                id: topRow
-                width: parent.width; spacing: 14
+            Card {
+                id: outputCard
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                cardFill: "#141414"
+                cardBorderColor: "#3a3a3a"
+                cardRadius: 14
+                cardPadding: 16
 
-                // Output card
-                Card {
-                    id: outputCard
-                    width: (topRow.width - 14) / 2
-                    height: 220
-                    cardFill: "#141414"
-                    cardBorderColor: "#3a3a3a"
-                    cardRadius: 14
-                    cardPadding: 16
+                Item {
+                    anchors.fill: parent
+                    anchors.margins: 16
 
                     // Header: title + kebab
                     Row {
@@ -61,10 +56,8 @@ Item {
                         anchors.top: outputHeader.bottom
                         anchors.topMargin: 10
                         anchors.left: parent.left
-                        anchors.leftMargin: 16
                         anchors.right: parent.right
-                        anchors.rightMargin: 16
-                        width: parent.width - 32
+                        width: parent.width
                     }
 
                     // Slider + pct + mute button
@@ -73,10 +66,8 @@ Item {
                         anchors.top: outputDeviceName.bottom
                         anchors.topMargin: 14
                         anchors.left: parent.left
-                        anchors.leftMargin: 16
                         anchors.right: parent.right
-                        anchors.rightMargin: 16
-                        width: parent.width - 32
+                        width: parent.width
                         spacing: 8
 
                         FlatSlider {
@@ -114,7 +105,7 @@ Item {
                     DeviceSelector {
                         id: outputDeviceList
                         overlayMode: false
-                        width: parent.width - 32
+                        width: parent.width
                         model: Services.Audio.sinks
                         currentNode: Services.Audio.sink
                         onPicked: n => Services.Audio.setDefaultSink(n)
@@ -123,21 +114,23 @@ Item {
                         anchors.top: outputSliderRow.bottom
                         anchors.topMargin: 10
                         anchors.left: parent.left
-                        anchors.leftMargin: 16
                         anchors.right: parent.right
-                        anchors.rightMargin: 16
                     }
                 }
+            }
 
-                // Input card
-                Card {
-                    id: inputCard
-                    width: (topRow.width - 14) / 2
-                    height: 220
-                    cardFill: "#141414"
-                    cardBorderColor: "#3a3a3a"
-                    cardRadius: 14
-                    cardPadding: 16
+            Card {
+                id: inputCard
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                cardFill: "#141414"
+                cardBorderColor: "#3a3a3a"
+                cardRadius: 14
+                cardPadding: 16
+
+                Item {
+                    anchors.fill: parent
+                    anchors.margins: 16
 
                     // Header: title + kebab
                     Row {
@@ -163,10 +156,8 @@ Item {
                         anchors.top: inputHeader.bottom
                         anchors.topMargin: 10
                         anchors.left: parent.left
-                        anchors.leftMargin: 16
                         anchors.right: parent.right
-                        anchors.rightMargin: 16
-                        width: parent.width - 32
+                        width: parent.width
                     }
 
                     // Slider + pct + mute button
@@ -175,10 +166,8 @@ Item {
                         anchors.top: inputDeviceName.bottom
                         anchors.topMargin: 14
                         anchors.left: parent.left
-                        anchors.leftMargin: 16
                         anchors.right: parent.right
-                        anchors.rightMargin: 16
-                        width: parent.width - 32
+                        width: parent.width
                         spacing: 8
 
                         FlatSlider {
@@ -215,7 +204,7 @@ Item {
                     DeviceSelector {
                         id: inputDeviceList
                         overlayMode: false
-                        width: parent.width - 32
+                        width: parent.width
                         model: Services.Audio.sources
                         currentNode: Services.Audio.source
                         onPicked: n => Services.Audio.setDefaultSource(n)
@@ -224,29 +213,36 @@ Item {
                         anchors.top: inputSliderRow.bottom
                         anchors.topMargin: 10
                         anchors.left: parent.left
-                        anchors.leftMargin: 16
                         anchors.right: parent.right
-                        anchors.rightMargin: 16
                     }
                 }
             }
+        }
 
-            // ---- Application Volumes card ----
-            Card {
-                id: appCard
-                width: parent.width
-                height: 300
-                cardFill: "#141414"
-                cardBorderColor: "#3a3a3a"
-                cardRadius: 14
-                cardPadding: 16
+        // ---- Application Volumes card ----
+        Card {
+            id: appCard
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            cardFill: "#141414"
+            cardBorderColor: "#3a3a3a"
+            cardRadius: 14
+            cardPadding: 16
+
+            Item {
+                anchors.fill: parent
+                anchors.margins: 16
 
                 Text { text: "Application Volumes"; color: "#ffffff"; font.pixelSize: 12; font.bold: true }
 
                 ListView {
                     id: appListView
+                    anchors.top: parent.children[1].bottom
+                    anchors.topMargin: 10
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.bottom: parent.bottom
                     width: parent.width
-                    height: 200
                     clip: true
                     spacing: 8
                     model: Services.Audio.appStreams
