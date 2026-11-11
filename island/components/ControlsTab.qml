@@ -4,8 +4,7 @@ import qs.components 1.0
 
 Item {
     id: root
-    width: 700
-    height: 800
+    anchors.fill: parent
     property bool outputOpen: false
     property bool inputOpen: false
 
@@ -19,28 +18,27 @@ Item {
         Column {
             id: contentColumn
             width: 700
-            height: 560
             spacing: 16
 
-            // ---- Top row: Output and Input cards ----
-            Row {
-                id: topRow
-                width: parent.width; spacing: 14
+            // ---- Output card ----
+            Card {
+                id: outputCard
+                width: parent.width
+                height: 160
+                cardFill: "#141414"
+                cardBorderColor: "#3a3a3a"
+                cardRadius: 14
+                cardPadding: 16
 
-                // Output card
-                Card {
-                    id: outputCard
-                    width: (topRow.width - 14) / 2
-                    height: 220
-                    cardFill: "#141414"
-                    cardBorderColor: "#3a3a3a"
-                    cardRadius: 14
-                    cardPadding: 16
+                Item {
+                    id: outputContent
+                    anchors.fill: parent
 
                     // Header: title + kebab
                     Row {
                         id: outputHeader
                         width: parent.width
+                        anchors.top: parent.top
                         Text { text: "Output"; color: "#ffffff"; font.pixelSize: 12; font.bold: true }
                         Item { width: 1 }
                         IconButton {
@@ -61,10 +59,8 @@ Item {
                         anchors.top: outputHeader.bottom
                         anchors.topMargin: 10
                         anchors.left: parent.left
-                        anchors.leftMargin: 16
                         anchors.right: parent.right
-                        anchors.rightMargin: 16
-                        width: parent.width - 32
+                        width: parent.width
                     }
 
                     // Slider + pct + mute button
@@ -73,10 +69,8 @@ Item {
                         anchors.top: outputDeviceName.bottom
                         anchors.topMargin: 14
                         anchors.left: parent.left
-                        anchors.leftMargin: 16
                         anchors.right: parent.right
-                        anchors.rightMargin: 16
-                        width: parent.width - 32
+                        width: parent.width
                         spacing: 8
 
                         FlatSlider {
@@ -114,7 +108,7 @@ Item {
                     DeviceSelector {
                         id: outputDeviceList
                         overlayMode: false
-                        width: parent.width - 32
+                        width: parent.width
                         model: Services.Audio.sinks
                         currentNode: Services.Audio.sink
                         onPicked: n => Services.Audio.setDefaultSink(n)
@@ -123,26 +117,30 @@ Item {
                         anchors.top: outputSliderRow.bottom
                         anchors.topMargin: 10
                         anchors.left: parent.left
-                        anchors.leftMargin: 16
                         anchors.right: parent.right
-                        anchors.rightMargin: 16
                     }
                 }
+            }
 
-                // Input card
-                Card {
-                    id: inputCard
-                    width: (topRow.width - 14) / 2
-                    height: 220
-                    cardFill: "#141414"
-                    cardBorderColor: "#3a3a3a"
-                    cardRadius: 14
-                    cardPadding: 16
+            // ---- Input card ----
+            Card {
+                id: inputCard
+                width: parent.width
+                height: 160
+                cardFill: "#141414"
+                cardBorderColor: "#3a3a3a"
+                cardRadius: 14
+                cardPadding: 16
+
+                Item {
+                    id: inputContent
+                    anchors.fill: parent
 
                     // Header: title + kebab
                     Row {
                         id: inputHeader
                         width: parent.width
+                        anchors.top: parent.top
                         Text { text: "Input"; color: "#ffffff"; font.pixelSize: 12; font.bold: true }
                         Item { width: 1 }
                         IconButton {
@@ -163,10 +161,8 @@ Item {
                         anchors.top: inputHeader.bottom
                         anchors.topMargin: 10
                         anchors.left: parent.left
-                        anchors.leftMargin: 16
                         anchors.right: parent.right
-                        anchors.rightMargin: 16
-                        width: parent.width - 32
+                        width: parent.width
                     }
 
                     // Slider + pct + mute button
@@ -175,10 +171,8 @@ Item {
                         anchors.top: inputDeviceName.bottom
                         anchors.topMargin: 14
                         anchors.left: parent.left
-                        anchors.leftMargin: 16
                         anchors.right: parent.right
-                        anchors.rightMargin: 16
-                        width: parent.width - 32
+                        width: parent.width
                         spacing: 8
 
                         FlatSlider {
@@ -215,7 +209,7 @@ Item {
                     DeviceSelector {
                         id: inputDeviceList
                         overlayMode: false
-                        width: parent.width - 32
+                        width: parent.width
                         model: Services.Audio.sources
                         currentNode: Services.Audio.source
                         onPicked: n => Services.Audio.setDefaultSource(n)
@@ -224,9 +218,7 @@ Item {
                         anchors.top: inputSliderRow.bottom
                         anchors.topMargin: 10
                         anchors.left: parent.left
-                        anchors.leftMargin: 16
                         anchors.right: parent.right
-                        anchors.rightMargin: 16
                     }
                 }
             }
@@ -241,132 +233,148 @@ Item {
                 cardRadius: 14
                 cardPadding: 16
 
-                Text { text: "Application Volumes"; color: "#ffffff"; font.pixelSize: 12; font.bold: true }
+                Item {
+                    id: appContent
+                    anchors.fill: parent
 
-                ListView {
-                    id: appListView
-                    width: parent.width
-                    height: 200
-                    clip: true
-                    spacing: 8
-                    model: Services.Audio.appStreams
-                    delegate: Item {
-                        width: ListView.view.width
-                        height: 56
+                    Text {
+                        id: appTitle
+                        text: "Application Volumes"
+                        color: "#ffffff"
+                        font.pixelSize: 12
+                        font.bold: true
+                        anchors.top: parent.top
+                    }
 
-                        Rectangle {
-                            id: rowBg
-                            anchors.fill: parent
-                            anchors.margins: 6
-                            color: "#0a0a0a"
-                            radius: 12
-                            border.color: "#2a2a2a"
-                            border.width: 1
-                        }
-
-                        Item {
-                            id: appIconContainer
-                            x: 18; y: 14
-                            width: 28; height: 28
-
-                            Image {
-                                id: appIcon
-                                anchors.fill: parent
-                                sourceSize: Qt.size(56, 56)
-                                asynchronous: true
-                                source: Quickshell.iconPath(Services.Audio.appIconName(modelData), "app-window")
-                                opacity: modelData.audio && modelData.audio.muted ? 0.4 : 1
-                            }
+                    ListView {
+                        id: appListView
+                        anchors.top: appTitle.bottom
+                        anchors.topMargin: 10
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.bottom: parent.bottom
+                        width: parent.width
+                        clip: true
+                        spacing: 8
+                        model: Services.Audio.appStreams
+                        delegate: Item {
+                            width: ListView.view.width
+                            height: 56
 
                             Rectangle {
-                                id: letterAvatar
+                                id: rowBg
                                 anchors.fill: parent
-                                radius: 14
-                                color: "#2a2a2e"
-                                visible: appIcon.status === Image.Error || appIcon.source === ""
+                                anchors.margins: 6
+                                color: "#0a0a0a"
+                                radius: 12
+                                border.color: "#2a2a2a"
+                                border.width: 1
+                            }
+
+                            Item {
+                                id: appIconContainer
+                                x: 18; y: 14
+                                width: 28; height: 28
+
+                                Image {
+                                    id: appIcon
+                                    anchors.fill: parent
+                                    sourceSize: Qt.size(56, 56)
+                                    asynchronous: true
+                                    source: Quickshell.iconPath(Services.Audio.appIconName(modelData), "app-window")
+                                    opacity: modelData.audio && modelData.audio.muted ? 0.4 : 1
+                                }
+
+                                Rectangle {
+                                    id: letterAvatar
+                                    anchors.fill: parent
+                                    radius: 14
+                                    color: "#2a2a2e"
+                                    visible: appIcon.status === Image.Error || appIcon.source === ""
+                                    Text {
+                                        anchors.centerIn: parent
+                                        text: Services.Audio.appName(modelData).charAt(0).toUpperCase()
+                                        color: "#ffffff"
+                                        font.pixelSize: 14
+                                        font.bold: true
+                                    }
+                                }
+
+                                MouseArea { anchors.fill: parent; onClicked: Services.Audio.toggleNodeMute(modelData) }
+                            }
+
+                            Column {
+                                x: 56; y: 12
+                                width: 180
+                                spacing: 2
                                 Text {
-                                    anchors.centerIn: parent
-                                    text: Services.Audio.appName(modelData).charAt(0).toUpperCase()
+                                    width: parent.width
+                                    text: Services.Audio.appName(modelData)
                                     color: "#ffffff"
-                                    font.pixelSize: 14
+                                    font.pixelSize: 12
                                     font.bold: true
+                                    elide: Text.ElideRight
+                                }
+                                Text {
+                                    width: parent.width
+                                    text: Services.Audio.appDetail(modelData)
+                                    color: "#9a9aa0"
+                                    font.pixelSize: 10
+                                    elide: Text.ElideRight
+                                    visible: text !== ""
                                 }
                             }
 
-                            MouseArea { anchors.fill: parent; onClicked: Services.Audio.toggleNodeMute(modelData) }
-                        }
+                            FlatSlider {
+                                x: 56; y: 36
+                                width: ListView.view.width - 56 - 120
+                                bold: true
+                                value: modelData.audio ? modelData.audio.volume : 0
+                                enabled: modelData.audio !== null
+                                onMoved: Services.Audio.setNodeVolume(modelData, value)
+                            }
 
-                        Column {
-                            x: 56; y: 12
-                            width: 180
-                            spacing: 2
                             Text {
-                                width: parent.width
-                                text: Services.Audio.appName(modelData)
+                                id: appPct
+                                x: ListView.view.width - 54
+                                y: 14
+                                width: 44
+                                text: modelData.audio ? Math.round(modelData.audio.volume * 100) + "%" : "0%"
                                 color: "#ffffff"
-                                font.pixelSize: 12
+                                font.pixelSize: 11
                                 font.bold: true
-                                elide: Text.ElideRight
+                                horizontalAlignment: Text.AlignRight
                             }
-                            Text {
-                                width: parent.width
-                                text: Services.Audio.appDetail(modelData)
-                                color: "#9a9aa0"
-                                font.pixelSize: 10
-                                elide: Text.ElideRight
-                                visible: text !== ""
+
+                            IconButton {
+                                id: appHeadphonesBtn
+                                x: ListView.view.width - 44; y: 30
+                                width: 36; height: 36
+                                iconName: "headphones"
+                                visible: false
+                            }
+
+                            IconButton {
+                                id: appMuteBtn
+                                x: ListView.view.width - 44; y: 30
+                                width: 36; height: 36
+                                iconName: modelData.audio && modelData.audio.muted ? "volume-x" : "volume-2"
+                                active: modelData.audio && modelData.audio.muted
+                                onClicked: Services.Audio.toggleNodeMute(modelData)
+                            }
+
+                            MouseArea {
+                                anchors.fill: parent
+                                onClicked: {}
                             }
                         }
 
-                        FlatSlider {
-                            x: 56; y: 36
-                            width: ListView.view.width - 56 - 120
-                            bold: true
-                            value: modelData.audio ? modelData.audio.volume : 0
-                            enabled: modelData.audio !== null
-                            onMoved: Services.Audio.setNodeVolume(modelData, value)
+                        empty: Text {
+                            anchors.centerIn: parent
+                            text: "No apps are playing audio"
+                            color: "#9a9aa0"
+                            font.pixelSize: 12
                         }
-
-                        Text {
-                            id: appPct
-                            x: ListView.view.width - 54
-                            y: 14
-                            width: 44
-                            text: modelData.audio ? Math.round(modelData.audio.volume * 100) + "%" : "0%"
-                            color: "#ffffff"
-                            font.pixelSize: 11
-                            font.bold: true
-                            horizontalAlignment: Text.AlignRight
-                        }
-
-                        IconButton {
-                            id: appHeadphonesBtn
-                            x: ListView.view.width - 44; y: 30
-                            width: 36; height: 36
-                            iconName: "headphones"
-                            visible: false
-                        }
-
-                        IconButton {
-                            id: appMuteBtn
-                            x: ListView.view.width - 44; y: 30
-                            width: 36; height: 36
-                            iconName: modelData.audio && modelData.audio.muted ? "volume-x" : "volume-2"
-                            active: modelData.audio && modelData.audio.muted
-                            onClicked: Services.Audio.toggleNodeMute(modelData)
-                        }
-
-                        MouseArea {
-                            anchors.fill: parent
-                            onClicked: {}
-                        }
-                    }
-
-                    empty: Text {
-                        anchors.centerIn: parent
-                        text: "No apps are playing audio"
-                        color: "#9a9aa0"
-                        font.pixelSize: 12
                     }
                 }
             }
