@@ -53,8 +53,16 @@ Singleton {
     }
 
     function togglePlay() { if (active) active.togglePlaying() }
-    function next()       { if (active && active.canGoNext) active.next() }
-    function previous()   { if (active && active.canGoPrevious) active.previous() }
+    function next() {
+        if (!active) return
+        if (active.canGoNext) { active.next(); return }
+        Quickshell.execDetached(["dbus-send", "--session", "--dest=" + active.dbusName, "/org/mpris/MediaPlayer2", "org.mpris.MediaPlayer2.Player.Next"])
+    }
+    function previous() {
+        if (!active) return
+        if (active.canGoPrevious) { active.previous(); return }
+        Quickshell.execDetached(["dbus-send", "--session", "--dest=" + active.dbusName, "/org/mpris/MediaPlayer2", "org.mpris.MediaPlayer2.Player.Previous"])
+    }
     function toggleShuffle() { if (active && active.shuffleSupported) active.shuffle = !active.shuffle }
     function toggleRepeat() {
         if (!active || !active.loopSupported) return

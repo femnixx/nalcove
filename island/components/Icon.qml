@@ -60,6 +60,7 @@ Item {
         // State indicators
         "hovered": "\u25CF",
         "pressed": "\uF110",
+        "refresh-ccw": "\uF021",
     }
 
     // Font glyph when name is mapped; SVG fallback otherwise
@@ -68,14 +69,14 @@ Item {
     Text {
         id: fontIcon
         anchors.fill: parent
-        text: root.useFont ? root.glyphMap[root.name] : ""
+        text: !!root.glyphMap[root.name] ? root.glyphMap[root.name] : ""
         font.family: "FiraMono Nerd Font"
         font.pixelSize: root.size
         color: root.color
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter
         renderType: Text.NativeRendering
-        visible: root.useFont
+        visible: !!root.glyphMap[root.name]
     }
 
     Image {
@@ -85,7 +86,7 @@ Item {
         sourceSize: Qt.size(root.size * 2, root.size * 2)
         fillMode: Image.PreserveAspectFit
         mipmap: true
-        visible: !root.useFont
+        visible: !root.glyphMap[root.name]
         onStatusChanged: {
             if (status === Image.Error) {
                 console.warn("Icon missing: " + root.name)
