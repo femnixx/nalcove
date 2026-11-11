@@ -42,55 +42,67 @@ Item {
             Text { text: "Open the case near your PC to see battery"; color: Style.dim; font.pixelSize: 11 }
         }
 
-        Pill {
-            id: settingsPill
+        Item {
             anchors.right: parent.right
             anchors.verticalCenter: parent.verticalCenter
-            text: "Bluetooth settings"
-            onClicked: Quickshell.execDetached(["env", "XDG_CURRENT_DESKTOP=GNOME", "gnome-control-center", "bluetooth"])
-        }
+            width: 300
 
-        Pill {
-            id: unblockPill
-            anchors.right: settingsPill.left
-            anchors.rightMargin: 10
-            anchors.verticalCenter: parent.verticalCenter
-            text: "Unblock"
-            visible: adapter && adapter.state === BluetoothAdapterState.Blocked
-            onClicked: unblockRfkill()
-        }
+            Row {
+                anchors.right: parent.right
+                anchors.verticalCenter: parent.verticalCenter
+                spacing: 10
 
-        Rectangle {
-            id: refreshButton
-            width: 24; height: 24; radius: 12; color: "#1a1a1a"
-            border.color: "#33ffffff"; border.width: 1
-            anchors.right: unblockPill.left
-            anchors.rightMargin: 10
-            anchors.verticalCenter: parent.verticalCenter
-            Icon { anchors.centerIn: parent; name: "refresh-ccw"; size: 14; color: Style.dim }
-            MouseArea { anchors.fill: parent; onClicked: if (adapter) adapter.discovering = !adapter.discovering }
-        }
+                // Power toggle switch
+                Rectangle {
+                    width: 40; height: 22; radius: 11; color: "#1a1a1a"
+                    border.color: "#33ffffff"; border.width: 1
+                    color: adapter && adapter.enabled ? Style.accent : "#3a3a3e"
+                    enabled: adapter && adapter.state !== BluetoothAdapterState.Blocked
+                    Rectangle { width: 18; height: 18; radius: 9; y: 2; color: "#ffffff"
+                                x: adapter && adapter.enabled ? parent.width - width - 2 : 2
+                                Behavior on x { NumberAnimation { duration: 120 } } }
+                    MouseArea { anchors.fill: parent; onClicked: if (adapter) adapter.enabled = !adapter.enabled }
+                }
 
-        Pill {
-            id: scanPill
-            anchors.right: refreshButton.left
-            anchors.rightMargin: 10
-            anchors.verticalCenter: parent.verticalCenter
-            text: adapter && adapter.discovering ? "Stop" : "Scan"
-            visible: adapter && adapter.enabled && adapter.state !== BluetoothAdapterState.Blocked
-            onClicked: adapter.discovering = !adapter.discovering
-        }
+                // Scan / Stop pill
+                Pill {
+                    id: scanPill
+                    text: adapter && adapter.discovering ? "Stop" : "Scan"
+                    visible: adapter && adapter.enabled && adapter.state !== BluetoothAdapterState.Blocked
+                    onClicked: adapter.discovering = !adapter.discovering
+                }
 
-        Rectangle {
-            width: 40; height: 22; radius: 11; anchors.right: scanPill.left
-            anchors.rightMargin: 10; anchors.verticalCenter: parent.verticalCenter
-            visible: adapter !== null
-            enabled: adapter && adapter.state !== BluetoothAdapterState.Blocked
-            color: adapter && adapter.enabled ? Style.accent : "#3a3a3e"
-            Rectangle { width: 18; height: 18; radius: 9; y: 2; color: "#ffffff"
-                        x: adapter && adapter.enabled ? parent.width - width - 2 : 2
-                        Behavior on x { NumberAnimation { duration: 120 } } }
-            MouseArea { anchors.fill: parent; onClicked: if (adapter) adapter.enabled = !adapter.enabled }
+                // Refresh button
+                Rectangle {
+                    width: 24; height: 24; radius: 12; color: "#1a1a1a"
+                    border.color: "#33ffffff"; border.width: 1
+                    Icon { anchors.centerIn: parent; name: "refresh-ccw"; size: 14; color: Style.dim }
+                    MouseArea { anchors.fill: parent; onClicked: if (adapter) adapter.discovering = !adapter.discovering }
+                }
+
+                // Unblock pill (rfkill)
+                Pill {
+                    id: unblockPill
+                    text: "Unblock"
+                    visible: adapter && adapter.state === BluetoothAdapterState.Blocked
+                    onClicked: unblockRfkill()
+                }
+
+                // Bluetooth settings pill
+                Pill {
+                    id: settingsPill
+                    text: "Bluetooth settings"
+                    onClicked: Quickshell.execDetached(["env", "XDG_CURRENT_DESKTOP=GNOME", "gnome-control-center", "bluetooth"])
+                }
+
+                // Bluetooth is off text (shown when off and not blocked)
+                Text {
+                    visible: adapter && !adapter.enabled && adapter.state !== BluetoothAdapterState.Blocked
+                    text: "Bluetooth is off"
+                    color: Style.dim
+                    font.pixelSize: 11
+                }
+            }
         }
     }
 
@@ -162,11 +174,5 @@ Item {
         anchors.centerIn: parent
         visible: !adapter
         text: "No Bluetooth adapter found"; color: Style.dim; font.pixelSize: 13
-    }
-
-    Text {
-        anchors.centerIn: parent
-        visible: adapter && !adapter.enabled && adapter.state !== BluetoothAdapterState.Blocked
-        text: "Bluetooth is off"; color: Style.dim; font.pixelSize: 13
     }
 }
