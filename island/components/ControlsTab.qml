@@ -34,13 +34,18 @@ Item {
                 Item {
                     id: outputContent
                     anchors.fill: parent
+                    anchors.margins: 16
 
-                    Row {
+                    // header
+                    Item {
                         id: outputHeader
                         width: parent.width
+                        height: 32
                         anchors.top: parent.top
-                        Text { text: "Output"; color: "#ffffff"; font.pixelSize: 12; font.bold: true }
-                        Item { width: 1 }
+                        Text {
+                            text: "Output"; color: "#ffffff"; font.pixelSize: 12; font.bold: true
+                            anchors.verticalCenter: parent.verticalCenter
+                        }
                         IconButton {
                             anchors.right: parent.right
                             anchors.verticalCenter: parent.verticalCenter
@@ -52,56 +57,49 @@ Item {
                     Text {
                         id: outputDeviceName
                         text: Services.Audio.label(Services.Audio.sink)
-                        color: "#9a9aa0"
-                        font.pixelSize: 11
+                        color: "#9a9aa0"; font.pixelSize: 11
                         elide: Text.ElideMiddle
-                        anchors.top: outputHeader.bottom
-                        anchors.topMargin: 10
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        width: parent.width
+                        anchors.top: outputHeader.bottom; anchors.topMargin: 6
+                        anchors.left: parent.left; anchors.right: parent.right
                     }
 
-                    Row {
+                    // slider row
+                    Item {
                         id: outputSliderRow
-                        anchors.top: outputDeviceName.bottom
-                        anchors.topMargin: 14
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        width: parent.width
-                        spacing: 8
+                        height: 36
+                        anchors.top: outputDeviceName.bottom; anchors.topMargin: 14
+                        anchors.left: parent.left; anchors.right: parent.right
 
+                        IconButton {
+                            id: outputMuteBtn
+                            anchors.right: parent.right
+                            anchors.verticalCenter: parent.verticalCenter
+                            iconName: Services.Audio.sinkMuted ? "volume-x" : "volume-2"
+                            active: Services.Audio.sinkMuted
+                            onClicked: Services.Audio.toggleSinkMute()
+                        }
+                        Text {
+                            id: pctOut
+                            width: 44
+                            anchors.right: outputMuteBtn.left; anchors.rightMargin: 8
+                            anchors.verticalCenter: parent.verticalCenter
+                            horizontalAlignment: Text.AlignRight
+                            text: Math.round(Services.Audio.sinkVolume * 100) + "%"
+                            color: "#ffffff"; font.pixelSize: 12; font.bold: true
+                        }
                         FlatSlider {
                             id: outputSlider
                             bold: true
-                            width: parent.width - 44 - 36 - 8
+                            anchors.left: parent.left
+                            anchors.right: pctOut.left; anchors.rightMargin: 8
                             anchors.verticalCenter: parent.verticalCenter
                             value: Services.Audio.sinkVolume
                             enabled: Services.Audio.sinkReady
                             onMoved: if (Services.Audio.sinkReady) Services.Audio.setSinkVolume(value)
                         }
-
-                        Text {
-                            id: pctOut
-                            text: Math.round(Services.Audio.sinkVolume * 100) + "%"
-                            color: "#ffffff"
-                            font.pixelSize: 12
-                            font.bold: true
-                            width: 44
-                            anchors.verticalCenter: parent.verticalCenter
-                            horizontalAlignment: Text.AlignRight
-                        }
-
-                        IconButton {
-                            id: outputMuteBtn
-                            iconName: Services.Audio.sinkMuted ? "volume-x" : "volume-2"
-                            active: Services.Audio.sinkMuted
-                            anchors.right: parent.right
-                            anchors.verticalCenter: parent.verticalCenter
-                            onClicked: Services.Audio.toggleSinkMute()
-                        }
                     }
 
+                    // DeviceSelector (accordion)
                     DeviceSelector {
                         id: outputDeviceList
                         overlayMode: false
@@ -111,10 +109,8 @@ Item {
                         onPicked: n => Services.Audio.setDefaultSink(n)
                         opened: outputOpen
                         onOpenedChanged: outputOpen = opened
-                        anchors.top: outputSliderRow.bottom
-                        anchors.topMargin: 10
-                        anchors.left: parent.left
-                        anchors.right: parent.right
+                        anchors.top: outputSliderRow.bottom; anchors.topMargin: 10
+                        anchors.left: parent.left; anchors.right: parent.right
                     }
                 }
             }
@@ -132,13 +128,18 @@ Item {
                 Item {
                     id: inputContent
                     anchors.fill: parent
+                    anchors.margins: 16
 
-                    Row {
+                    // header
+                    Item {
                         id: inputHeader
                         width: parent.width
+                        height: 32
                         anchors.top: parent.top
-                        Text { text: "Input"; color: "#ffffff"; font.pixelSize: 12; font.bold: true }
-                        Item { width: 1 }
+                        Text {
+                            text: "Input"; color: "#ffffff"; font.pixelSize: 12; font.bold: true
+                            anchors.verticalCenter: parent.verticalCenter
+                        }
                         IconButton {
                             anchors.right: parent.right
                             anchors.verticalCenter: parent.verticalCenter
@@ -150,55 +151,49 @@ Item {
                     Text {
                         id: inputDeviceName
                         text: Services.Audio.label(Services.Audio.source)
-                        color: "#9a9aa0"
-                        font.pixelSize: 11
+                        color: "#9a9aa0"; font.pixelSize: 11
                         elide: Text.ElideMiddle
-                        anchors.top: inputHeader.bottom
-                        anchors.topMargin: 10
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        width: parent.width
+                        anchors.top: inputHeader.bottom; anchors.topMargin: 6
+                        anchors.left: parent.left; anchors.right: parent.right
                     }
 
-                    Row {
+                    // slider row
+                    Item {
                         id: inputSliderRow
-                        anchors.top: inputDeviceName.bottom
-                        anchors.topMargin: 14
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        width: parent.width
-                        spacing: 8
+                        height: 36
+                        anchors.top: inputDeviceName.bottom; anchors.topMargin: 14
+                        anchors.left: parent.left; anchors.right: parent.right
 
+                        IconButton {
+                            id: inputMuteBtn
+                            anchors.right: parent.right
+                            anchors.verticalCenter: parent.verticalCenter
+                            iconName: Services.Audio.sourceMuted ? "mic-off" : "mic"
+                            active: Services.Audio.sourceMuted
+                            onClicked: Services.Audio.toggleSourceMute()
+                        }
                         FlatSlider {
                             id: inputSlider
                             bold: true
-                            width: parent.width - 44 - 36 - 8
+                            anchors.left: parent.left
+                            anchors.right: pctIn.left; anchors.rightMargin: 8
                             anchors.verticalCenter: parent.verticalCenter
                             value: Services.Audio.sourceVolume
                             enabled: Services.Audio.sourceReady
                             onMoved: if (Services.Audio.sourceReady) Services.Audio.setSourceVolume(value)
                         }
-
                         Text {
-                            text: Math.round(Services.Audio.sourceVolume * 100) + "%"
-                            color: "#ffffff"
-                            font.pixelSize: 12
-                            font.bold: true
+                            id: pctIn
                             width: 44
+                            anchors.right: inputMuteBtn.left; anchors.rightMargin: 8
                             anchors.verticalCenter: parent.verticalCenter
                             horizontalAlignment: Text.AlignRight
-                        }
-
-                        IconButton {
-                            id: inputMuteBtn
-                            iconName: Services.Audio.sourceMuted ? "mic-off" : "mic"
-                            active: Services.Audio.sourceMuted
-                            anchors.right: parent.right
-                            anchors.verticalCenter: parent.verticalCenter
-                            onClicked: Services.Audio.toggleSourceMute()
+                            text: Math.round(Services.Audio.sourceVolume * 100) + "%"
+                            color: "#ffffff"; font.pixelSize: 12; font.bold: true
                         }
                     }
 
+                    // DeviceSelector (accordion)
                     DeviceSelector {
                         id: inputDeviceList
                         overlayMode: false
@@ -208,10 +203,8 @@ Item {
                         onPicked: n => Services.Audio.setDefaultSource(n)
                         opened: inputOpen
                         onOpenedChanged: inputOpen = opened
-                        anchors.top: inputSliderRow.bottom
-                        anchors.topMargin: 10
-                        anchors.left: parent.left
-                        anchors.right: parent.right
+                        anchors.top: inputSliderRow.bottom; anchors.topMargin: 10
+                        anchors.left: parent.left; anchors.right: parent.right
                     }
                 }
             }
@@ -229,6 +222,7 @@ Item {
                 Item {
                     id: appContent
                     anchors.fill: parent
+                    anchors.margins: 16
 
                     Text {
                         id: appTitle
@@ -241,10 +235,8 @@ Item {
 
                     ListView {
                         id: appListView
-                        anchors.top: appTitle.bottom
-                        anchors.topMargin: 10
-                        anchors.left: parent.left
-                        anchors.right: parent.right
+                        anchors.top: appTitle.bottom; anchors.topMargin: 10
+                        anchors.left: parent.left; anchors.right: parent.right
                         anchors.bottom: parent.bottom
                         width: parent.width
                         clip: true
@@ -333,9 +325,7 @@ Item {
                                 y: 14
                                 width: 44
                                 text: modelData.audio ? Math.round(modelData.audio.volume * 100) + "%" : "0%"
-                                color: "#ffffff"
-                                font.pixelSize: 11
-                                font.bold: true
+                                color: "#ffffff"; font.pixelSize: 11; font.bold: true
                                 horizontalAlignment: Text.AlignRight
                             }
 
@@ -352,7 +342,7 @@ Item {
                                 x: ListView.view.width - 44; y: 30
                                 width: 36; height: 36
                                 iconName: modelData.audio && modelData.audio.muted ? "volume-x" : "volume-2"
-                                active: !!(modelData.audio && modelData.audio.muted)
+                                active: !! (modelData.audio && modelData.audio.muted)
                                 onClicked: Services.Audio.toggleNodeMute(modelData)
                             }
 
