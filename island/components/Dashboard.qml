@@ -57,14 +57,13 @@ Item {
                         Behavior on color { ColorAnimation { duration: 140 } }
 
                     Column {
-                        anchors.left: parent.left
-                        anchors.top: parent.top
+                        anchors.centerIn: parent
                         spacing: 2
                         Icon {
                             name: iconName
                             size: 14
                             color: isActive ? "#ffffff" : "#9a9aa0"
-                            anchors.left: parent.left
+                            anchors.horizontalCenter: parent.horizontalCenter
                             Behavior on color { ColorAnimation { duration: 140 } }
                         }
                         Text {
@@ -72,7 +71,7 @@ Item {
                             font.pixelSize: 9
                             font.bold: true
                             color: isActive ? "#ffffff" : "#9a9aa0"
-                            anchors.left: parent.left
+                            anchors.horizontalCenter: parent.horizontalCenter
                             Behavior on color { ColorAnimation { duration: 140 } }
                         }
                     }
@@ -116,21 +115,20 @@ Item {
                 property string label: modelData[2]
 
                 Column {
-                    anchors.left: parent.left
-                    anchors.top: parent.top
+                    anchors.centerIn: parent
                     spacing: 1
                     Icon {
                         name: iconName
                         size: 14
                         color: "#9a9aa0"
-                        anchors.left: parent.left
+                        anchors.horizontalCenter: parent.horizontalCenter
                     }
                     Text {
                         text: label
                         font.pixelSize: 7
                         font.bold: true
                         color: "#9a9aa0"
-                        anchors.left: parent.left
+                        anchors.horizontalCenter: parent.horizontalCenter
                     }
                 }
 
