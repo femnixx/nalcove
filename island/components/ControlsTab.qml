@@ -34,7 +34,6 @@ Item {
                     id: outputContent
                     anchors.fill: parent
 
-                    // Header: title + kebab
                     Row {
                         id: outputHeader
                         width: parent.width
@@ -49,7 +48,6 @@ Item {
                         }
                     }
 
-                    // Device name (middle-elided)
                     Text {
                         id: outputDeviceName
                         text: Services.Audio.label(Services.Audio.sink)
@@ -63,7 +61,6 @@ Item {
                         width: parent.width
                     }
 
-                    // Slider + pct + mute button
                     Row {
                         id: outputSliderRow
                         anchors.top: outputDeviceName.bottom
@@ -104,7 +101,6 @@ Item {
                         }
                     }
 
-                    // Inline device list (accordion)
                     DeviceSelector {
                         id: outputDeviceList
                         overlayMode: false
@@ -136,7 +132,6 @@ Item {
                     id: inputContent
                     anchors.fill: parent
 
-                    // Header: title + kebab
                     Row {
                         id: inputHeader
                         width: parent.width
@@ -151,7 +146,6 @@ Item {
                         }
                     }
 
-                    // Device name (middle-elided)
                     Text {
                         id: inputDeviceName
                         text: Services.Audio.label(Services.Audio.source)
@@ -165,7 +159,6 @@ Item {
                         width: parent.width
                     }
 
-                    // Slider + pct + mute button
                     Row {
                         id: inputSliderRow
                         anchors.top: inputDeviceName.bottom
@@ -205,7 +198,6 @@ Item {
                         }
                     }
 
-                    // Inline device list (accordion)
                     DeviceSelector {
                         id: inputDeviceList
                         overlayMode: false
