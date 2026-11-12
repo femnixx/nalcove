@@ -11,72 +11,70 @@ Item {
     property bool active: false
     anchors.fill: parent
 
+    property real tabCellWidth: 56
+    property real tabCellHeight: 36
+
     function fmtTime(s) {
         const t = Math.max(0, Math.floor(s))
         return Math.floor(t / 60) + ":" + String(t % 60).padStart(2, "0")
     }
 
     // --- TOP BAR: Main tabs on left ---
-    Rectangle {
-        id: tabBar
-        x: 20; y: 12
-        width: parent.width - 40; height: 44
-        color: "transparent"
+    RowLayout {
+        id: tabsRow
+        anchors.left: parent.left
+        anchors.leftMargin: 20
+        anchors.verticalCenter: parent.verticalCenter
+        spacing: 8
 
-        Row {
-            id: tabsRow
-            anchors.left: parent.left
-            anchors.verticalCenter: parent.verticalCenter
-            spacing: 8
+        Repeater {
+            model: [
+                ["home", "home", "Home"],
+                ["music", "music", "Music"],
+                ["clipboard", "clipboard", "Clipboard"],
+                ["alerts", "bell", "Alerts"],
+                ["shelf", "folder", "Shelf"],
+                ["notes", "notebook", "Notes"]
+            ]
+            delegate: Item {
+                Layout.preferredWidth: tabCellWidth
+                Layout.preferredHeight: tabCellHeight
+                property string pageId: modelData[0]
+                property string iconName: modelData[1]
+                property string label: modelData[2]
+                property bool isActive: dashboardRoot.page === pageId
 
-            Repeater {
-                model: [
-                    ["home", "home", "Home"],
-                    ["music", "music", "Music"],
-                    ["clipboard", "clipboard", "Clipboard"],
-                    ["alerts", "bell", "Alerts"],
-                    ["shelf", "folder", "Shelf"],
-                    ["notes", "notebook", "Notes"]
-                ]
-                delegate: Item {
-                    width: 56; height: 36
-                    property string pageId: modelData[0]
-                    property string iconName: modelData[1]
-                    property string label: modelData[2]
-                    property bool isActive: dashboardRoot.page === pageId
+                Rectangle {
+                    anchors.fill: parent
+                    radius: 10
+                    color: isActive ? "#3b8bff" : "transparent"
+                    border.color: isActive ? "#3b8bff" : "transparent"
+                    border.width: isActive ? 1 : 0
+                    Behavior on color { ColorAnimation { duration: 140 } }
 
-                    Rectangle {
+                    Column {
+                        anchors.centerIn: parent
+                        spacing: 2
+                        Icon {
+                            name: iconName
+                            size: 14
+                            color: isActive ? "#ffffff" : "#9a9aa0"
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            Behavior on color { ColorAnimation { duration: 140 } }
+                        }
+                        Text {
+                            text: label
+                            font.pixelSize: 9
+                            font.bold: true
+                            color: isActive ? "#ffffff" : "#9a9aa0"
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            Behavior on color { ColorAnimation { duration: 140 } }
+                        }
+                    }
+
+                    MouseArea {
                         anchors.fill: parent
-                        radius: 10
-                        color: isActive ? "#3b8bff" : "transparent"
-                        border.color: isActive ? "#3b8bff" : "transparent"
-                        border.width: isActive ? 1 : 0
-                        Behavior on color { ColorAnimation { duration: 140 } }
-
-                        Column {
-                            anchors.centerIn: parent
-                            spacing: 2
-                            Icon {
-                                name: iconName
-                                size: 14
-                                color: isActive ? "#ffffff" : "#9a9aa0"
-                                anchors.horizontalCenter: parent.horizontalCenter
-                                Behavior on color { ColorAnimation { duration: 140 } }
-                            }
-                            Text {
-                                text: label
-                                font.pixelSize: 9
-                                font.bold: true
-                                color: isActive ? "#ffffff" : "#9a9aa0"
-                                anchors.horizontalCenter: parent.horizontalCenter
-                                Behavior on color { ColorAnimation { duration: 140 } }
-                            }
-                        }
-
-                        MouseArea {
-                            anchors.fill: parent
-                            onClicked: dashboardRoot.page = pageId
-                        }
+                        onClicked: dashboardRoot.page = pageId
                     }
                 }
             }
@@ -84,14 +82,14 @@ Item {
     }
 
     // --- SECOND ROW: Smaller icons spread across + battery on right ---
-    Row {
+    RowLayout {
         id: utilityRow
         anchors.left: parent.left
         anchors.leftMargin: 20
         anchors.right: parent.right
         anchors.rightMargin: 20
-        anchors.top: tabBar.bottom
-        anchors.topMargin: 6
+        anchors.top: parent.top
+        anchors.topMargin: 56
         height: 36
         spacing: 10
 
@@ -106,7 +104,8 @@ Item {
                 ["settings", "settings", "Settings"]
             ]
             delegate: Item {
-                width: 56; height: 36
+                Layout.preferredWidth: tabCellWidth
+                Layout.preferredHeight: tabCellHeight
                 property string pageId: modelData[0]
                 property string iconName: modelData[1]
                 property string label: modelData[2]
@@ -149,7 +148,7 @@ Item {
         }
 
         // Spacer pushes battery to the right
-        Item { width: 1; Layout.fillWidth: true }
+        Item { Layout.fillWidth: true }
 
         // Battery indicator on the right - percentage first, then icon
         Row {
