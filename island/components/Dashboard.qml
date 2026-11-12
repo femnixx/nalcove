@@ -149,10 +149,11 @@ Item {
                                 name: iconName
                                 size: s(14)
                                 color: isActive ? "#ffffff" : "#9a9aa0"
-                                anchors.horizontalCenter: parent.horizontalCenter
+                                anchors.horizontalCenter: tabLabel.horizontalCenter
                                 Behavior on color { ColorAnimation { duration: 140 } }
                             }
                             Text {
+                                id: tabLabel
                                 text: showLabel ? label : ""
                                 font.pixelSize: 7 * ui
                                 font.bold: true
