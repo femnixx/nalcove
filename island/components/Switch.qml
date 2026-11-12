@@ -3,13 +3,14 @@ import QtQuick
 
 Rectangle {
     id: root
-    width: 44
-    height: 26
-    radius: 13
-
+    property real ui: 1
     property bool checked: false
     property bool enabled: true
     property var onToggled: null
+
+    function s(px) { return Math.round(px * ui) }
+
+    width: s(44); height: s(26); radius: s(13)
 
     color: root.enabled ? (root.checked ? Style.accent : Style.track) : Style.track
     border.color: "transparent"

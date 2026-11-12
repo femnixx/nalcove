@@ -6,6 +6,7 @@ import "../services" as Services
 
 Item {
     id: root
+    property real ui: 1
     // GPU polling wakes a hybrid NVIDIA GPU and costs battery. Leave off unless you want it.
     property bool showGpu: false
 
@@ -18,6 +19,8 @@ Item {
     property real gpuTemp: -1
     property real _prevIdle: 0
     property real _prevTotal: 0
+
+    function s(px) { return Math.round(px * ui) }
 
     function parse(text) {
         for (const line of text.split("\n")) {
@@ -70,22 +73,23 @@ Item {
     }
 
     Column {
-        anchors.fill: parent; anchors.margins: 6; spacing: 14
+        anchors.fill: parent; anchors.margins: s(6); spacing: s(14)
         Repeater {
             model: root.rows
             delegate: Column {
-                width: parent.width; spacing: 5
-                Item {
-                    width: parent.width; height: 16
-                    Text { text: modelData.label; color: "#9a9aa0"; font.pixelSize: 12 }
+                width: parent.width; spacing: s(5)
+
+                Row {
+                    width: parent.width; height: s(16)
+                    Text { text: modelData.label; color: "#9a9aa0"; font.pixelSize: 12 * ui }
                     Text { anchors.right: parent.right; text: modelData.text; color: "#ffffff"
-                           font.pixelSize: 12; font.bold: true }
+                           font.pixelSize: 12 * ui; font.bold: true }
                 }
                 Rectangle {
-                    width: parent.width; height: 6; radius: 3; color: "#22ffffff"
+                    width: parent.width; height: s(6); radius: s(3); color: "#22ffffff"
                     Rectangle {
                         width: parent.width * Math.max(0, Math.min(1, modelData.frac)); height: parent.height
-                        radius: 3; color: modelData.color
+                        radius: s(3); color: modelData.color
                         Behavior on width { NumberAnimation { duration: 400 } }
                     }
                 }

@@ -3,7 +3,10 @@ import Quickshell.Io
 
 Item {
     id: root
+    property real ui: 1
     property var entries: []
+
+    function s(px) { return Math.round(px * ui) }
 
     // 1) the list
     Process {
@@ -37,28 +40,28 @@ Item {
 
     Row {
         id: header
-        spacing: 12
-        Text { text: "Clipboard History"; color: "#ffffff"; font.pixelSize: 15; font.bold: true
+        spacing: s(12)
+        Text { text: "Clipboard History"; color: "#ffffff"; font.pixelSize: 15 * ui; font.bold: true
                anchors.verticalCenter: parent.verticalCenter }
         Rectangle {
-            width: 80; height: 26; radius: 13; color: "#22ffffff"
-            Text { anchors.centerIn: parent; text: "Clear All"; color: "#ffffff"; font.pixelSize: 11 }
+            width: s(80); height: s(26); radius: s(13); color: "#22ffffff"
+            Text { anchors.centerIn: parent; text: "Clear All"; color: "#ffffff"; font.pixelSize: 11 * ui }
             MouseArea { anchors.fill: parent; onClicked: wipeProc.running = true }
         }
     }
 
     ListView {
-        anchors { top: header.bottom; topMargin: 10; left: parent.left; right: parent.right; bottom: parent.bottom }
+        anchors { top: header.bottom; topMargin: s(10); left: parent.left; right: parent.right; bottom: parent.bottom }
         model: root.entries
-        spacing: 6
+        spacing: s(6)
         clip: true
         delegate: Rectangle {
-            width: ListView.view.width; height: 34; radius: 10
+            width: ListView.view.width; height: s(34); radius: s(10)
             color: ma.containsMouse ? "#22ffffff" : "#16ffffff"
             Text {
-                anchors.fill: parent; anchors.leftMargin: 12; anchors.rightMargin: 12
+                anchors.fill: parent; anchors.leftMargin: s(12); anchors.rightMargin: s(12)
                 text: modelData.replace(/^\d+\t/, "")
-                color: "#ffffff"; font.pixelSize: 12
+                color: "#ffffff"; font.pixelSize: 12 * ui
                 elide: Text.ElideRight; verticalAlignment: Text.AlignVCenter
             }
             MouseArea {
@@ -75,5 +78,6 @@ Item {
         anchors.centerIn: parent
         visible: root.entries.length === 0
         text: "Clipboard is empty"; color: "#66ffffff"
+        font.pixelSize: 13 * ui
     }
 }

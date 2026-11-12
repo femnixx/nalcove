@@ -3,11 +3,14 @@ import QtQuick
 
 Item {
     id: root
-    width: 4
+    property real ui: 1
+    width: s(4)
     anchors.right: parent.right
     anchors.top: parent.top
     anchors.bottom: parent.bottom
     visible: root.flickable && root.flickable.contentHeight > root.flickable.height && root.flickable.visible
+
+    function s(px) { return Math.round(px * ui) }
 
     property var flickable: null
     property real fadeDelay: 800
@@ -15,11 +18,11 @@ Item {
     Rectangle {
         id: handle
         width: parent.width
-        radius: 2
+        radius: s(2)
         color: Style.dim
         opacity: root._visible ? 0.6 : 0
         y: root._visible ? (root.flickable.contentY / root.flickable.contentHeight) * (root.height - height) : 0
-        height: Math.max(30, (root.flickable.height / root.flickable.contentHeight) * root.height)
+        height: Math.max(s(30), (root.flickable.height / root.flickable.contentHeight) * root.height)
 
         Behavior on y { NumberAnimation { duration: 100 } }
         Behavior on opacity { NumberAnimation { duration: 200 } }

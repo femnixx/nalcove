@@ -4,35 +4,38 @@ import Quickshell.Services.Notifications
 
 Rectangle {
     id: root
+    property real ui: 1
     color: Style.card
     radius: Style.cardRadius
     clip: true
 
+    function s(px) { return Math.round(px * ui) }
+
     Column {
         anchors.fill: parent
-        anchors.margins: 16
-        spacing: 12
+        anchors.margins: s(16)
+        spacing: s(12)
 
         Row {
-            spacing: 12
+            spacing: s(12)
             Text {
                 text: "Notifications"
                 color: "#ffffff"
                 opacity: 1.0
-                font.pixelSize: 18
+                font.pixelSize: 18 * ui
                 font.bold: true
             }
-            Item { width: 40 }
+            Item { width: s(40) }
             Rectangle {
-                width: 100; height: 28; radius: 14
+                width: s(100); height: s(28); radius: s(14)
                 color: Style.cardHi
-                border.color: Style.border; border.width: 1
+                border.color: Style.border; border.width: s(1)
                 Text {
                     anchors.centerIn: parent
                     text: "Clear All"
                     color: "#ffffff"
                     opacity: 1.0
-                    font.pixelSize: 12
+                    font.pixelSize: 12 * ui
                 }
                 MouseArea {
                     anchors.fill: parent
@@ -43,14 +46,14 @@ Rectangle {
 
         ListView {
             width: parent.width
-            height: parent.height - 60
+            height: parent.height - s(60)
             model: Notifications
-            spacing: 8
+            spacing: s(8)
             delegate: Rectangle {
                 width: parent.width
-                height: Math.max(72, content.implicitHeight + 16)
+                height: Math.max(s(72), content.implicitHeight + s(16))
                 color: Style.cardHi
-                radius: 10
+                radius: s(10)
                 clip: true
 
                 property bool hovered: false
@@ -58,13 +61,13 @@ Rectangle {
                 Column {
                     id: content
                     anchors.fill: parent
-                    anchors.margins: 16
-                    spacing: 6
+                    anchors.margins: s(16)
+                    spacing: s(6)
 
                     Row {
-                        spacing: 12
+                        spacing: s(12)
                         Rectangle {
-                            width: 40; height: 40; radius: 20
+                            width: s(40); height: s(40); radius: s(20)
                             color: (modelData.appIcon && modelData.appIcon !== "") ? "transparent" : Style.accent
                             Image {
                                 anchors.fill: parent
@@ -75,32 +78,32 @@ Rectangle {
                             Icon {
                                 anchors.centerIn: parent
                                 name: "bell"
-                                size: 20
+                                size: s(20)
                                 color: "white"
                                 visible: !(modelData.appIcon && modelData.appIcon !== "")
                             }
                         }
 
                         Column {
-                            spacing: 2
+                            spacing: s(2)
                             Text {
                                 text: modelData.appName || "Unknown"
                                 color: "#9a9aa0"
-                                font.pixelSize: 11
+                                font.pixelSize: 11 * ui
                                 font.bold: true
                             }
                             Text {
                                 text: modelData.summary || ""
                                 color: "#ffffff"
                                 opacity: 1.0
-                                font.pixelSize: 14
+                                font.pixelSize: 14 * ui
                                 font.bold: true
                                 elide: Text.ElideRight
                             }
                             Text {
                                 text: modelData.body || ""
                                 color: "#9a9aa0"
-                                font.pixelSize: 12
+                                font.pixelSize: 12 * ui
                                 wrapMode: Text.WordWrap
                                 maximumLineCount: 2
                                 elide: Text.ElideRight
@@ -109,21 +112,21 @@ Rectangle {
                     }
 
                     Row {
-                        spacing: 8
-                        Item { width: 52 }
+                        spacing: s(8)
+                        Item { width: s(52) }
                         Repeater {
                             model: modelData.actions || []
                             delegate: Item {
                                 id: actionDelegate
                                 property bool hovered: false
-                                width: Math.max(60, actionText.implicitWidth + 24)
-                                height: 30
+                                width: Math.max(s(60), actionText.implicitWidth + s(24))
+                                height: s(30)
 
                                 Rectangle {
                                     anchors.fill: parent
-                                    radius: 15
+                                    radius: s(15)
                                     color: actionDelegate.hovered ? Style.accent : "transparent"
-                                    border.color: Style.border; border.width: 1
+                                    border.color: Style.border; border.width: s(1)
 
                                     Text {
                                         id: actionText
@@ -131,7 +134,7 @@ Rectangle {
                                         text: modelData.label
                                         color: actionDelegate.hovered ? "white" : "#ffffff"
                                         opacity: 1.0
-                                        font.pixelSize: 12
+                                        font.pixelSize: 12 * ui
                                     }
                                 }
 
@@ -145,15 +148,15 @@ Rectangle {
                             }
                         }
 
-                        Item { width: 40 }
+                        Item { width: s(40) }
                         Rectangle {
-                            width: 32; height: 32; radius: 16
+                            width: s(32); height: s(32); radius: s(16)
                             color: dismissDelegate.hovered ? "#ff453a20" : "transparent"
-                            border.color: Style.border; border.width: 1
+                            border.color: Style.border; border.width: s(1)
                             Icon {
                                 anchors.centerIn: parent
                                 name: "x"
-                                size: 14
+                                size: s(14)
                                 color: dismissDelegate.hovered ? "#ff453a" : "#9a9aa0"
                             }
                             MouseArea {
@@ -179,7 +182,7 @@ Rectangle {
                 text: "No notifications"
                 color: "#ffffff"
                 opacity: 1.0
-                font.pixelSize: 14
+                font.pixelSize: 14 * ui
             }
         }
     }

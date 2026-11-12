@@ -9,23 +9,43 @@ Item {
     property string page: "home"
     property bool pinned: false
     property bool active: false
-    anchors.fill: parent
+    property real ui: 1
+
+    function s(px) { return Math.round(px * ui) }
+
+    // Tab rows switch to icons-only below this width.
+    readonly property bool narrow: width < 640
+
+    // Every tab cell in BOTH rows has this width and the rows use the same spacing,
+    // so the two rows line up column for column. Tabs pack to the left.
+    readonly property real tabW: s(68)
+    readonly property real tabGap: s(8)
+
+    // Page loaders only exist while the island is open (or fading out), so a closed
+    // island holds almost no memory. Set this to `true` if opening ever feels janky.
+    readonly property bool alive: active || opacity > 0
 
     function fmtTime(s) {
         const t = Math.max(0, Math.floor(s))
         return Math.floor(t / 60) + ":" + String(t % 60).padStart(2, "0")
     }
 
+    // Size comes from the parent (IslandWindow gives it a fixed width/height).
+    // No anchors.fill here, or it would fight the size set from outside.
+
     ColumnLayout {
         anchors.fill: parent
-        spacing: 8
+        anchors.leftMargin: s(20)
+        anchors.rightMargin: s(20)
+        anchors.bottomMargin: s(14)
+        spacing: s(8)
 
-        // --- TOP BAR: Main tabs on left ---
+        // --- TOP BAR: main tabs, fixed-width cells packed to the left ---
         RowLayout {
             id: tabsRow
             Layout.fillWidth: true
-            Layout.alignment: Qt.AlignLeft
-            spacing: 8
+            Layout.topMargin: s(8)
+            spacing: dashboardRoot.tabGap
 
             Repeater {
                 model: [
@@ -37,16 +57,18 @@ Item {
                     ["notes", "notebook", "Notes"]
                 ]
                 delegate: Item {
-                    Layout.preferredWidth: 56
-                    Layout.preferredHeight: 36
+                    Layout.fillWidth: false
+                    Layout.preferredWidth: dashboardRoot.tabW
+                    Layout.preferredHeight: s(36)
                     property string pageId: modelData[0]
                     property string iconName: modelData[1]
                     property string label: modelData[2]
                     property bool isActive: dashboardRoot.page === pageId
+                    property bool showLabel: !dashboardRoot.narrow
 
                     Rectangle {
                         anchors.fill: parent
-                        radius: 10
+                        radius: s(10)
                         color: isActive ? "#3b8bff" : "transparent"
                         border.color: isActive ? "#3b8bff" : "transparent"
                         border.width: isActive ? 1 : 0
@@ -54,17 +76,17 @@ Item {
 
                         Column {
                             anchors.centerIn: parent
-                            spacing: 2
+                            spacing: s(2)
                             Icon {
                                 name: iconName
-                                size: 14
+                                size: s(14)
                                 color: isActive ? "#ffffff" : "#9a9aa0"
                                 anchors.horizontalCenter: parent.horizontalCenter
                                 Behavior on color { ColorAnimation { duration: 140 } }
                             }
                             Text {
-                                text: label
-                                font.pixelSize: 9
+                                text: showLabel ? label : ""
+                                font.pixelSize: 9 * ui
                                 font.bold: true
                                 color: isActive ? "#ffffff" : "#9a9aa0"
                                 anchors.horizontalCenter: parent.horizontalCenter
@@ -79,14 +101,18 @@ Item {
                     }
                 }
             }
+
+            // Takes the leftover width so the tabs stay packed on the left
+            Item { Layout.fillWidth: true }
         }
 
-        // --- SECOND ROW: Smaller icons spread across + battery on right ---
+        // --- SECOND ROW: smaller tabs packed left, battery pinned to the right ---
         RowLayout {
             id: utilityRow
             Layout.fillWidth: true
-            Layout.alignment: Qt.AlignLeft
-            spacing: 10
+            Layout.topMargin: s(6)
+            Layout.preferredHeight: s(36)
+            spacing: dashboardRoot.tabGap
 
             Repeater {
                 model: [
@@ -99,16 +125,18 @@ Item {
                     ["settings", "settings", "Settings"]
                 ]
                 delegate: Item {
-                    Layout.preferredWidth: 56
-                    Layout.preferredHeight: 36
+                    Layout.fillWidth: false
+                    Layout.preferredWidth: dashboardRoot.tabW
+                    Layout.preferredHeight: s(36)
                     property string pageId: modelData[0]
                     property string iconName: modelData[1]
                     property string label: modelData[2]
                     property bool isActive: dashboardRoot.page === pageId
+                    property bool showLabel: !dashboardRoot.narrow
 
                     Rectangle {
                         anchors.fill: parent
-                        radius: 10
+                        radius: s(10)
                         color: isActive ? "#3b8bff" : "transparent"
                         border.color: isActive ? "#3b8bff" : "transparent"
                         border.width: isActive ? 1 : 0
@@ -116,17 +144,17 @@ Item {
 
                         Column {
                             anchors.centerIn: parent
-                            spacing: 1
+                            spacing: s(1)
                             Icon {
                                 name: iconName
-                                size: 14
+                                size: s(14)
                                 color: isActive ? "#ffffff" : "#9a9aa0"
                                 anchors.horizontalCenter: parent.horizontalCenter
                                 Behavior on color { ColorAnimation { duration: 140 } }
                             }
                             Text {
-                                text: label
-                                font.pixelSize: 7
+                                text: showLabel ? label : ""
+                                font.pixelSize: 7 * ui
                                 font.bold: true
                                 color: isActive ? "#ffffff" : "#9a9aa0"
                                 anchors.horizontalCenter: parent.horizontalCenter
@@ -142,58 +170,70 @@ Item {
                 }
             }
 
-            // Spacer pushes battery to the right
+            // Spacer pushes the battery to the far right
             Item { Layout.fillWidth: true }
 
-            // Battery indicator on the right - percentage first, then icon
+            // Battery indicator on the right: percentage first, then icon
             Row {
-                spacing: 6
+                Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
+                spacing: s(6)
 
                 Text {
                     text: Math.round(Services.Battery.pct * 100) + "%"
                     color: Services.Battery.accent
-                    font.pixelSize: 10
+                    font.pixelSize: 10 * ui
                     font.bold: true
                     anchors.verticalCenter: parent.verticalCenter
                 }
 
                 Icon {
                     name: Services.Battery.charging ? "battery-charging" : (Services.Battery.low ? "battery-low" : "battery")
-                    size: 14
+                    size: s(14)
                     color: "#9a9aa0"
                     anchors.verticalCenter: parent.verticalCenter
                 }
-
-                Item { width: 6 }
             }
         }
 
         // Divider line below second row
         Rectangle {
             Layout.fillWidth: true
-            height: 1
+            height: s(1)
             color: "#2a2a2e"
-            Layout.topMargin: 4
+            Layout.topMargin: s(4)
         }
 
-        // --- CONTENT AREA: Tab panels ---
+        // --- CONTENT AREA: Tab panels (only the active page is loaded) ---
         Item {
             Layout.fillWidth: true
             Layout.fillHeight: true
 
-            Loader { anchors.fill: parent; active: page === "home";      source: "HomeTab.qml" }
-            Loader { anchors.fill: parent; active: page === "music";     source: "MusicTab.qml" }
-            Loader { anchors.fill: parent; active: page === "clipboard"; source: "ClipboardTab.qml" }
-            Loader { anchors.fill: parent; active: page === "alerts";    source: "AlertsTab.qml" }
-            Loader { anchors.fill: parent; active: page === "shelf";     source: "ShelfTab.qml" }
-            Loader { anchors.fill: parent; active: page === "notes";     source: "NotesTab.qml" }
-            Loader { anchors.fill: parent; active: page === "calendar";  source: "CalendarTab.qml" }
-            Loader { anchors.fill: parent; active: page === "controls";  source: "ControlsTab.qml" }
-            Loader { anchors.fill: parent; active: page === "bluetooth"; source: "BluetoothTab.qml" }
-            Loader { anchors.fill: parent; active: page === "system";    source: "SystemTab.qml" }
-            Loader { anchors.fill: parent; active: page === "wifi";      source: "WifiTab.qml" }
-            Loader { anchors.fill: parent; active: page === "search";    source: "SearchTab.qml" }
-            Loader { anchors.fill: parent; active: page === "settings";  source: "SettingsTab.qml" }
+            Loader { id: homeLoader; anchors.fill: parent; active: alive && page === "home"; source: "HomeTab.qml";
+                     onLoaded: if (item) item.ui = dashboardRoot.ui }
+            Loader { id: musicLoader;  anchors.fill: parent; active: alive && page === "music";     source: "MusicTab.qml";
+                     onLoaded: if (item) item.ui = dashboardRoot.ui }
+            Loader { id: clipboardLoader; anchors.fill: parent; active: alive && page === "clipboard"; source: "ClipboardTab.qml";
+                     onLoaded: if (item) item.ui = dashboardRoot.ui }
+            Loader { id: alertsLoader;   anchors.fill: parent; active: alive && page === "alerts";    source: "AlertsTab.qml";
+                     onLoaded: if (item) item.ui = dashboardRoot.ui }
+            Loader { id: shelfLoader;    anchors.fill: parent; active: alive && page === "shelf";     source: "ShelfTab.qml";
+                     onLoaded: if (item) item.ui = dashboardRoot.ui }
+            Loader { id: notesLoader;    anchors.fill: parent; active: alive && page === "notes";     source: "NotesTab.qml";
+                     onLoaded: if (item) item.ui = dashboardRoot.ui }
+            Loader { id: calendarLoader; anchors.fill: parent; active: alive && page === "calendar";  source: "CalendarTab.qml";
+                     onLoaded: if (item) item.ui = dashboardRoot.ui }
+            Loader { id: controlsLoader; anchors.fill: parent; active: alive && page === "controls";  source: "ControlsTab.qml";
+                     onLoaded: if (item) item.ui = dashboardRoot.ui }
+            Loader { id: bluetoothLoader;anchors.fill: parent; active: alive && page === "bluetooth"; source: "BluetoothTab.qml";
+                     onLoaded: if (item) item.ui = dashboardRoot.ui }
+            Loader { id: systemLoader;   anchors.fill: parent; active: alive && page === "system";    source: "SystemTab.qml";
+                     onLoaded: if (item) item.ui = dashboardRoot.ui }
+            Loader { id: wifiLoader;     anchors.fill: parent; active: alive && page === "wifi";      source: "WifiTab.qml";
+                     onLoaded: if (item) item.ui = dashboardRoot.ui }
+            Loader { id: searchLoader;   anchors.fill: parent; active: alive && page === "search";    source: "SearchTab.qml";
+                     onLoaded: if (item) item.ui = dashboardRoot.ui }
+            Loader { id: settingsLoader; anchors.fill: parent; active: alive && page === "settings";  source: "SettingsTab.qml";
+                     onLoaded: if (item) item.ui = dashboardRoot.ui }
         }
     }
 }

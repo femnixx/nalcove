@@ -5,13 +5,14 @@ import QtQuick.Layouts
 
 Item {
     id: root
+    property real ui: 1
     Layout.fillWidth: true
     Layout.fillHeight: true
 
     Column {
         anchors.fill: parent
-        anchors.margins: Style.s4
-        spacing: Style.s3
+        anchors.margins: Style.s4 * ui
+        spacing: Style.s3 * ui
 
         // DND toggle
         Card {
@@ -20,21 +21,21 @@ Item {
 
             RowLayout {
                 anchors.fill: parent
-                anchors.margins: Style.s4
-                spacing: Style.s3
+                anchors.margins: Style.s4 * ui
+                spacing: Style.s3 * ui
 
                 Column {
                     Layout.fillWidth: true
                     Text {
                         text: "Do Not Disturb"
                         color: Style.fg
-                        font.pixelSize: Style.tBody
+                        font.pixelSize: Style.tBody * ui
                         font.family: Style.fontFamily
                     }
                     Text {
                         text: "Suppress notification peeks"
                         color: Style.dim
-                        font.pixelSize: Style.tSmall
+                        font.pixelSize: Style.tSmall * ui
                         font.family: Style.fontFamily
                     }
                 }
@@ -56,35 +57,35 @@ Item {
 
             RowLayout {
                 anchors.fill: parent
-                anchors.margins: Style.s4
-                spacing: Style.s3
+                anchors.margins: Style.s4 * ui
+                spacing: Style.s3 * ui
 
                 Column {
                     Layout.fillWidth: true
                     Text {
                         text: "Notification History"
                         color: Style.fg
-                        font.pixelSize: Style.tBody
+                        font.pixelSize: Style.tBody * ui
                         font.family: Style.fontFamily
                     }
                     Text {
                         text: "Max items: " + Services.Notifications.maxItems
                         color: Style.dim
-                        font.pixelSize: Style.tSmall
+                        font.pixelSize: Style.tSmall * ui
                         font.family: Style.fontFamily
                     }
                 }
 
                 Row {
-                    spacing: Style.s2
-                    Pill {
+                    spacing: Style.s2 * ui
+                    Pill { ui: root.ui
                         text: "−"
-                        height: Style.controlH
+                        height: Style.controlH * ui
                         onClicked: Services.Notifications.maxItems = Math.max(10, Services.Notifications.maxItems - 10)
                     }
-                    Pill {
+                    Pill { ui: root.ui
                         text: "+"
-                        height: Style.controlH
+                        height: Style.controlH * ui
                         onClicked: Services.Notifications.maxItems = Math.min(200, Services.Notifications.maxItems + 10)
                     }
                 }
@@ -100,22 +101,22 @@ Item {
 
             Column {
                 anchors.fill: parent
-                anchors.margins: Style.s4
-                spacing: Style.s2
+                anchors.margins: Style.s4 * ui
+                spacing: Style.s2 * ui
 
                 Text {
                     text: "Appearance"
                     color: Style.dim
-                    font.pixelSize: Style.tSmall
+                    font.pixelSize: Style.tSmall * ui
                     font.bold: true
                     font.family: Style.fontFamily
                 }
 
                 Row {
-                    spacing: Style.s2
-                    Pill { text: "Light"; onClicked: console.log("Light theme not implemented") }
-                    Pill { text: "Dark"; onClicked: console.log("Dark theme not implemented") }
-                    Pill { text: "System"; onClicked: console.log("System theme not implemented") }
+                    spacing: Style.s2 * ui
+                    Pill { ui: root.ui text: "Light"; onClicked: console.log("Light theme not implemented") }
+                    Pill { ui: root.ui text: "Dark"; onClicked: console.log("Dark theme not implemented") }
+                    Pill { ui: root.ui text: "System"; onClicked: console.log("System theme not implemented") }
                 }
             }
         }
@@ -129,13 +130,13 @@ Item {
 
             Column {
                 anchors.fill: parent
-                anchors.margins: Style.s4
-                spacing: Style.s2
+                anchors.margins: Style.s4 * ui
+                spacing: Style.s2 * ui
 
                 Text {
                     text: "About"
                     color: Style.dim
-                    font.pixelSize: Style.tSmall
+                    font.pixelSize: Style.tSmall * ui
                     font.bold: true
                     font.family: Style.fontFamily
                 }
@@ -143,14 +144,14 @@ Item {
                 Text {
                     text: "Dynamic Notch for Niri"
                     color: Style.fg
-                    font.pixelSize: Style.tBody
+                    font.pixelSize: Style.tBody * ui
                     font.family: Style.fontFamily
                 }
 
                 Text {
                     text: "Built with Quickshell & Qt Quick"
                     color: Style.dim
-                    font.pixelSize: Style.tSmall
+                    font.pixelSize: Style.tSmall * ui
                     font.family: Style.fontFamily
                 }
             }

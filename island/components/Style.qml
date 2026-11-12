@@ -73,8 +73,8 @@ QtObject {
     readonly property int notifyHeight: 120
     readonly property int expandedWidth: 780
     readonly property int expandedHeight: 400
-    readonly property int windowWidth: 780
-    readonly property int windowHeight: 470
+readonly property int windowWidth: Style.expandedWidth + 2 * Style.flareRadius + Style.overshootMargin
+readonly property int windowHeight: Style.windowHeight
     readonly property int overshootMargin: 0
 
     // ===== UI constants =====

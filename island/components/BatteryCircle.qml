@@ -5,8 +5,11 @@ import "../services" as Services
 //   >60%  green, <60% yellow, <=15% red, charged = blue
 Rectangle {
     id: root
-    width: 48; height: 48
+    property real ui: 1
+    width: s(48); height: s(48)
     color: "transparent"
+
+    function s(px) { return Math.round(px * ui) }
 
     // Compute battery color based on charge level
     readonly property color batteryColor: {
@@ -24,7 +27,7 @@ Rectangle {
         width: root.width; height: root.height
         radius: root.width / 2
         border.color: "#3a3a3a"
-        border.width: 2
+        border.width: s(2)
         color: "transparent"
         anchors.centerIn: parent
     }
@@ -32,7 +35,7 @@ Rectangle {
     // Inner circle filled with battery color
     Rectangle {
         id: inner
-        width: root.width - 8; height: root.height - 8
+        width: root.width - s(8); height: root.height - s(8)
         radius: inner.width / 2
         color: root.batteryColor
         anchors.centerIn: parent
@@ -43,7 +46,7 @@ Rectangle {
         id: pctText
         text: Services.Battery.ready ? Math.round(Services.Battery.pct * 100) + "%" : "AC"
         color: root.batteryColor
-        font.pixelSize: 11
+        font.pixelSize: 11 * ui
         font.bold: true
         anchors.centerIn: parent
     }
@@ -53,11 +56,11 @@ Rectangle {
         id: chargingBolt
         anchors.centerIn: parent
         visible: Services.Battery.ready && Services.Battery.charging
-        width: 10; height: 10
+        width: s(10); height: s(10)
         Text {
             anchors.fill: parent
             text: "\u26A1"
-            font.pixelSize: 10
+            font.pixelSize: 10 * ui
             color: "#ffffff"
             horizontalAlignment: Text.AlignHCenter
             verticalAlignment: Text.AlignVCenter

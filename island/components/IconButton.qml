@@ -2,26 +2,28 @@ import QtQuick
 
 Item {
     id: root
-    width: 36
-    height: 36
-
+    property real ui: 1
     property string iconName: ""
     property bool active: false
     property string tooltip: ""
 
+    function s(px) { return Math.round(px * ui) }
+
+    width: s(36); height: s(36)
+
     Rectangle {
         id: bg
         anchors.fill: parent
-        radius: 10
+        radius: s(10)
         color: root.pressed ? "#1f1f1f" : (root.hovered || root.active ? "#1f1f1f" : "transparent")
         border.color: "#5a5a5a"
-        border.width: 1
+        border.width: s(1)
 
         Icon {
             id: icon
             anchors.centerIn: parent
             name: root.iconName
-            size: 18
+            size: s(18)
             color: root.active ? "#3b8bff" : "#ffffff"
         }
     }

@@ -4,8 +4,11 @@ import "../services"
 
 // Month grid + today card
 Item {
+    property real ui: 1
     id: root
     clip: true
+
+    function s(px) { return Math.round(px * ui) }
 
     // Rebuild only when the day changes
     readonly property int today: Clock.now.getDate()
@@ -22,7 +25,7 @@ Item {
         return out
     }
 
-    readonly property real gap: 12
+    readonly property real gap: s(12)
     readonly property real leftW: (width - gap) * 0.53
 
     Rectangle {
@@ -32,36 +35,36 @@ Item {
         color: Style.card
         radius: Style.cardRadius
 
-        readonly property real cell: (width - 40) / 7
+        readonly property real cell: (width - s(40)) / 7
 
         Text {
-            x: 20; y: 12
+            x: s(20); y: s(12)
             text: Qt.formatDate(Clock.now, "MMMM yyyy")
             color: Style.fg
-            font.pixelSize: 16
+            font.pixelSize: 16 * ui
             font.bold: true
         }
         Row {
-            x: 20; y: 44
+            x: s(20); y: s(44)
             Repeater {
                 model: ["M", "T", "W", "T", "F", "S", "S"]
                 delegate: Item {
-                    width: monthCard.cell; height: 16
-                    Text { anchors.centerIn: parent; text: modelData; color: Style.dim; font.pixelSize: 11 }
+                    width: monthCard.cell; height: s(16)
+                    Text { anchors.centerIn: parent; text: modelData; color: Style.dim; font.pixelSize: 11 * ui }
                 }
             }
         }
         Grid {
-            x: 20; y: 64
+            x: s(20); y: s(64)
             columns: 7
             Repeater {
                 model: root.cellList
                 delegate: Item {
                     width: monthCard.cell
-                    height: Math.min(26, (monthCard.height - 72) / 6)
+                    height: Math.min(s(26), (monthCard.height - s(72)) / 6)
                     Rectangle {
                         anchors.centerIn: parent
-                        width: 22; height: 22; radius: 11
+                        width: s(22); height: s(22); radius: s(11)
                         visible: modelData === root.today
                         color: Style.accent
                     }
@@ -70,7 +73,7 @@ Item {
                         visible: modelData > 0
                         text: modelData
                         color: Style.fg
-                        font.pixelSize: 12
+                        font.pixelSize: 12 * ui
                     }
                 }
             }
@@ -85,25 +88,25 @@ Item {
 
         Column {
             anchors.centerIn: parent
-            spacing: 6
+            spacing: s(6)
             Text {
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: Qt.formatDate(Clock.now, "d")
                 color: Style.fg
-                font.pixelSize: 56
+                font.pixelSize: 56 * ui
                 font.bold: true
             }
             Text {
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: Qt.formatDate(Clock.now, "dddd")
                 color: Style.fg
-                font.pixelSize: 15
+                font.pixelSize: 15 * ui
             }
             Text {
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: "Nothing scheduled"
                 color: Style.dim
-                font.pixelSize: 12
+                font.pixelSize: 12 * ui
             }
         }
     }

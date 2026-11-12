@@ -5,10 +5,14 @@ import QtQuick.Shapes
 // kind: "play" | "pause" | "next" | "prev"
 Item {
     id: root
+    property real ui: 1
     property string kind: "play"
     property color color: "white"
-    implicitWidth: 16
-    implicitHeight: 16
+
+    function s(px) { return Math.round(px * ui) }
+
+    implicitWidth: s(16)
+    implicitHeight: s(16)
 
     // play triangle
     Shape {
@@ -29,8 +33,8 @@ Item {
     Item {
         anchors.fill: parent
         visible: root.kind === "pause"
-        Rectangle { x: root.width * 0.15; width: root.width * 0.27; height: root.height; radius: 1.5; color: root.color }
-        Rectangle { x: root.width * 0.58; width: root.width * 0.27; height: root.height; radius: 1.5; color: root.color }
+        Rectangle { x: root.width * 0.15; width: root.width * 0.27; height: root.height; radius: 1.5 * ui; color: root.color }
+        Rectangle { x: root.width * 0.58; width: root.width * 0.27; height: root.height; radius: 1.5 * ui; color: root.color }
     }
 
     // next: triangle + bar on the right
@@ -49,7 +53,7 @@ Item {
     }
     Rectangle {
         visible: root.kind === "next"
-        x: root.width * 0.8; width: root.width * 0.2; height: root.height; radius: 1; color: root.color
+        x: root.width * 0.8; width: root.width * 0.2; height: root.height; radius: 1 * ui; color: root.color
     }
 
     // prev: bar on the left + triangle pointing left
@@ -68,6 +72,6 @@ Item {
     }
     Rectangle {
         visible: root.kind === "prev"
-        x: 0; width: root.width * 0.2; height: root.height; radius: 1; color: root.color
+        x: 0; width: root.width * 0.2; height: root.height; radius: 1 * ui; color: root.color
     }
 }

@@ -3,11 +3,14 @@ import Quickshell.Io
 
 Item {
     id: root
+    property real ui: 1
     property string weatherDesc: "Loading..."
     property string temp: "--°"
     property string iconName: "cloud"
     property string city: "Unknown"
     property bool loading: true
+
+    function s(px) { return Math.round(px * ui) }
 
     Process {
         id: weatherFetch
@@ -28,7 +31,7 @@ Item {
     }
 
     Timer {
-        interval: 300000 // 5 minutes
+        interval: 300000 // 5 minutes (duration, unscaled)
         running: true
         repeat: true
         onTriggered: { weatherFetch.running = true }
@@ -53,21 +56,21 @@ Item {
 
         Column {
             anchors.fill: parent
-            anchors.margins: 12
-            spacing: 4
+            anchors.margins: s(12)
+            spacing: s(4)
 
             Text {
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: root.loading ? "Loading..." : root.city
                 color: Style.dim
-                font.pixelSize: 11
+                font.pixelSize: 11 * ui
                 elide: Text.ElideRight
             }
 
             Icon {
                 anchors.horizontalCenter: parent.horizontalCenter
                 name: root.iconName
-                size: 36
+                size: s(36)
                 color: Style.fg
             }
 
@@ -75,7 +78,7 @@ Item {
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: root.temp
                 color: Style.fg
-                font.pixelSize: 24
+                font.pixelSize: 24 * ui
                 font.bold: true
             }
 
@@ -83,7 +86,7 @@ Item {
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: root.weatherDesc
                 color: Style.dim
-                font.pixelSize: 11
+                font.pixelSize: 11 * ui
                 elide: Text.ElideRight
             }
         }

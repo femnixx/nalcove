@@ -3,14 +3,17 @@ import "../services" as Services
 
 Rectangle {
     id: root
-    radius: 18; color: "#1a1a1a"; border.color: "#2a2a2a"; border.width: 1
+    property real ui: 1
+    radius: s(18); color: "#1a1a1a"; border.color: "#2a2a2a"; border.width: s(1)
 
-    property real maxHeight: 400
+    property real maxHeight: s(400)
     property real explicitHeight: 0
     signal outputClicked()
 
-    readonly property real spacing: 10
-    readonly property real margins: 24
+    function s(px) { return Math.round(px * ui) }
+
+    readonly property real spacing: s(10)
+    readonly property real margins: s(24)
 
     Column {
         id: content
@@ -21,32 +24,33 @@ Rectangle {
         // ---- Volume row ----
         Column {
             width: parent.width
-            spacing: 6
+            spacing: s(6)
             Text {
                 text: "Output"
                 color: "#9a9aa0"
-                font.pixelSize: 10
+                font.pixelSize: 10 * ui
                 font.bold: true
             }
             Row {
                 id: sliderRow
-                width: parent.width; spacing: 10
+                width: parent.width; spacing: s(10)
                 Item {
-                    width: 22; height: 22; anchors.verticalCenter: parent.verticalCenter
-                    Icon { name: "volume"; size: 18; anchors.centerIn: parent; opacity: Services.Audio.sinkMuted ? 0.5 : 1.0 }
+                    width: s(22); height: s(22); anchors.verticalCenter: parent.verticalCenter
+                    Icon { name: "volume"; size: s(18); anchors.centerIn: parent; opacity: Services.Audio.sinkMuted ? 0.5 : 1.0 }
                     MouseArea { anchors.fill: parent; onClicked: Services.Audio.toggleSinkMute() }
                 }
                 FlatSlider {
-                    width: parent.width - 22 - 34 - 20
+                    ui: root.ui
+                    width: parent.width - s(22) - s(34) - s(20)
                     anchors.verticalCenter: parent.verticalCenter
                     value: Services.Audio.sinkVolume
                     enabled: Services.Audio.sinkReady
                     onMoved: if (Services.Audio.sinkReady) Services.Audio.setSinkVolume(value)
                 }
                 Text {
-                    width: 34; anchors.verticalCenter: parent.verticalCenter
+                    width: s(34); anchors.verticalCenter: parent.verticalCenter
                     text: Math.round(Services.Audio.sinkVolume * 100)
-                    color: "#ffffff"; font.pixelSize: 12; horizontalAlignment: Text.AlignRight
+                    color: "#ffffff"; font.pixelSize: 12 * ui; horizontalAlignment: Text.AlignRight
                 }
             }
         }
@@ -54,6 +58,7 @@ Rectangle {
         // ---- Device selector (overlay, floats on top within reserved space) ----
         DeviceSelector {
             id: outputSelector
+            ui: root.ui
             width: content.width
             maxDropdownHeight: outputSelector.itemHeight * 3 + outputSelector.listSpacing * 2 + outputSelector.listPadding
             model: Services.Audio.sinks

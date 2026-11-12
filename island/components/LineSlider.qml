@@ -2,28 +2,32 @@ import QtQuick
 
 Item {
     id: root
+    property real ui: 1
     property real value: 0
     property color fillColor: "white"
     signal moved(real v)
-    implicitHeight: 20
+
+    function s(px) { return Math.round(px * ui) }
+
+    implicitHeight: s(20)
 
     Rectangle {
         anchors.verticalCenter: parent.verticalCenter
         width: parent.width
-        height: 6
-        radius: 3
+        height: s(6)
+        radius: s(3)
         color: Style.track
         Rectangle {
             width: parent.width * Math.max(0, Math.min(1, root.value))
             height: parent.height
-            radius: 3
+            radius: s(3)
             color: root.fillColor
         }
     }
     Rectangle {
         anchors.verticalCenter: parent.verticalCenter
-        x: Math.max(0, Math.min(1, root.value)) * (root.width - 16)
-        width: 16; height: 16; radius: 8
+        x: Math.max(0, Math.min(1, root.value)) * (root.width - s(16))
+        width: s(16); height: s(16); radius: s(8)
         color: "white"
     }
     MouseArea {

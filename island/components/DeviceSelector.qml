@@ -2,6 +2,7 @@ import QtQuick
 
 Item {
     id: root
+    property real ui: 1
     property var model: []
     property var currentNode: null
     property bool opened: false
@@ -9,15 +10,17 @@ Item {
     property bool overlayMode: false
     signal picked(var node)
 
-    readonly property int itemHeight: 30
-    readonly property int listSpacing: 2
-    readonly property int listPadding: 8
+    function s(px) { return Math.round(px * ui) }
+
+    readonly property int itemHeight: s(30)
+    readonly property int listSpacing: s(2)
+    readonly property int listPadding: s(8)
 
     function labelOf(n) { return n ? (n.description || n.nickname || n.name || "Unknown") : "No device" }
     function open() { opened = true }
     function close() { opened = false }
 
-    width: parent ? parent.width : 200
+    width: parent ? parent.width : s(200)
     // In overlay mode, height stays at header only; dropdown floats on top
     height: overlayMode ? header.height : header.height + (opened ? dropdownBg.height : 0)
     clip: overlayMode ? false : true
@@ -26,15 +29,15 @@ Item {
     // Header
     Rectangle {
         id: header
-        width: parent.width; height: 32; radius: 10; color: "#1a1a1a"
+        width: parent.width; height: s(32); radius: s(10); color: "#1a1a1a"
         Text {
-            anchors.fill: parent; anchors.leftMargin: 10; anchors.rightMargin: 26
+            anchors.fill: parent; anchors.leftMargin: s(10); anchors.rightMargin: s(26)
             text: root.labelOf(root.currentNode)
-            color: "#ffffff"; font.pixelSize: 12
+            color: "#ffffff"; font.pixelSize: 12 * ui
             elide: Text.ElideRight; verticalAlignment: Text.AlignVCenter
         }
         Text {
-            anchors.right: parent.right; anchors.rightMargin: 10
+            anchors.right: parent.right; anchors.rightMargin: s(10)
             anchors.verticalCenter: parent.verticalCenter
             text: root.opened ? "▴" : "▾"; color: "#9a9aa0"
         }
@@ -50,7 +53,7 @@ Item {
         y: overlayMode ? -dropdownBg.height : header.height
         width: parent.width
         height: Math.min(list.implicitHeight + listPadding, root.maxDropdownHeight)
-        radius: 10; color: "#1a1a1a"; border.color: "#2a2a2a"; border.width: 1
+        radius: s(10); color: "#1a1a1a"; border.color: "#2a2a2a"; border.width: s(1)
         clip: true
         visible: root.opened
         z: overlayMode ? 100 : 0
@@ -59,8 +62,8 @@ Item {
         Flickable {
             id: flickable
             anchors.fill: parent
-            anchors.margins: 4
-            contentWidth: parent.width - 8
+            anchors.margins: s(4)
+            contentWidth: parent.width - s(8)
             contentHeight: list.height
             clip: true
             boundsBehavior: Flickable.StopAtBounds
@@ -73,8 +76,8 @@ Item {
 
                 Text {
                     visible: !root.model || root.model.length === 0
-                    text: "No devices found"; color: "#9a9aa0"; font.pixelSize: 12
-                    height: 30; verticalAlignment: Text.AlignVCenter; leftPadding: 10
+                    text: "No devices found"; color: "#9a9aa0"; font.pixelSize: 12 * ui
+                    height: s(30); verticalAlignment: Text.AlignVCenter; leftPadding: s(10)
                 }
 
                 Repeater {
@@ -82,16 +85,16 @@ Item {
                     delegate: Rectangle {
                         width: list.width
                         height: root.itemHeight
-                        radius: 8
+                        radius: s(8)
                         property bool isCur: !!root.currentNode && modelData.name === root.currentNode.name
                         color: ma.containsMouse ? "#2a2a2a" : "transparent"
                         Text {
                             anchors.fill: parent
-                            anchors.leftMargin: 10
-                            anchors.rightMargin: 10
+                            anchors.leftMargin: s(10)
+                            anchors.rightMargin: s(10)
                             text: root.labelOf(modelData)
                             color: parent.isCur ? "#3b8bff" : "#ffffff"
-                            font.pixelSize: 12
+                            font.pixelSize: 12 * ui
                             elide: Text.ElideRight
                             verticalAlignment: Text.AlignVCenter
                         }
