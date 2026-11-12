@@ -11,9 +11,6 @@ Item {
     property bool active: false
     anchors.fill: parent
 
-    property real tabCellWidth: 56
-    property real tabCellHeight: 36
-
     function fmtTime(s) {
         const t = Math.max(0, Math.floor(s))
         return Math.floor(t / 60) + ":" + String(t % 60).padStart(2, "0")
@@ -37,8 +34,8 @@ Item {
                 ["notes", "notebook", "Notes"]
             ]
             delegate: Item {
-                Layout.preferredWidth: tabCellWidth
-                Layout.preferredHeight: tabCellHeight
+                Layout.preferredWidth: 56
+                Layout.preferredHeight: 36
                 property string pageId: modelData[0]
                 property string iconName: modelData[1]
                 property string label: modelData[2]
@@ -88,8 +85,8 @@ Item {
         anchors.leftMargin: 20
         anchors.right: parent.right
         anchors.rightMargin: 20
-        anchors.top: parent.top
-        anchors.topMargin: 56
+        anchors.top: tabsRow.bottom
+        anchors.topMargin: 6
         height: 36
         spacing: 10
 
@@ -104,8 +101,8 @@ Item {
                 ["settings", "settings", "Settings"]
             ]
             delegate: Item {
-                Layout.preferredWidth: tabCellWidth
-                Layout.preferredHeight: tabCellHeight
+                Layout.preferredWidth: 56
+                Layout.preferredHeight: 36
                 property string pageId: modelData[0]
                 property string iconName: modelData[1]
                 property string label: modelData[2]
